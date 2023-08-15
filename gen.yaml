@@ -2,8 +2,8 @@ configVersion: 1.0.0
 management:
   docChecksum: 7b193330bf41e2c47ba62aa354c4a561
   docVersion: 0.0.1
-  speakeasyVersion: 1.71.1
-  generationVersion: 2.83.3
+  speakeasyVersion: 1.72.0
+  generationVersion: 2.84.1
 generation:
   comments:
     disableComments: false
@@ -16,9 +16,9 @@ features:
   terraform:
     core: 2.83.0
     globalSecurity: 2.81.1
-    globalServerURLs: 2.81.1
+    globalServerURLs: 2.82.0
     includes: 2.81.1
 terraform:
-  version: 0.1.0
+  version: 0.2.0
   author: Kong
   packageName: Konnect
