@@ -117,8 +117,8 @@ func New(opts ...SDKOption) *Konnect {
 		sdkConfiguration: sdkConfiguration{
 			Language:          "terraform",
 			OpenAPIDocVersion: "0.0.1",
-			SDKVersion:        "0.2.0",
-			GenVersion:        "2.84.1",
+			SDKVersion:        "0.2.1",
+			GenVersion:        "2.84.3",
 		},
 	}
 	for _, opt := range opts {

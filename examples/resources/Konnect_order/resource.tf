@@ -1,4 +1,4 @@
-resource "konnect_order" "my_order" {
+resource "Konnect_order" "my_order" {
     description = "...my_description..."
             image = "...my_image..."
             name = "Terrence Rau"
