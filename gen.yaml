@@ -9,7 +9,7 @@ generation:
     disableComments: false
     omitDescriptionIfSummaryPresent: false
   baseServerURL: ""
-  sdkClassName: Konnect
+  sdkClassName: konnect
   singleTagPerOp: false
   tagNamespacingDisabled: false
 features:
