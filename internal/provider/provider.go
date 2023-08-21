@@ -25,8 +25,10 @@ type KonnectProvider struct {
 
 // KonnectProviderModel describes the provider data model.
 type KonnectProviderModel struct {
-	ServerURL types.String `tfsdk:"server_url"`
-	APIKey    types.String `tfsdk:"api_key"`
+	ServerURL                types.String `tfsdk:"server_url"`
+	KonnectAccessToken       types.String `tfsdk:"konnect_access_token"`
+	PersonalAccessToken      types.String `tfsdk:"personal_access_token"`
+	SystemAccountAccessToken types.String `tfsdk:"system_account_access_token"`
 }
 
 func (p *KonnectProvider) Metadata(ctx context.Context, req provider.MetadataRequest, resp *provider.MetadataResponse) {
@@ -36,14 +38,22 @@ func (p *KonnectProvider) Metadata(ctx context.Context, req provider.MetadataReq
 
 func (p *KonnectProvider) Schema(ctx context.Context, req provider.SchemaRequest, resp *provider.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		Description: `Hashicups: Example Hashicups through Speakeasy`,
+		Description: `Konnect API: The Konnect platform API`,
 		Attributes: map[string]schema.Attribute{
 			"server_url": schema.StringAttribute{
-				MarkdownDescription: "Server URL (defaults to https://example.com)",
+				MarkdownDescription: "Server URL (defaults to https://global.api.konghq.com/v2)",
 				Optional:            true,
 				Required:            false,
 			},
-			"api_key": schema.StringAttribute{
+			"konnect_access_token": schema.StringAttribute{
+				Optional:  true,
+				Sensitive: true,
+			},
+			"personal_access_token": schema.StringAttribute{
+				Optional:  true,
+				Sensitive: true,
+			},
+			"system_account_access_token": schema.StringAttribute{
 				Optional:  true,
 				Sensitive: true,
 			},
@@ -63,12 +73,31 @@ func (p *KonnectProvider) Configure(ctx context.Context, req provider.ConfigureR
 	ServerURL := data.ServerURL.ValueString()
 
 	if ServerURL == "" {
-		ServerURL = "https://example.com"
+		ServerURL = "https://global.api.konghq.com/v2"
 	}
 
-	apiKey := data.APIKey.ValueString()
+	konnectAccessToken := new(string)
+	if !data.KonnectAccessToken.IsUnknown() && !data.KonnectAccessToken.IsNull() {
+		*konnectAccessToken = data.KonnectAccessToken.ValueString()
+	} else {
+		konnectAccessToken = nil
+	}
+	personalAccessToken := new(string)
+	if !data.PersonalAccessToken.IsUnknown() && !data.PersonalAccessToken.IsNull() {
+		*personalAccessToken = data.PersonalAccessToken.ValueString()
+	} else {
+		personalAccessToken = nil
+	}
+	systemAccountAccessToken := new(string)
+	if !data.SystemAccountAccessToken.IsUnknown() && !data.SystemAccountAccessToken.IsNull() {
+		*systemAccountAccessToken = data.SystemAccountAccessToken.ValueString()
+	} else {
+		systemAccountAccessToken = nil
+	}
 	security := shared.Security{
-		APIKey: apiKey,
+		KonnectAccessToken:       konnectAccessToken,
+		PersonalAccessToken:      personalAccessToken,
+		SystemAccountAccessToken: systemAccountAccessToken,
 	}
 
 	opts := []sdk.SDKOption{
@@ -83,13 +112,13 @@ func (p *KonnectProvider) Configure(ctx context.Context, req provider.ConfigureR
 
 func (p *KonnectProvider) Resources(ctx context.Context) []func() resource.Resource {
 	return []func() resource.Resource{
-		NewOrderResource,
+		NewRuntimeGroupResource,
 	}
 }
 
 func (p *KonnectProvider) DataSources(ctx context.Context) []func() datasource.DataSource {
 	return []func() datasource.DataSource{
-		NewOrderDataSource,
+		NewRuntimeGroupDataSource,
 	}
 }
 

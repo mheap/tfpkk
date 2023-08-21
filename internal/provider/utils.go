@@ -18,12 +18,9 @@ import (
 )
 
 func debugResponse(response *http.Response) string {
-	dumpReq, err := httputil.DumpRequest(response.Request, true)
+	dumpReq, err := httputil.DumpRequest(response.Request, false)
 	if err != nil {
-		dumpReq, err = httputil.DumpRequest(response.Request, false)
-		if err != nil {
-			return err.Error()
-		}
+		return err.Error()
 	}
 	dumpRes, err := httputil.DumpResponse(response, true)
 	if err != nil {
