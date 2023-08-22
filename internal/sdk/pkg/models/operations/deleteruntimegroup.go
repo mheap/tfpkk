@@ -3,9 +3,9 @@
 package operations
 
 import (
-	"Konnect/internal/sdk/pkg/models/shared"
 	"encoding/json"
 	"fmt"
+	"konnect/internal/sdk/pkg/models/shared"
 	"net/http"
 )
 

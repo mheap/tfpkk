@@ -3,8 +3,8 @@
 package boolplanmodifier
 
 import (
-	"Konnect/internal/planmodifiers/utils"
 	"context"
+	"konnect/internal/planmodifiers/utils"
 
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 )

@@ -12,7 +12,7 @@ import (
 	"strings"
 	"time"
 
-	"Konnect/internal/sdk/pkg/types"
+	"konnect/internal/sdk/pkg/types"
 )
 
 const (

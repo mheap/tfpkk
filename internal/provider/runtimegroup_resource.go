@@ -3,14 +3,12 @@
 package provider
 
 import (
-	"Konnect/internal/sdk"
-	"Konnect/internal/sdk/pkg/models/shared"
 	"context"
+	"encoding/json"
 	"fmt"
+	"konnect/internal/sdk"
+	"konnect/internal/sdk/pkg/models/shared"
 
-	speakeasy_objectplanmodifier "Konnect/internal/planmodifiers/objectplanmodifier"
-	speakeasy_stringplanmodifier "Konnect/internal/planmodifiers/stringplanmodifier"
-	"Konnect/internal/sdk/pkg/models/operations"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -19,6 +17,10 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
+	speakeasy_objectplanmodifier "konnect/internal/planmodifiers/objectplanmodifier"
+	speakeasy_stringplanmodifier "konnect/internal/planmodifiers/stringplanmodifier"
+	"konnect/internal/sdk/pkg/models/operations"
+	"konnect/internal/validators"
 )
 
 // Ensure provider defined types fully satisfy framework interfaces.
@@ -36,12 +38,12 @@ type RuntimeGroupResource struct {
 
 // RuntimeGroupResourceModel describes the resource data model.
 type RuntimeGroupResourceModel struct {
-	ClusterType types.String            `tfsdk:"cluster_type"`
-	Config      *RuntimeGroupConfig     `tfsdk:"config"`
-	Description types.String            `tfsdk:"description"`
-	ID          types.String            `tfsdk:"id"`
-	Labels      map[string]types.String `tfsdk:"labels"`
-	Name        types.String            `tfsdk:"name"`
+	ClusterType types.String        `tfsdk:"cluster_type"`
+	Config      *RuntimeGroupConfig `tfsdk:"config"`
+	Description types.String        `tfsdk:"description"`
+	ID          types.String        `tfsdk:"id"`
+	Labels      types.String        `tfsdk:"labels"`
+	Name        types.String        `tfsdk:"name"`
 }
 
 func (r *RuntimeGroupResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
@@ -100,11 +102,14 @@ func (r *RuntimeGroupResource) Schema(ctx context.Context, req resource.SchemaRe
 				},
 				Description: `The runtime group ID.`,
 			},
-			"labels": schema.MapAttribute{
-				Computed:    true,
-				Optional:    true,
-				ElementType: types.StringType,
-				Description: `Labels to facilitate tagged search on runtime groups. Keys must be of length 1-63 characters, and cannot start with 'kong', 'konnect', 'mesh', 'kic', or '_'.`,
+			"labels": schema.StringAttribute{
+				Computed: true,
+				Optional: true,
+				Validators: []validator.String{
+					validators.IsValidJSON(),
+				},
+				MarkdownDescription: `Parsed as JSON.` + "\n" +
+					`Labels to facilitate tagged search on runtime groups. Keys must be of length 1-63 characters, and cannot start with 'kong', 'konnect', 'mesh', 'kic', or '_'.`,
 			},
 			"name": schema.StringAttribute{
 				Required:    true,
@@ -164,8 +169,10 @@ func (r *RuntimeGroupResource) Create(ctx context.Context, req resource.CreateRe
 	} else {
 		description = nil
 	}
-	labels := make(map[string]string)
-	// Warning. This is a map, but the source tf var is not a map. This might indicate a bug.
+	var labels interface{}
+	if !data.Labels.IsUnknown() && !data.Labels.IsNull() {
+		_ = json.Unmarshal([]byte(data.Labels.ValueString()), &labels)
+	}
 	name := data.Name.ValueString()
 	request := shared.CreateRuntimeGroupRequest{
 		ClusterType: clusterType,
@@ -254,8 +261,10 @@ func (r *RuntimeGroupResource) Update(ctx context.Context, req resource.UpdateRe
 	} else {
 		description = nil
 	}
-	labels := make(map[string]string)
-	// Warning. This is a map, but the source tf var is not a map. This might indicate a bug.
+	var labels interface{}
+	if !data.Labels.IsUnknown() && !data.Labels.IsNull() {
+		_ = json.Unmarshal([]byte(data.Labels.ValueString()), &labels)
+	}
 	name := new(string)
 	if !data.Name.IsUnknown() && !data.Name.IsNull() {
 		*name = data.Name.ValueString()

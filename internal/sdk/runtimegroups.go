@@ -3,13 +3,13 @@
 package sdk
 
 import (
-	"Konnect/internal/sdk/pkg/models/operations"
-	"Konnect/internal/sdk/pkg/models/shared"
-	"Konnect/internal/sdk/pkg/utils"
 	"bytes"
 	"context"
 	"fmt"
 	"io"
+	"konnect/internal/sdk/pkg/models/operations"
+	"konnect/internal/sdk/pkg/models/shared"
+	"konnect/internal/sdk/pkg/utils"
 	"net/http"
 	"strings"
 )

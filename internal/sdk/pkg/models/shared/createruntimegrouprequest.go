@@ -45,7 +45,7 @@ type CreateRuntimeGroupRequest struct {
 	// The description of the runtime group in Konnect.
 	Description *string `json:"description,omitempty"`
 	// Labels to facilitate tagged search on runtime groups. Keys must be of length 1-63 characters, and cannot start with 'kong', 'konnect', 'mesh', 'kic', or '_'.
-	Labels map[string]string `json:"labels,omitempty"`
+	Labels interface{} `json:"labels,omitempty"`
 	// The name of the runtime group.
 	Name string `json:"name"`
 }

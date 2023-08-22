@@ -3,15 +3,17 @@
 package provider
 
 import (
-	"Konnect/internal/sdk"
-	"Konnect/internal/sdk/pkg/models/operations"
 	"context"
 	"fmt"
+	"konnect/internal/sdk"
+	"konnect/internal/sdk/pkg/models/operations"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
+	"konnect/internal/validators"
 )
 
 // Ensure provider defined types fully satisfy framework interfaces.
@@ -29,11 +31,11 @@ type RuntimeGroupDataSource struct {
 
 // RuntimeGroupDataSourceModel describes the data model.
 type RuntimeGroupDataSourceModel struct {
-	Config      *RuntimeGroupConfig     `tfsdk:"config"`
-	Description types.String            `tfsdk:"description"`
-	ID          types.String            `tfsdk:"id"`
-	Labels      map[string]types.String `tfsdk:"labels"`
-	Name        types.String            `tfsdk:"name"`
+	Config      *RuntimeGroupConfig `tfsdk:"config"`
+	Description types.String        `tfsdk:"description"`
+	ID          types.String        `tfsdk:"id"`
+	Labels      types.String        `tfsdk:"labels"`
+	Name        types.String        `tfsdk:"name"`
 }
 
 // Metadata returns the data source type name.
@@ -69,10 +71,13 @@ func (r *RuntimeGroupDataSource) Schema(ctx context.Context, req datasource.Sche
 				Optional:    true,
 				Description: `The runtime group ID`,
 			},
-			"labels": schema.MapAttribute{
-				Computed:    true,
-				ElementType: types.StringType,
-				Description: `Labels to facilitate tagged search on runtime groups. Keys must be of length 1-63 characters, and cannot start with 'kong', 'konnect', 'mesh', 'kic', or '_'.`,
+			"labels": schema.StringAttribute{
+				Computed: true,
+				Validators: []validator.String{
+					validators.IsValidJSON(),
+				},
+				MarkdownDescription: `Parsed as JSON.` + "\n" +
+					`Labels to facilitate tagged search on runtime groups. Keys must be of length 1-63 characters, and cannot start with 'kong', 'konnect', 'mesh', 'kic', or '_'.`,
 			},
 			"name": schema.StringAttribute{
 				Computed:    true,

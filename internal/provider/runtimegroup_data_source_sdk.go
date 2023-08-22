@@ -3,8 +3,9 @@
 package provider
 
 import (
-	"Konnect/internal/sdk/pkg/models/shared"
+	"encoding/json"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"konnect/internal/sdk/pkg/models/shared"
 )
 
 func (r *RuntimeGroupDataSourceModel) RefreshFromGetResponse(resp *shared.RuntimeGroup) {
@@ -36,11 +37,11 @@ func (r *RuntimeGroupDataSourceModel) RefreshFromGetResponse(resp *shared.Runtim
 	} else {
 		r.ID = types.StringNull()
 	}
-	if r.Labels == nil && len(resp.Labels) > 0 {
-		r.Labels = make(map[string]types.String)
-		for key, value := range resp.Labels {
-			r.Labels[key] = types.StringValue(value)
-		}
+	if resp.Labels == nil {
+		r.Labels = types.StringNull()
+	} else {
+		labelsResult, _ := json.Marshal(resp.Labels)
+		r.Labels = types.StringValue(string(labelsResult))
 	}
 	if resp.Name != nil {
 		r.Name = types.StringValue(*resp.Name)

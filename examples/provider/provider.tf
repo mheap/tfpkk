@@ -1,12 +1,12 @@
 terraform {
   required_providers {
-    Konnect = {
-      source  = "Kong/Konnect"
+    konnect = {
+      source  = "kong/konnect"
       version = "0.2.2"
     }
   }
 }
 
-provider "Konnect" {
+provider "konnect" {
   # Configuration options
 }

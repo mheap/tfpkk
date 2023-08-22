@@ -3,9 +3,9 @@
 package provider
 
 import (
-	"Konnect/internal/sdk"
-	"Konnect/internal/sdk/pkg/models/shared"
 	"context"
+	"konnect/internal/sdk"
+	"konnect/internal/sdk/pkg/models/shared"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/provider"
@@ -31,7 +31,7 @@ type KonnectProviderModel struct {
 }
 
 func (p *KonnectProvider) Metadata(ctx context.Context, req provider.MetadataRequest, resp *provider.MetadataResponse) {
-	resp.TypeName = "Konnect"
+	resp.TypeName = "konnect"
 	resp.Version = p.version
 }
 

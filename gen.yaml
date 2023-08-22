@@ -18,7 +18,8 @@ features:
     globalSecurity: 2.81.1
     globalServerURLs: 2.81.1
     includes: 2.81.1
+    typeOverrides: 2.81.1
 terraform:
   version: 0.2.2
-  author: Kong
-  packageName: Konnect
+  author: kong
+  packageName: konnect

@@ -3,7 +3,6 @@
 package provider
 
 import (
-	tfReflect "Konnect/internal/provider/reflect"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -12,6 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
+	tfReflect "konnect/internal/provider/reflect"
 	"net/http"
 	"net/http/httputil"
 	"reflect"

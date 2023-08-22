@@ -17,7 +17,7 @@ type RuntimeGroupRuntimeGroupSummary struct {
 	// The runtime group ID.
 	ID *string `json:"id,omitempty"`
 	// Labels to facilitate tagged search on runtime groups. Keys must be of length 1-63 characters, and cannot start with 'kong', 'konnect', 'mesh', 'kic', or '_'.
-	Labels map[string]string `json:"labels,omitempty"`
+	Labels interface{} `json:"labels,omitempty"`
 	// The name of the runtime group.
 	Name *string `json:"name,omitempty"`
 	// An ISO-8604 timestamp representation of runtime group update date.

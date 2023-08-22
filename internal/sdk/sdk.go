@@ -3,9 +3,9 @@
 package sdk
 
 import (
-	"Konnect/internal/sdk/pkg/models/shared"
-	"Konnect/internal/sdk/pkg/utils"
 	"fmt"
+	"konnect/internal/sdk/pkg/models/shared"
+	"konnect/internal/sdk/pkg/utils"
 	"net/http"
 	"time"
 )

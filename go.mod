@@ -1,4 +1,4 @@
-module Konnect
+module konnect
 
 go 1.18
 

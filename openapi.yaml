@@ -860,6 +860,7 @@ components:
         - id
         - type
     Labels:
+      x-speakeasy-type-override: any
       title: Labels
       type: object
       example:
