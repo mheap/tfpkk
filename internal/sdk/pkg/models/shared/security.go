@@ -3,7 +3,6 @@
 package shared
 
 type Security struct {
-	KonnectAccessToken       *string `security:"scheme,type=http,subtype=bearer,name=Authorization"`
 	PersonalAccessToken      *string `security:"scheme,type=http,subtype=bearer,name=Authorization"`
 	SystemAccountAccessToken *string `security:"scheme,type=http,subtype=bearer,name=Authorization"`
 }

@@ -8,12 +8,14 @@ import (
 	"context"
 	"fmt"
 
+	speakeasy_objectplanmodifier "Konnect/internal/planmodifiers/objectplanmodifier"
+	speakeasy_stringplanmodifier "Konnect/internal/planmodifiers/stringplanmodifier"
 	"Konnect/internal/sdk/pkg/models/operations"
-	"Konnect/internal/validators"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
@@ -36,12 +38,10 @@ type RuntimeGroupResource struct {
 type RuntimeGroupResourceModel struct {
 	ClusterType types.String            `tfsdk:"cluster_type"`
 	Config      *RuntimeGroupConfig     `tfsdk:"config"`
-	CreatedAt   types.String            `tfsdk:"created_at"`
 	Description types.String            `tfsdk:"description"`
 	ID          types.String            `tfsdk:"id"`
 	Labels      map[string]types.String `tfsdk:"labels"`
 	Name        types.String            `tfsdk:"name"`
-	UpdatedAt   types.String            `tfsdk:"updated_at"`
 }
 
 func (r *RuntimeGroupResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
@@ -67,24 +67,26 @@ func (r *RuntimeGroupResource) Schema(ctx context.Context, req resource.SchemaRe
 			},
 			"config": schema.SingleNestedAttribute{
 				Computed: true,
+				PlanModifiers: []planmodifier.Object{
+					speakeasy_objectplanmodifier.SuppressDiff(),
+				},
 				Attributes: map[string]schema.Attribute{
 					"control_plane_endpoint": schema.StringAttribute{
-						Computed:    true,
+						Computed: true,
+						PlanModifiers: []planmodifier.String{
+							speakeasy_stringplanmodifier.SuppressDiff(),
+						},
 						Description: `Control Plane Endpoint.`,
 					},
 					"telemetry_endpoint": schema.StringAttribute{
-						Computed:    true,
+						Computed: true,
+						PlanModifiers: []planmodifier.String{
+							speakeasy_stringplanmodifier.SuppressDiff(),
+						},
 						Description: `Telemetry Endpoint.`,
 					},
 				},
 				Description: `CP configuration object for related access endpoints.`,
-			},
-			"created_at": schema.StringAttribute{
-				Computed: true,
-				Validators: []validator.String{
-					validators.IsRFC3339(),
-				},
-				Description: `An ISO-8604 timestamp representation of runtime group creation date.`,
 			},
 			"description": schema.StringAttribute{
 				Computed:    true,
@@ -92,7 +94,10 @@ func (r *RuntimeGroupResource) Schema(ctx context.Context, req resource.SchemaRe
 				Description: `The description of the runtime group in Konnect.`,
 			},
 			"id": schema.StringAttribute{
-				Computed:    true,
+				Computed: true,
+				PlanModifiers: []planmodifier.String{
+					speakeasy_stringplanmodifier.SuppressDiff(),
+				},
 				Description: `The runtime group ID.`,
 			},
 			"labels": schema.MapAttribute{
@@ -104,13 +109,6 @@ func (r *RuntimeGroupResource) Schema(ctx context.Context, req resource.SchemaRe
 			"name": schema.StringAttribute{
 				Required:    true,
 				Description: `The name of the runtime group.`,
-			},
-			"updated_at": schema.StringAttribute{
-				Computed: true,
-				Validators: []validator.String{
-					validators.IsRFC3339(),
-				},
-				Description: `An ISO-8604 timestamp representation of runtime group update date.`,
 			},
 		},
 	}

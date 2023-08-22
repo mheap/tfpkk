@@ -8,10 +8,8 @@ import (
 	"context"
 	"fmt"
 
-	"Konnect/internal/validators"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
-	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 )
@@ -32,12 +30,10 @@ type RuntimeGroupDataSource struct {
 // RuntimeGroupDataSourceModel describes the data model.
 type RuntimeGroupDataSourceModel struct {
 	Config      *RuntimeGroupConfig     `tfsdk:"config"`
-	CreatedAt   types.String            `tfsdk:"created_at"`
 	Description types.String            `tfsdk:"description"`
 	ID          types.String            `tfsdk:"id"`
 	Labels      map[string]types.String `tfsdk:"labels"`
 	Name        types.String            `tfsdk:"name"`
-	UpdatedAt   types.String            `tfsdk:"updated_at"`
 }
 
 // Metadata returns the data source type name.
@@ -65,19 +61,12 @@ func (r *RuntimeGroupDataSource) Schema(ctx context.Context, req datasource.Sche
 				},
 				Description: `CP configuration object for related access endpoints.`,
 			},
-			"created_at": schema.StringAttribute{
-				Computed: true,
-				Validators: []validator.String{
-					validators.IsRFC3339(),
-				},
-				Description: `An ISO-8604 timestamp representation of runtime group creation date.`,
-			},
 			"description": schema.StringAttribute{
 				Computed:    true,
 				Description: `The description of the runtime group in Konnect.`,
 			},
 			"id": schema.StringAttribute{
-				Computed:    true,
+				Optional:    true,
 				Description: `The runtime group ID`,
 			},
 			"labels": schema.MapAttribute{
@@ -88,13 +77,6 @@ func (r *RuntimeGroupDataSource) Schema(ctx context.Context, req datasource.Sche
 			"name": schema.StringAttribute{
 				Computed:    true,
 				Description: `The name of the runtime group.`,
-			},
-			"updated_at": schema.StringAttribute{
-				Computed: true,
-				Validators: []validator.String{
-					validators.IsRFC3339(),
-				},
-				Description: `An ISO-8604 timestamp representation of runtime group update date.`,
 			},
 		},
 	}

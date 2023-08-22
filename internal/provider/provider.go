@@ -26,7 +26,6 @@ type KonnectProvider struct {
 // KonnectProviderModel describes the provider data model.
 type KonnectProviderModel struct {
 	ServerURL                types.String `tfsdk:"server_url"`
-	KonnectAccessToken       types.String `tfsdk:"konnect_access_token"`
 	PersonalAccessToken      types.String `tfsdk:"personal_access_token"`
 	SystemAccountAccessToken types.String `tfsdk:"system_account_access_token"`
 }
@@ -44,10 +43,6 @@ func (p *KonnectProvider) Schema(ctx context.Context, req provider.SchemaRequest
 				MarkdownDescription: "Server URL (defaults to https://global.api.konghq.com/v2)",
 				Optional:            true,
 				Required:            false,
-			},
-			"konnect_access_token": schema.StringAttribute{
-				Optional:  true,
-				Sensitive: true,
 			},
 			"personal_access_token": schema.StringAttribute{
 				Optional:  true,
@@ -76,12 +71,6 @@ func (p *KonnectProvider) Configure(ctx context.Context, req provider.ConfigureR
 		ServerURL = "https://global.api.konghq.com/v2"
 	}
 
-	konnectAccessToken := new(string)
-	if !data.KonnectAccessToken.IsUnknown() && !data.KonnectAccessToken.IsNull() {
-		*konnectAccessToken = data.KonnectAccessToken.ValueString()
-	} else {
-		konnectAccessToken = nil
-	}
 	personalAccessToken := new(string)
 	if !data.PersonalAccessToken.IsUnknown() && !data.PersonalAccessToken.IsNull() {
 		*personalAccessToken = data.PersonalAccessToken.ValueString()
@@ -95,7 +84,6 @@ func (p *KonnectProvider) Configure(ctx context.Context, req provider.ConfigureR
 		systemAccountAccessToken = nil
 	}
 	security := shared.Security{
-		KonnectAccessToken:       konnectAccessToken,
 		PersonalAccessToken:      personalAccessToken,
 		SystemAccountAccessToken: systemAccountAccessToken,
 	}

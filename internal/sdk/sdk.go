@@ -63,64 +63,8 @@ func (c *sdkConfiguration) GetServerDetails() (string, map[string]string) {
 
 // Konnect - Konnect API: The Konnect platform API
 type Konnect struct {
-	APIProductDocumentation        *apiProductDocumentation
-	APIProductVersionSpecification *apiProductVersionSpecification
-	APIProductVersions             *apiProductVersions
-	APIProducts                    *apiProducts
-	AuditLogs                      *auditLogs
-	AuthSettings                   *authSettings
-	// CACertificates - CA certificates
-	CACertificates *caCertificates
-	// Certificates - Certificates
-	Certificates           *certificates
 	CompositeRuntimeGroups *compositeRuntimeGroups
-	// Consumers - Consumers
-	Consumers     *consumers
-	CustomReports *customReports
-	// DPCertificates - DP Certificates
-	DPCertificates *dpCertificates
-	// DPNodes - DP Nodes
-	DPNodes *dpNodes
-	// Debug - Debug routes
-	Debug *debug
-	// Information - Information routes
-	Information *information
-	Invites     *invites
-	// KeySets - Key-sets
-	KeySets *keySets
-	// Keys - Keys
-	Keys *keys
-	// Plugins - Plugins
-	Plugins              *plugins
-	PortalAuthSettings   *portalAuthSettings
-	PortalDevelopers     *portalDevelopers
-	PortalRoles          *portalRoles
-	PortalTeamMembership *portalTeamMembership
-	PortalTeamRoles      *portalTeamRoles
-	PortalTeams          *portalTeams
-	Roles                *roles
-	// Routes - Gateway routes
-	Routes        *routes
-	RuntimeGroups *runtimeGroups
-	// SNIs - SNIs
-	SNIs *snIs
-	// Services - Gateway services
-	Services                     *services
-	SystemAccounts               *systemAccounts
-	SystemAccountsAccessTokens   *systemAccountsAccessTokens
-	SystemAccountsRoles          *systemAccountsRoles
-	SystemAccountsTeamMembership *systemAccountsTeamMembership
-	// Targets - Target routes
-	Targets        *targets
-	TeamMembership *teamMembership
-	Teams          *teams
-	// Upstreams - Upstreams
-	Upstreams *upstreams
-	Users     *users
-	// Vaults - Vaults
-	Vaults *vaults
-	// ConsumerGroups - Consumer Groups
-	ConsumerGroups *consumerGroups
+	RuntimeGroups          *runtimeGroups
 
 	sdkConfiguration sdkConfiguration
 }
@@ -196,87 +140,9 @@ func New(opts ...SDKOption) *Konnect {
 		}
 	}
 
-	sdk.APIProductDocumentation = newAPIProductDocumentation(sdk.sdkConfiguration)
-
-	sdk.APIProductVersionSpecification = newAPIProductVersionSpecification(sdk.sdkConfiguration)
-
-	sdk.APIProductVersions = newAPIProductVersions(sdk.sdkConfiguration)
-
-	sdk.APIProducts = newAPIProducts(sdk.sdkConfiguration)
-
-	sdk.AuditLogs = newAuditLogs(sdk.sdkConfiguration)
-
-	sdk.AuthSettings = newAuthSettings(sdk.sdkConfiguration)
-
-	sdk.CACertificates = newCACertificates(sdk.sdkConfiguration)
-
-	sdk.Certificates = newCertificates(sdk.sdkConfiguration)
-
 	sdk.CompositeRuntimeGroups = newCompositeRuntimeGroups(sdk.sdkConfiguration)
 
-	sdk.Consumers = newConsumers(sdk.sdkConfiguration)
-
-	sdk.CustomReports = newCustomReports(sdk.sdkConfiguration)
-
-	sdk.DPCertificates = newDPCertificates(sdk.sdkConfiguration)
-
-	sdk.DPNodes = newDPNodes(sdk.sdkConfiguration)
-
-	sdk.Debug = newDebug(sdk.sdkConfiguration)
-
-	sdk.Information = newInformation(sdk.sdkConfiguration)
-
-	sdk.Invites = newInvites(sdk.sdkConfiguration)
-
-	sdk.KeySets = newKeySets(sdk.sdkConfiguration)
-
-	sdk.Keys = newKeys(sdk.sdkConfiguration)
-
-	sdk.Plugins = newPlugins(sdk.sdkConfiguration)
-
-	sdk.PortalAuthSettings = newPortalAuthSettings(sdk.sdkConfiguration)
-
-	sdk.PortalDevelopers = newPortalDevelopers(sdk.sdkConfiguration)
-
-	sdk.PortalRoles = newPortalRoles(sdk.sdkConfiguration)
-
-	sdk.PortalTeamMembership = newPortalTeamMembership(sdk.sdkConfiguration)
-
-	sdk.PortalTeamRoles = newPortalTeamRoles(sdk.sdkConfiguration)
-
-	sdk.PortalTeams = newPortalTeams(sdk.sdkConfiguration)
-
-	sdk.Roles = newRoles(sdk.sdkConfiguration)
-
-	sdk.Routes = newRoutes(sdk.sdkConfiguration)
-
 	sdk.RuntimeGroups = newRuntimeGroups(sdk.sdkConfiguration)
-
-	sdk.SNIs = newSNIs(sdk.sdkConfiguration)
-
-	sdk.Services = newServices(sdk.sdkConfiguration)
-
-	sdk.SystemAccounts = newSystemAccounts(sdk.sdkConfiguration)
-
-	sdk.SystemAccountsAccessTokens = newSystemAccountsAccessTokens(sdk.sdkConfiguration)
-
-	sdk.SystemAccountsRoles = newSystemAccountsRoles(sdk.sdkConfiguration)
-
-	sdk.SystemAccountsTeamMembership = newSystemAccountsTeamMembership(sdk.sdkConfiguration)
-
-	sdk.Targets = newTargets(sdk.sdkConfiguration)
-
-	sdk.TeamMembership = newTeamMembership(sdk.sdkConfiguration)
-
-	sdk.Teams = newTeams(sdk.sdkConfiguration)
-
-	sdk.Upstreams = newUpstreams(sdk.sdkConfiguration)
-
-	sdk.Users = newUsers(sdk.sdkConfiguration)
-
-	sdk.Vaults = newVaults(sdk.sdkConfiguration)
-
-	sdk.ConsumerGroups = newConsumerGroups(sdk.sdkConfiguration)
 
 	return sdk
 }

@@ -5,7 +5,6 @@ package provider
 import (
 	"Konnect/internal/sdk/pkg/models/shared"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"time"
 )
 
 func (r *RuntimeGroupResourceModel) RefreshFromGetResponse(resp *shared.RuntimeGroup) {
@@ -27,11 +26,6 @@ func (r *RuntimeGroupResourceModel) RefreshFromGetResponse(resp *shared.RuntimeG
 			r.Config.TelemetryEndpoint = types.StringNull()
 		}
 	}
-	if resp.CreatedAt != nil {
-		r.CreatedAt = types.StringValue(resp.CreatedAt.Format(time.RFC3339))
-	} else {
-		r.CreatedAt = types.StringNull()
-	}
 	if resp.Description != nil {
 		r.Description = types.StringValue(*resp.Description)
 	} else {
@@ -52,11 +46,6 @@ func (r *RuntimeGroupResourceModel) RefreshFromGetResponse(resp *shared.RuntimeG
 		r.Name = types.StringValue(*resp.Name)
 	} else {
 		r.Name = types.StringNull()
-	}
-	if resp.UpdatedAt != nil {
-		r.UpdatedAt = types.StringValue(resp.UpdatedAt.Format(time.RFC3339))
-	} else {
-		r.UpdatedAt = types.StringNull()
 	}
 }
 
