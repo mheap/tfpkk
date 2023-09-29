@@ -14,9 +14,9 @@ generation:
   tagNamespacingDisabled: false
 features:
   terraform:
-    core: 2.83.0
+    core: 2.90.0
     globalSecurity: 2.81.1
-    globalServerURLs: 2.81.1
+    globalServerURLs: 2.82.0
     includes: 2.81.1
     typeOverrides: 2.81.1
 terraform:

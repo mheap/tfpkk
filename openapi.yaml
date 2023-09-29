@@ -1,69 +1,393 @@
 openapi: 3.0.3
 info:
-  title: Konnect API
-  version: 2.0.0
-  description: The Konnect platform API
   contact:
+    email: support@konghq.com
     name: Kong
     url: https://cloud.konghq.com
+  description: The Konnect platform API
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0.html
+  title: Konnect API
+  version: 2.0.0
 servers:
   - url: https://global.api.konghq.com/v2
   - url: https://us.api.konghq.com/v2
   - url: https://eu.api.konghq.com/v2
     description: Production
+externalDocs:
+  description: Documentation for Kong Gateway and its APIs
+  url: https://docs.konghq.com
 paths:
-  /runtime-groups:
-    get:
-      summary: List Runtime Groups
+  /runtime-groups/{runtimeGroupId}/core-entities/services:
+    post:
+      x-speakeasy-entity-operation: Service#create
+      description: Create a new service
+      operationId: create-service
       responses:
-        '200':
-          $ref: '#/components/responses/ListRuntimeGroupsResponse'
-        '400':
-          $ref: '#/components/responses/RuntimeGroupsBadRequest'
-        '401':
-          $ref: '#/components/responses/RuntimeGroupUnauthenticated'
-        '403':
-          $ref: '#/components/responses/RuntimeGroupPermissionDenied'
-        '503':
-          $ref: '#/components/responses/ServiceUnavailable'
-      operationId: list-runtime-groups
-      description: >-
-        Returns an array of runtime groups objects containing information about the Konnect Runtime Groups.
-      parameters:
-        - $ref: '#/components/parameters/PageSize'
-        - $ref: '#/components/parameters/PageNumber'
-        - $ref: '#/components/parameters/FilterByNameEquality'
-        - $ref: '#/components/parameters/FilterByNameEqualityShort'
-        - $ref: '#/components/parameters/FilterByNameContains'
-        - $ref: '#/components/parameters/FilterByNameNotEquals'
-        - $ref: '#/components/parameters/FilterByIdEquality'
-        - $ref: '#/components/parameters/FilterByIdEqualityShort'
-        - $ref: '#/components/parameters/FilterByClusterTypeEquality'
-        - $ref: '#/components/parameters/FilterByClusterTypeEqualityShort'
-        - $ref: '#/components/parameters/FilterByClusterTypeNotEquals'
-        - $ref: '#/components/parameters/FilterByLabels'
+        "201":
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  connect_timeout:
+                    type: integer
+                  created_at:
+                    type: integer
+                  enabled:
+                    type: boolean
+                  host:
+                    type: string
+                  id:
+                    type: string
+                  name:
+                    type: string
+                  path:
+                    type: string
+                  port:
+                    type: integer
+                  protocol:
+                    type: string
+                  read_timeout:
+                    type: integer
+                  retries:
+                    type: integer
+                  updated_at:
+                    type: integer
+                  write_timeout:
+                    type: integer
+                x-examples:
+                  Example 1:
+                    connect_timeout: 6000
+                    created_at: 1684437851
+                    enabled: true
+                    host: example.com
+                    id: ebf4e826-b17a-4e23-9d58-2621c9faa135
+                    name: my-service
+                    path: /some_api
+                    port: 80
+                    protocol: http
+                    read_timeout: 6000
+                    retries: 5
+                    updated_at: 1684437851
+                    write_timeout: 6000
+              examples:
+                http service creation:
+                  value:
+                    connect_timeout: 6000
+                    created_at: 1684437851
+                    enabled: true
+                    host: example.com
+                    id: ebf4e826-b17a-4e23-9d58-2621c9faa135
+                    name: my-service
+                    path: /some_api
+                    port: 80
+                    protocol: http
+                    read_timeout: 6000
+                    retries: 5
+                    updated_at: 1684437851
+                    write_timeout: 6000
+          description: Successfully created service
+        "400":
+          content:
+            application/json:
+              schema:
+                type: object
+          description: Invalid service
+      summary: Create a new service
       tags:
-        - Runtime Groups
+        - Services
+      requestBody:
+        $ref: "#/components/requestBodies/service-request"
+    parameters:
+      - $ref: "#/components/parameters/runtimeGroupId"
+  /runtime-groups/{runtimeGroupId}/core-entities/services/{service_id}:
+    parameters:
+      - $ref: "#/components/parameters/runtimeGroupId"
+      - $ref: "#/components/parameters/service_id"
+    delete:
+      x-speakeasy-entity-operation: Service#delete
+      description: Delete a service
+      operationId: delete-service
+      responses:
+        "204":
+          description: Successfully deleted service or the resource didn't exist
+      summary: Delete a service
+      tags:
+        - Services
+    get:
+      x-speakeasy-entity-operation: Service#read
+      description: Get a service using ID or name.
+      operationId: get-service
+      responses:
+        "200":
+          $ref: "#/components/responses/service-response"
+        "404":
+          description: Resource does not exist
+      summary: Fetch a service
+      tags:
+        - Services
+    put:
+      x-speakeasy-entity-operation: Service#update
+      description: Create or Update service using ID or name.
+      operationId: upsert-service
+      responses:
+        "200":
+          $ref: "#/components/responses/service-response"
+        "400":
+          content:
+            application/json:
+              schema:
+                type: object
+          description: Invalid service
+      summary: Upsert a service
+      tags:
+        - Services
+      requestBody:
+        $ref: "#/components/requestBodies/service-request"
+  /api-products:
+    post:
+      x-speakeasy-entity-operation: ApiProduct#create
+      summary: Create API Product
+      description: >
+        An API Product packages together associated APIs and their operations, backed by thorough documentation,
+
+        with the objective of making API consumption straightforward for developers.
+
+      operationId: create-api-product
+      responses:
+        "201":
+          $ref: "#/components/responses/APIProductResponse"
+        "400":
+          description: Bad Request
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/BadRequestError"
+              examples:
+                APIProductNameBadRequestExample:
+                  $ref: "#/components/examples/APIProductNameBadRequestExample"
+        "401":
+          $ref: "#/components/responses/ApiProductUnauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "415":
+          $ref: "#/components/responses/UnsupportedMediaType"
+      tags:
+        - API Products
+      requestBody:
+        $ref: "#/components/requestBodies/CreateAPIProductRequest"
+  /api-products/{id}:
+    parameters:
+      - schema:
+          type: string
+          format: uuid
+          example: d32d905a-ed33-46a3-a093-d8f536af9a8a
+        name: id
+        in: path
+        required: true
+        description: API product identifier
+    get:
+      x-speakeasy-entity-operation: ApiProduct#read
+      summary: Fetch API product
+      description: Returns an API product.
+      operationId: get-api-product
+      responses:
+        "200":
+          $ref: "#/components/responses/APIProductResponse"
+        "401":
+          $ref: "#/components/responses/ApiProductUnauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/ApiProductNotFound"
+      tags:
+        - API Products
+    patch:
+      x-speakeasy-entity-operation: ApiProduct#update
+      summary: Update an individual API product
+      description: Updates an API product.
+      operationId: update-api-product
+      responses:
+        "200":
+          $ref: "#/components/responses/APIProductResponse"
+        "400":
+          description: Bad Request
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/BadRequestError"
+              examples:
+                APIProductNameBadRequestExample:
+                  $ref: "#/components/examples/APIProductNameBadRequestExample"
+        "401":
+          $ref: "#/components/responses/ApiProductUnauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/ApiProductNotFound"
+        "415":
+          $ref: "#/components/responses/UnsupportedMediaType"
+      tags:
+        - API Products
+      requestBody:
+        $ref: "#/components/requestBodies/UpdateAPIProductRequest"
+    delete:
+      x-speakeasy-entity-operation: ApiProduct#delete
+      summary: Delete API Product
+      description: Removes an individual API product.
+      operationId: delete-api-product
+      responses:
+        "204":
+          description: API product was deleted successfully.
+        "401":
+          $ref: "#/components/responses/ApiProductUnauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/ApiProductNotFound"
+      tags:
+        - API Products
+  /api-products/{apiProductId}/product-versions:
+    parameters:
+      - schema:
+          type: string
+          format: uuid
+          example: d32d905a-ed33-46a3-a093-d8f536af9a8a
+        name: apiProductId
+        description: The API Product ID
+        in: path
+        required: true
+    post:
+      x-speakeasy-entity-operation: ApiProductVersion#create
+      summary: Create API Product Version
+      description: Creates a version of an API product.
+      operationId: create-api-product-version
+      responses:
+        "201":
+          $ref: "#/components/responses/APIProductVersionResponse"
+        "400":
+          description: Bad Request
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/BadRequestError"
+              examples:
+                APIProductVersionNameBadRequestExample:
+                  $ref: "#/components/examples/APIProductNameBadRequestExample"
+        "401":
+          $ref: "#/components/responses/ApiProductUnauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/ApiProductNotFound"
+        "415":
+          $ref: "#/components/responses/UnsupportedMediaType"
+      tags:
+        - API Product Versions
+      requestBody:
+        $ref: "#/components/requestBodies/CreateAPIProductVersionRequest"
+  /api-products/{apiProductId}/product-versions/{id}:
+    parameters:
+      - schema:
+          type: string
+          format: uuid
+          example: d32d905a-ed33-46a3-a093-d8f536af9a8a
+        name: apiProductId
+        description: The API product identifier
+        in: path
+        required: true
+      - schema:
+          type: string
+          format: uuid
+          example: 9f5061ce-78f6-4452-9108-ad7c02821fd5
+        name: id
+        description: The API product version identifier
+        in: path
+        required: true
+    get:
+      x-speakeasy-entity-operation: ApiProductVersion#read
+      summary: Fetch API Product Version
+      description: Returns a version of an API product.
+      operationId: get-api-product-version
+      responses:
+        "200":
+          $ref: "#/components/responses/APIProductVersionResponse"
+        "401":
+          $ref: "#/components/responses/ApiProductUnauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/ApiProductNotFound"
+      tags:
+        - API Product Versions
+    patch:
+      x-speakeasy-entity-operation: ApiProductVersion#update
+      summary: Update an API Product Version
+      description: Updates an API product version.
+      operationId: update-api-product-version
+      responses:
+        "200":
+          $ref: "#/components/responses/APIProductVersionResponse"
+        "400":
+          description: Bad Request
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/BadRequestError"
+              examples:
+                APIProductVersionNameBadRequestExample:
+                  $ref: "#/components/examples/APIProductNameBadRequestExample"
+        "401":
+          $ref: "#/components/responses/ApiProductUnauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/ApiProductNotFound"
+        "415":
+          $ref: "#/components/responses/UnsupportedMediaType"
+      tags:
+        - API Product Versions
+      requestBody:
+        $ref: "#/components/requestBodies/UpdateAPIProductVersionRequest"
+    delete:
+      x-speakeasy-entity-operation: ApiProductVersion#delete
+      summary: Delete API Product Version
+      description: Removes an API product version.
+      operationId: delete-api-product-version
+      responses:
+        "204":
+          description: API product version was deleted successfully.
+        "401":
+          $ref: "#/components/responses/ApiProductUnauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/ApiProductNotFound"
+      tags:
+        - API Product Versions
+  /runtime-groups:
     parameters: []
     post:
       x-speakeasy-entity-operation: RuntimeGroup#create
       summary: Create Runtime Group
       operationId: create-runtime-group
       responses:
-        '201':
-          $ref: '#/components/responses/CreateRuntimeGroupResponse'
-        '400':
-          $ref: '#/components/responses/RuntimeGroupsBadRequest'
-        '401':
-          $ref: '#/components/responses/RuntimeGroupUnauthenticated'
-        '403':
-          $ref: '#/components/responses/RuntimeGroupPermissionDenied'
-        '409':
-          $ref: '#/components/responses/RuntimeGroupConflict'
-        '500':
-          $ref: '#/components/responses/InternalServerError'
-        '503':
-          $ref: '#/components/responses/ServiceUnavailable'
+        "201":
+          $ref: "#/components/responses/CreateRuntimeGroupResponse"
+        "400":
+          $ref: "#/components/responses/RuntimeGroupsBadRequest"
+        "401":
+          $ref: "#/components/responses/RuntimeGroupUnauthenticated"
+        "403":
+          $ref: "#/components/responses/RuntimeGroupPermissionDenied"
+        "409":
+          $ref: "#/components/responses/RuntimeGroupConflict"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
       tags:
         - Runtime Groups
       requestBody:
@@ -71,10 +395,10 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/CreateRuntimeGroupRequest'
+              $ref: "#/components/schemas/CreateRuntimeGroupRequest"
             examples:
               Example Request Body:
-                $ref: '#/components/examples/CreateRuntimeGroupRequestExample'
+                $ref: "#/components/examples/CreateRuntimeGroupRequestExample"
       description: Create a runtime group in the Konnect Organization.
   /runtime-groups/{id}:
     parameters:
@@ -90,18 +414,18 @@ paths:
       x-speakeasy-entity-operation: RuntimeGroup#read
       summary: Fetch Runtime Group
       responses:
-        '200':
-          $ref: '#/components/responses/RetrieveRuntimeGroupResponse'
-        '400':
-          $ref: '#/components/responses/RuntimeGroupsBadRequest'
-        '401':
-          $ref: '#/components/responses/RuntimeGroupUnauthenticated'
-        '403':
-          $ref: '#/components/responses/RuntimeGroupPermissionDenied'
-        '404':
-          $ref: '#/components/responses/RuntimeGroupNotFound'
-        '503':
-          $ref: '#/components/responses/ServiceUnavailable'
+        "200":
+          $ref: "#/components/responses/RetrieveRuntimeGroupResponse"
+        "400":
+          $ref: "#/components/responses/RuntimeGroupsBadRequest"
+        "401":
+          $ref: "#/components/responses/RuntimeGroupUnauthenticated"
+        "403":
+          $ref: "#/components/responses/RuntimeGroupPermissionDenied"
+        "404":
+          $ref: "#/components/responses/RuntimeGroupNotFound"
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
       operationId: get-runtime-group
       description: Returns information about a team from a given team ID.
       tags:
@@ -111,30 +435,30 @@ paths:
       summary: Update Runtime Group
       operationId: update-runtime-group
       responses:
-        '200':
-          $ref: '#/components/responses/UpdateRuntimeGroupResponse'
-        '400':
-          $ref: '#/components/responses/RuntimeGroupsBadRequest'
-        '401':
-          $ref: '#/components/responses/RuntimeGroupUnauthenticated'
-        '403':
-          $ref: '#/components/responses/RuntimeGroupPermissionDenied'
-        '404':
-          $ref: '#/components/responses/RuntimeGroupNotFound'
-        '500':
-          $ref: '#/components/responses/InternalServerError'
-        '503':
-          $ref: '#/components/responses/ServiceUnavailable'
+        "200":
+          $ref: "#/components/responses/UpdateRuntimeGroupResponse"
+        "400":
+          $ref: "#/components/responses/RuntimeGroupsBadRequest"
+        "401":
+          $ref: "#/components/responses/RuntimeGroupUnauthenticated"
+        "403":
+          $ref: "#/components/responses/RuntimeGroupPermissionDenied"
+        "404":
+          $ref: "#/components/responses/RuntimeGroupNotFound"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
       description: Update an individual runtime group.
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/UpdateRuntimeGroupRequest'
+              $ref: "#/components/schemas/UpdateRuntimeGroupRequest"
             examples:
               Example Request Body:
-                $ref: '#/components/examples/UpdateRuntimeGroupRequestExample'
+                $ref: "#/components/examples/UpdateRuntimeGroupRequestExample"
       tags:
         - Runtime Groups
     delete:
@@ -142,352 +466,1660 @@ paths:
       summary: Delete Runtime Group
       operationId: delete-runtime-group
       responses:
-        '204':
+        "204":
           description: No Content
-        '400':
-          $ref: '#/components/responses/RuntimeGroupsBadRequest'
-        '401':
-          $ref: '#/components/responses/RuntimeGroupUnauthenticated'
-        '403':
-          $ref: '#/components/responses/RuntimeGroupPermissionDenied'
-        '404':
-          $ref: '#/components/responses/RuntimeGroupNotFound'
-        '500':
-          $ref: '#/components/responses/InternalServerError'
-        '503':
-          $ref: '#/components/responses/ServiceUnavailable'
+        "400":
+          $ref: "#/components/responses/RuntimeGroupsBadRequest"
+        "401":
+          $ref: "#/components/responses/RuntimeGroupUnauthenticated"
+        "403":
+          $ref: "#/components/responses/RuntimeGroupPermissionDenied"
+        "404":
+          $ref: "#/components/responses/RuntimeGroupNotFound"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
       description: Delete an individual runtime group.
       tags:
         - Runtime Groups
-  /runtime-groups/{id}/composite-memberships:
-    parameters:
-      - schema:
-          type: string
-        name: id
-        in: path
-        required: true
-        description: ID of a composite runtime group
-    get:
-      summary: List Composite RG Memberships
-      tags:
-        - Composite Runtime Groups
-      responses:
-        '200':
-          $ref: '#/components/responses/ListCompositeMemberships'
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '503':
-          $ref: '#/components/responses/ServiceUnavailable'
-      operationId: get-runtime-groups-id-composite-memberships
-      description: >-
-        Returns an array of runtime groups that are a member of this composite runtime group.
-      parameters:
-        - $ref: '#/components/parameters/PageSize'
-        - $ref: '#/components/parameters/PageNumber'
-  /runtime-groups/{id}/composite-memberships/add:
-    parameters:
-      - schema:
-          type: string
-        name: id
-        in: path
-        required: true
-        description: ID of a composite runtime group
-    post:
-      summary: Add Composite RG Members
-      operationId: post-runtime-groups-id-composite-memberships-add
-      responses:
-        '204':
-          description: No Content
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '503':
-          $ref: '#/components/responses/ServiceUnavailable'
-      requestBody:
-        $ref: '#/components/requestBodies/CompositeMemebershipAdd'
-      tags:
-        - Composite Runtime Groups
-      description: >-
-        Adds one or more runtime groups as a member of a composite runtime group.
-  /runtime-groups/{id}/composite-memberships/remove:
-    parameters:
-      - schema:
-          type: string
-        name: id
-        in: path
-        required: true
-        description: ID of a composite runtime group
-    post:
-      summary: Remove Composite RG Members
-      operationId: post-runtime-groups-id-composite-memberships-remove
-      requestBody:
-        $ref: '#/components/requestBodies/CompositeMembershipRemove'
-      tags:
-        - Composite Runtime Groups
-      description: >-
-        Removes one or more runtime groups from the members of a composite runtime group.
-      responses:
-        '204':
-          description: No Content
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '503':
-          $ref: '#/components/responses/ServiceUnavailable'
-  /runtime-groups/{id}/composite-status:
-    parameters:
-      - schema:
-          type: string
-        name: id
-        in: path
-        required: true
-        description: ID of a composite runtime group
-    get:
-      summary: Get Composite RG Status
-      tags:
-        - Composite Runtime Groups
-      responses:
-        '200':
-          $ref: '#/components/responses/GetCompositeStatus'
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '503':
-          $ref: '#/components/responses/ServiceUnavailable'
-      operationId: get-runtime-groups-id-composite-status
-      description: >-
-        Returns the status of a composite runtime group, including existing conflicts.
 components:
   parameters:
-    FilterByLabels:
-      name: labels
-      description: Filter runtime groups in the response by associated labels.
-      in: query
-      required: false
+    service_id:
+      x-speakeasy-match: id
+      name: service_id
+      description: ID **or** name of the service to lookup
+      example: 7fca84d6-7d37-4a74-a7b0-93e576089a41
+      in: path
+      required: true
       schema:
         type: string
-        example: key:value,existCheck
-    FilterByNameEquality:
-      name: filter[name][eq]
-      description: >-
-        Filter by direct equality comparison of the name property with a supplied value.
-      in: query
-      required: false
+    runtimeGroupId:
+      name: runtimeGroupId
+      in: path
+      required: true
       schema:
         type: string
-        example: test
-    FilterByNameEqualityShort:
-      name: filter[name]
+        example: 9524ec7d-36d9-465d-a8c5-83a3c9390458
       description: >-
-        Filter by direct equality comparison (short-hand) of the name property with a supplied value.
-      in: query
-      required: false
-      schema:
+        The ID of your runtime group. This variable is available in the Konnect manager
+  schemas:
+    Service:
+      x-speakeasy-entity: Service
+      description: >-
+        service entities are abstractions of upstream services. The main attribute of a service is its URL which can be set as a single string or by specifying the `protocol`, `host`, `port` and `path` individually.
+      example:
+        host: example.internal
+        id: 49fd316e-c457-481c-9fc7-8079153e4f3c
+        name: example-service
+        path: /
+        port: 80
+        protocol: http
+      type: object
+      properties:
+        ca_certificates:
+          description: >-
+            Array of `CA Certificate` object UUIDs that are used to build the trust store while verifying upstream server's TLS certificate. If set to `null` when Nginx default is respected. If default CA list in Nginx are not specified and TLS verification is enabled, then handshake with upstream server will always fail (because no CA are trusted).
+          type: array
+          items:
+            type: string
+        client_certificate:
+          additionalProperties: false
+          description: >-
+            Certificate to be used as client certificate while TLS handshaking to the upstream server.
+          type: object
+          properties:
+            id:
+              type: string
+        connect_timeout:
+          default: 60000
+          description: >-
+            The timeout in milliseconds for establishing a connection to the upstream server.
+          type: integer
+        created_at:
+          description: Unix epoch when the resource was created.
+          type: integer
+          example: 1422386534
+        enabled:
+          default: true
+          description: >-
+            Whether the service is active. If set to `false`, the proxy behavior will be as if any routes attached to it do not exist (404). Default: `true`.
+          type: boolean
+        host:
+          description: >-
+            The host of the upstream server. Note that the host value is case sensitive.
+          type: string
+        id:
+          type: string
+        name:
+          description: The service name.
+          type: string
+        path:
+          description: The path to be used in requests to the upstream server.
+          type: string
+        port:
+          default: 80
+          description: The upstream server port.
+          type: integer
+        protocol:
+          default: http
+          description: The protocol used to communicate with the upstream.
+          type: string
+        read_timeout:
+          default: 60000
+          description: >-
+            The timeout in milliseconds between two successive read operations for transmitting a request to the upstream server.
+          type: integer
+        retries:
+          default: 5
+          description: The number of retries to execute upon failure to proxy.
+          type: integer
+        tags:
+          description: >-
+            An optional set of strings associated with the service for grouping and filtering.
+          type: array
+          items:
+            type: string
+        tls_verify:
+          description: >-
+            Whether to enable verification of upstream server TLS certificate. If set to `null`, then the Nginx default is respected.
+          type: boolean
+        tls_verify_depth:
+          description: >-
+            Maximum depth of chain while verifying Upstream server's TLS certificate. If set to `null`, then the Nginx default is respected.
+          type: integer
+        updated_at:
+          description: Unix epoch when the resource was last updated.
+          type: integer
+        url:
+          description: >-
+            Helper field to set `protocol`, `host`, `port` and `path` using a URL. This field is write-only and is not returned in responses.
+          type: string
+        write_timeout:
+          default: 60000
+          description: >-
+            The timeout in milliseconds between two successive write operations for transmitting a request to the upstream server.
+          type: integer
+      x-examples:
+        Example 1:
+          id: 9748f662-7711-4a90-8186-dc02f10eb0f5
+          created_at: 1422386534
+          updated_at: 1422386534
+          name: my-service
+          retries: 5
+          protocol: http
+          host: example.com
+          port: 80
+          path: /some_api
+          connect_timeout: 60000
+          write_timeout: 60000
+          read_timeout: 60000
+          tags:
+            - user-level
+            - low-priority
+          client_certificate:
+            id: 4e3ad2e4-0bc4-4638-8e34-c84a417ba39b
+          tls_verify: true
+          tls_verify_depth: null
+          ca_certificates:
+            - 4e3ad2e4-0bc4-4638-8e34-c84a417ba39b
+            - 51e77dc2-8f3e-4afa-9d0e-0e3bbbcfd515
+          enabled: true
+      title: Service
+    APIProductLabels:
+      title: Labels
+      type: object
+      description: >
+        description: A maximum of 5 user-defined labels are allowed on this resource.
+
+        Keys must not start with kong, konnect, insomnia, mesh, kic or _, which are reserved for Kong.
+
+        Keys are case-sensitive.
+
+      additionalProperties:
         type: string
-        example: test
-    FilterByNameContains:
-      name: filter[name][contains]
+        pattern: ^[a-z0-9A-Z]{1}([a-z0-9A-Z\-._]*[a-z0-9A-Z]+)?$
+        minLength: 1
+        maxLength: 63
+      default: {}
+    APIProductFilterParameters:
+      title: APIProductFilterParameters
+      type: object
+      properties:
+        name:
+          $ref: "#/components/schemas/StringFieldFilter"
+    APIProductVersionFilterParameters:
+      title: APIProductVersionFilterParameters
+      type: object
+      properties:
+        name:
+          $ref: "#/components/schemas/StringFieldFilter"
+    SortQuery:
+      title: SortQuery
+      type: string
+      example: name desc
+      description: >
+        The `asc` suffix is optional as the default sort order is ascending.
+
+        The `desc` suffix is used to specify a descending order.
+
+        Multiple sort attributes may be provided via a comma separated list.
+
+        JSONPath notation may be used to specify a sub-attribute (eg: 'foo.bar desc').
+
+    APIProduct:
+      x-speakeasy-entity: ApiProduct
+      title: API Product
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - name
+        - description
+        - portal_ids
+        - created_at
+        - updated_at
+        - labels
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: b9e81174-b5bb-4638-a3c3-8afe61a0abf8
+          description: The API product ID.
+        name:
+          type: string
+          description: The name of the API product
+          example: My Name
+        description:
+          type: string
+          description: The description of the API product
+          example: MyDescription
+        portal_ids:
+          type: array
+          uniqueItems: true
+          minItems: 0
+          description: >-
+            The list of portal identifiers which this API product is published to
+          items:
+            type: string
+            format: uuid
+            example: 25a2624c-49fc-4764-99e1-224ed819f200
+        created_at:
+          $ref: "#/components/schemas/CreatedAt"
+        updated_at:
+          $ref: "#/components/schemas/UpdatedAt"
+        labels:
+          $ref: "#/components/schemas/APIProductLabels"
+    APIProductDocumentSummary:
+      title: API Product Document Summary
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - parent_document_id
+        - slug
+        - title
+        - status
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: de5c9818-be5c-42e6-b514-e3d4bc30ddeb
+          description: The API product document identifier.
+        parent_document_id:
+          type: string
+          format: uuid
+          description: The parent API product document identifier.
+          example: null
+        slug:
+          type: string
+          pattern: ^[\w-]+$
+          description: API product document slug
+          example: api-product-document
+        status:
+          $ref: "#/components/schemas/PublishStatus"
+        title:
+          type: string
+          description: API product document title
+          example: API Product Document
+    APIProductDocument:
+      type: object
+      title: ApiProductDocument
+      description: an api product document
+      required:
+        - id
+        - parent_document_id
+        - title
+        - slug
+        - status
+        - metadata
+        - ast
+        - updated_at
+        - created_at
+      properties:
+        id:
+          type: string
+          format: uuid
+        parent_document_id:
+          type: string
+          format: uuid
+        title:
+          type: string
+        slug:
+          type: string
+        status:
+          type: string
+          enum:
+            - unpublished
+            - published
+        metadata:
+          type: object
+        ast:
+          type: array
+          items:
+            $ref: "#/components/schemas/AnyNode"
+        created_at:
+          $ref: "#/components/schemas/CreatedAt"
+        updated_at:
+          $ref: "#/components/schemas/UpdatedAt"
+    APIProductVersion:
+      x-speakeasy-entity: ApiProductVersion
+      title: API Product Version
+      type: object
+      additionalProperties: false
+      required:
+        - name
+        - publish_status
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: 9f5061ce-78f6-4452-9108-ad7c02821fd5
+          description: The API product version identifier.
+        name:
+          type: string
+          description: The version of the API product
+          example: FirstVersion
+        gateway_service:
+          $ref: "#/components/schemas/GatewayServicePayload"
+        publish_status:
+          type: string
+          description: The publish status of the API product version
+          enum:
+            - unpublished
+            - published
+          example: unpublished
+        deprecated:
+          type: boolean
+          description: Indicates if this API product version is deprecated
+          example: false
+        created_at:
+          $ref: "#/components/schemas/CreatedAt"
+        updated_at:
+          $ref: "#/components/schemas/UpdatedAt"
+    APIProductVersionSpec:
+      title: API Product Version Spec
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - name
+        - content
+        - created_at
+        - updated_at
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: 7710d5c4-d902-410b-992f-18b814155b53
+          description: The API product version specification identifier.
+        name:
+          type: string
+          description: The name of the API product version specification
+          example: oas.yaml
+        content:
+          type: string
+          description: The contents of the API product version specification
+          example: My YAML or JSON formatted OAS content
+        created_at:
+          $ref: "#/components/schemas/CreatedAt"
+        updated_at:
+          $ref: "#/components/schemas/UpdatedAt"
+    CreateAPIProductDTO:
+      title: Create API Product Request
+      description: The request schema to create an API product.
+      type: object
+      additionalProperties: false
+      required:
+        - name
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 100
+          example: API Product
+          description: The name of the API product.
+        description:
+          type: string
+          example: Text describing the API product
+          description: The description of the API product.
+          default: null
+        labels:
+          $ref: "#/components/schemas/APIProductLabels"
+    UpdateAPIProductDTO:
+      title: Update API Product Request
+      description: The request schema for updating an API product.
+      type: object
+      additionalProperties: false
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 100
+          example: API Product
+          description: The name for the API product.
+        description:
+          type: string
+          example: Text describing the API product
+          description: The description of the API product.
+        labels:
+          $ref: "#/components/schemas/APIProductLabels"
+        portal_ids:
+          type: array
+          uniqueItems: true
+          minItems: 0
+          description: >-
+            The list of portal identifiers which this API product should be published to
+          items:
+            type: string
+            format: uuid
+            example: 25a2624c-49fc-4764-99e1-224ed819f200
+    CreateAPIProductVersionDTO:
+      title: Create API Product Version Request
+      description: The request schema to create a version of an API product.
+      type: object
+      additionalProperties: false
+      required:
+        - name
+      properties:
+        name:
+          type: string
+          minLength: 1
+          example: v1
+          description: The version name of the API product version.
+        publish_status:
+          type: string
+          description: The publish status of the API product version.
+          enum:
+            - unpublished
+            - published
+          example: unpublished
+          default: unpublished
+        deprecated:
+          type: boolean
+          description: Indicates if the version of the API product is deprecated.
+          example: false
+          default: false
+        gateway_service:
+          $ref: "#/components/schemas/GatewayServicePayload"
+    CreateAPIProductVersionSpecDTO:
+      title: Create API Product Version Specification Request
       description: >-
-        Filter by contains comparison of the name property with a supplied substring.
-      in: query
-      required: false
-      schema:
+        The request schema to create a specification for a version of an API product.
+      type: object
+      additionalProperties: false
+      required:
+        - name
+        - content
+      properties:
+        name:
+          type: string
+          pattern: ^.+(?:\.yaml|\.yml|\.json)$
+          minLength: 1
+          maxLength: 255
+          example: oas.yaml
+          description: The name of the API product version specification
+        content:
+          type: string
+          format: byte
+          minLength: 1
+          example: TXkgWUFNTCBvciBKU09OIGZvcm1hdHRlZCBPQVMgY29udGVudA==
+          description: The base64 encoded contents of the API product version specification
+    CreateAPIProductDocumentDTO:
+      type: object
+      title: CreateDocumentPayload
+      description: a document payload
+      required:
+        - slug
+        - status
+        - title
+        - content
+      properties:
+        parent_document_id:
+          type: string
+          format: uuid
+          description: parent document id
+          example: dd4e1b98-3629-4dd3-acc0-759a726ffee2
+          default: null
+        slug:
+          type: string
+          maxLength: 80
+          pattern: ^[\w-]+$
+          description: >-
+            document slug. must be unique accross documents belonging to an api product
+          example: path-for-seo
+        status:
+          $ref: "#/components/schemas/PublishStatus"
+        title:
+          type: string
+          minLength: 1
+          description: document title
+          example: How to create a document in Konnect DocumentHub
+        content:
+          type: string
+          format: byte
+          description: Must be a base64 encoded string
+          example: YmFzZTY0LWVuY29kZWQgdGV4dCBzdHJpbmc=
+        metadata:
+          type: object
+          description: metadata of the document
+          example:
+            author: John Doe
+          default: {}
+    UpdateAPIProductDocumentDTO:
+      type: object
+      title: UpdateDocumentAttributesAndContentPayload
+      description: a document payload
+      properties:
+        parent_document_id:
+          type: string
+          format: uuid
+          description: >
+            Parent document Id. If this value is explicitly set to null, the
+
+            document will be put as a top level document at the bottom of the tree.
+
+          example: dd4e1b98-3629-4dd3-acc0-759a726ffee2
+        slug:
+          type: string
+          pattern: ^[\w-]+$
+          maxLength: 80
+          description: >-
+            document slug. must be unique accross documents belonging to an api product
+          example: path-for-seo
+        status:
+          $ref: "#/components/schemas/PublishStatus"
+        title:
+          type: string
+          minLength: 1
+          description: document title
+          example: How to update a document in Konnect DocumentHub
+        content:
+          type: string
+          format: byte
+          description: base64 encoded string of the document content
+          example: YmFzZTY0LWVuY29kZWQgdGV4dCBzdHJpbmc=
+        metadata:
+          type: object
+    UpdateAPIProductVersionDTO:
+      title: Update API Product Version Request
+      description: The request schema for updating a version of an API product.
+      type: object
+      additionalProperties: false
+      properties:
+        name:
+          type: string
+          minLength: 1
+          example: v1
+          description: The version name of the API product version.
+        publish_status:
+          type: string
+          description: The publish status of the API product version.
+          enum:
+            - unpublished
+            - published
+          example: unpublished
+        deprecated:
+          type: boolean
+          description: Indicates if the version of the API product is deprecated.
+          example: false
+        notify:
+          x-speakeasy-terraform-ignore: true
+          type: boolean
+          description: >
+            When set to `true`, and all the following conditions are true:
+
+            - version of the API product deprecation has changed from `false` -> `true`
+
+            - version of the API product is published
+
+
+            then consumers of the now deprecated verion of the API product will be notified.
+
+          example: true
+        gateway_service:
+          $ref: "#/components/schemas/GatewayServicePayload"
+    GatewayServicePayload:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: >-
+            The identifier of a gateway service associated with the version of the API product.
+          example: 09b4786a-3e48-4631-8f6b-62d1d8e1a7f3
+        control_plane_id:
+          type: string
+          format: uuid
+          description: >-
+            The identifier of the control plane that the gateway service resides in
+          example: e4d9ebb1-26b4-426a-b00e-cb67044f3baf
+    StringFieldEqualsFilter:
+      title: StringFieldEqualsFilter
+      description: Filter a string value by exact match.
+      type: string
+    StringFieldContainsFilter:
+      type: object
+      title: StringFieldContainsFilter
+      description: Filter a string value field by partial contains.
+      properties:
+        contains:
+          type: string
+      required:
+        - contains
+    StringFieldFilter:
+      title: StringFieldFilter
+      description: Filter a string value field either by exact match or partial contains.
+      oneOf:
+        - $ref: "#/components/schemas/StringFieldEqualsFilter"
+        - $ref: "#/components/schemas/StringFieldContainsFilter"
+    PageMeta:
+      type: object
+      description: >-
+        Contains pagination query parameters and the total number of objects returned.
+      required:
+        - number
+        - size
+        - total
+      properties:
+        number:
+          type: number
+          example: 1
+        size:
+          type: number
+          example: 10
+        total:
+          type: number
+          example: 100
+    PaginatedMeta:
+      type: object
+      title: PaginatedMeta
+      description: returns the pagination information
+      properties:
+        page:
+          $ref: "#/components/schemas/PageMeta"
+      required:
+        - page
+    CreatedAt:
+      type: string
+      format: date-time
+      example: "2022-11-04T20:10:06.927Z"
+      description: An ISO-8601 timestamp representation of entity creation date.
+    UpdatedAt:
+      type: string
+      format: date-time
+      example: "2022-11-04T20:10:06.927Z"
+      description: An ISO-8601 timestamp representation of entity update date.
+    BaseError:
+      type: object
+      title: Error
+      description: standard error
+      required:
+        - status
+        - title
+        - instance
+        - detail
+      properties:
+        status:
+          type: integer
+          description: >
+            The HTTP status code of the error. Useful when passing the response
+
+            body to child properties in a frontend UI. Must be returned as an integer.
+
+        title:
+          type: string
+          description: |
+            A short, human-readable summary of the problem. It should not
+            change between occurences of a problem, except for localization.
+            Should be provided as "Sentence case" for direct use in the UI.
+        type:
+          type: string
+          description: The error type.
+        instance:
+          type: string
+          description: |
+            Used to return the correlation ID back to the user, in the format
+            kong:trace:<correlation_id>. This helps us find the relevant logs
+            when a customer reports an issue.
+        detail:
+          type: string
+          description: >
+            A human readable explanation specific to this occurence of the problem.
+
+            This field may contain request/entity data to help the user understand
+
+            what went wrong. Enclose variable values in square brackets. Should be
+
+            provided as "Sentence case" for direct use in the UI.
+
+    InvalidRules:
+      description: invalid parameters rules
+      type: string
+      enum:
+        - required
+        - enum
+        - min_length
+        - max_length
+        - min_digits
+        - min_lowercase
+        - min_uppercase
+        - min_symbols
+        - is_array
+        - is_base64
+        - is_boolean
+        - is_date_time
+        - is_integer
+        - is_null
+        - is_number
+        - is_object
+        - is_string
+        - is_uuid
+        - unknown_property
+        - is_label
+        - matches_regex
+    InvalidParameterChoiceItem:
+      type: object
+      properties:
+        field:
+          type: string
+          example: name
+        rule:
+          $ref: "#/components/schemas/InvalidRules"
+        reason:
+          type: string
+          example: is a required field
+        choices:
+          type: array
+          uniqueItems: true
+          items: {}
+      required:
+        - field
+        - reason
+    InvalidParameterDependentItem:
+      type: object
+      properties:
+        field:
+          type: string
+          example: name
+        rule:
+          description: invalid parameters rules
+          type: string
+          enum:
+            - dependent_fields
+        reason:
+          type: string
+          example: is a required field
+        dependents:
+          type: array
+          uniqueItems: true
+          items: {}
+      required:
+        - field
+        - rule
+        - reason
+        - dependents
+    InvalidParameters:
+      type: array
+      uniqueItems: true
+      minItems: 1
+      description: invalid parameters
+      items:
+        oneOf:
+          - $ref: "#/components/schemas/InvalidParameterChoiceItem"
+          - $ref: "#/components/schemas/InvalidParameterDependentItem"
+    BadRequestError:
+      type: object
+      required:
+        - invalid_parameters
+      properties:
+        status:
+          example: 400
+        title:
+          example: Bad Request
+        type:
+          example: https://httpstatuses.com/400
+        instance:
+          example: kong:trace:1234567890
+        detail:
+          example: Invalid request body
+        invalid_parameters:
+          $ref: "#/components/schemas/InvalidParameters"
+      allOf:
+        - $ref: "#/components/schemas/BaseError"
+    UnauthorizedError:
+      type: object
+      properties:
+        status:
+          example: 401
+        title:
+          example: Unauthorized
+        type:
+          example: https://httpstatuses.com/401
+        instance:
+          example: kong:trace:1234567890
+        detail:
+          example: Invalid credentials
+      allOf:
+        - $ref: "#/components/schemas/BaseError"
+    ForbiddenError:
+      type: object
+      properties:
+        status:
+          example: 403
+        title:
+          example: Forbidden
+        type:
+          example: https://httpstatuses.com/403
+        instance:
+          example: kong:trace:1234567890
+        detail:
+          example: Forbidden
+      allOf:
+        - $ref: "#/components/schemas/BaseError"
+    NotFoundError:
+      type: object
+      properties:
+        status:
+          example: 404
+        title:
+          example: Not Found
+        type:
+          example: https://httpstatuses.com/404
+        instance:
+          example: kong:trace:1234567890
+        detail:
+          example: Not found
+      allOf:
+        - $ref: "#/components/schemas/BaseError"
+    UnsupportedMediaTypeError:
+      type: object
+      properties:
+        status:
+          example: 415
+        title:
+          example: UnsupportedMediaType
+        type:
+          example: https://httpstatuses.com/415
+        instance:
+          example: kong:trace:1234567890
+        detail:
+          example: UnsupportedMediaType
+      allOf:
+        - $ref: "#/components/schemas/BaseError"
+    PublishStatus:
+      description: document publish status
+      type: string
+      enum:
+        - published
+        - unpublished
+    DocumentTree:
+      type: object
+      title: DocumentTree
+      description: a document tree
+      required:
+        - id
+        - title
+        - slug
+        - metadata
+        - children
+        - status
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: d32d905a-ed33-46a3-a093-d8f536af9a8a
+        parent_document_id:
+          type: string
+          format: uuid
+          example: dd4e1b98-3629-4dd3-acc0-759a726ffee2
+        title:
+          type: string
+        slug:
+          type: string
+          description: document slug
+          example: path-for-seo
+        metadata:
+          type: object
+          description: metadata of the document
+          example:
+            author: John Doe
+        status:
+          $ref: "#/components/schemas/PublishStatus"
+    BaseNode:
+      type: object
+      required:
+        - type
+      properties:
+        type:
+          type: string
+    AnyNode:
+      oneOf:
+        - $ref: "#/components/schemas/DocumentBlock"
+        - $ref: "#/components/schemas/HeadingBlock"
+        - $ref: "#/components/schemas/BlockQuoteBlock"
+        - $ref: "#/components/schemas/ParagraphBlock"
+        - $ref: "#/components/schemas/TextBlock"
+        - $ref: "#/components/schemas/BreakBlock"
+        - $ref: "#/components/schemas/CodeBlock"
+        - $ref: "#/components/schemas/ListBlock"
+        - $ref: "#/components/schemas/ListItemBlock"
+        - $ref: "#/components/schemas/Text"
+        - $ref: "#/components/schemas/Emphasis"
+        - $ref: "#/components/schemas/Code"
+        - $ref: "#/components/schemas/Link"
+        - $ref: "#/components/schemas/Image"
+        - $ref: "#/components/schemas/StrikeThrough"
+        - $ref: "#/components/schemas/TableBlock"
+        - $ref: "#/components/schemas/TableHeaderBlock"
+        - $ref: "#/components/schemas/TableCellBlock"
+        - $ref: "#/components/schemas/TableRowBlock"
+        - $ref: "#/components/schemas/TaskCheckbox"
+      discriminator:
+        propertyName: type
+        mapping:
+          document: "#/components/schemas/DocumentBlock"
+          heading: "#/components/schemas/HeadingBlock"
+          blockquote: "#/components/schemas/BlockQuoteBlock"
+          paragraph: "#/components/schemas/ParagraphBlock"
+          text_block: "#/components/schemas/TextBlock"
+          break: "#/components/schemas/BreakBlock"
+          code_block: "#/components/schemas/CodeBlock"
+          list: "#/components/schemas/ListBlock"
+          list_item: "#/components/schemas/ListItemBlock"
+          text: "#/components/schemas/Text"
+          emphasis: "#/components/schemas/Emphasis"
+          code: "#/components/schemas/Code"
+          link: "#/components/schemas/Link"
+          image: "#/components/schemas/Image"
+          strikethrough: "#/components/schemas/StrikeThrough"
+          task_checkbox: "#/components/schemas/TaskCheckbox"
+          table: "#/components/schemas/TableBlock"
+          table_header: "#/components/schemas/TableHeaderBlock"
+          table_cell: "#/components/schemas/TableCellBlock"
+          table_row: "#/components/schemas/TableRowBlock"
+    BlockNode:
+      allOf:
+        - $ref: "#/components/schemas/BaseNode"
+        - type: object
+          properties:
+            children:
+              description: List of children nodes of the current node
+              type: array
+              items:
+                $ref: "#/components/schemas/AnyNode"
+    DocumentBlock:
+      allOf:
+        - $ref: "#/components/schemas/BlockNode"
+        - type: object
+          properties:
+            version:
+              type: string
+      description: content of the document
+      example:
+        type: doc
+        content:
+          - type: paragraph
+            content:
+              - type: text
+                text: Hello World
+    HeadingBlock:
+      allOf:
+        - $ref: "#/components/schemas/BlockNode"
+        - type: object
+          properties:
+            level:
+              description: Level of the heading which maps to HTML <h> tag
+              type: number
+              minimum: 1
+              maximum: 6
+    BlockQuoteBlock:
+      allOf:
+        - $ref: "#/components/schemas/BlockNode"
+    ParagraphBlock:
+      allOf:
+        - $ref: "#/components/schemas/BlockNode"
+    TextBlock:
+      allOf:
+        - $ref: "#/components/schemas/BlockNode"
+    BreakBlock:
+      allOf:
+        - $ref: "#/components/schemas/BlockNode"
+    CodeBlock:
+      allOf:
+        - $ref: "#/components/schemas/BlockNode"
+        - type: object
+          properties:
+            lang:
+              type: string
+    ListBlock:
+      allOf:
+        - $ref: "#/components/schemas/BlockNode"
+        - type: object
+          properties:
+            isOrdered:
+              description: Defines if the list is ordered or not
+              type: boolean
+    ListItemBlock:
+      allOf:
+        - $ref: "#/components/schemas/BlockNode"
+    Text:
+      allOf:
+        - $ref: "#/components/schemas/BaseNode"
+        - $ref: "#/components/schemas/BlockNode"
+        - type: object
+          properties:
+            text:
+              type: string
+            hardBreak:
+              description: >
+                If this property is true the end of this block should
+
+                be a carriage return and not concatenated to the next Text block.
+
+              type: boolean
+            softBreak:
+              description: >
+                If this property is true the end of this block should should be
+
+                concatenated with a space caracter before the next block. This is
+
+                the flag showing that the parsed markdown block was at the end of
+
+                the line.
+
+              type: boolean
+    Emphasis:
+      allOf:
+        - $ref: "#/components/schemas/BaseNode"
+        - $ref: "#/components/schemas/BlockNode"
+        - type: object
+          properties:
+            level:
+              type: number
+              minimum: 1
+              maximum: 2
+              description: |
+                Level of emphasis
+                1 - italic
+                2 - bold
+    Code:
+      allOf:
+        - $ref: "#/components/schemas/BaseNode"
+        - $ref: "#/components/schemas/BlockNode"
+    Link:
+      allOf:
+        - $ref: "#/components/schemas/BaseNode"
+        - type: object
+          properties:
+            href:
+              description: Target url of the link
+              type: string
+            title:
+              description: Title of the link
+              type: string
+    Image:
+      allOf:
+        - $ref: "#/components/schemas/BaseNode"
+        - type: object
+          properties:
+            url:
+              description: Url of the image
+              type: string
+            alt:
+              description: Alternate tag of the image
+              type: string
+            title:
+              description: Title of the image
+              type: string
+    StrikeThrough:
+      allOf:
+        - $ref: "#/components/schemas/BaseNode"
+    TaskCheckbox:
+      allOf:
+        - $ref: "#/components/schemas/BaseNode"
+        - type: object
+          properties:
+            checked:
+              type: boolean
+              description: State of the checkbox
+          required:
+            - checked
+    AlignmentKind:
+      type: string
+      enum:
+        - left
+        - right
+        - center
+        - none
+    TableAlignments:
+      type: object
+      properties:
+        alignments:
+          type: array
+          items:
+            $ref: "#/components/schemas/AlignmentKind"
+      required:
+        - alignments
+    TableBlock:
+      allOf:
+        - $ref: "#/components/schemas/BlockNode"
+        - $ref: "#/components/schemas/TableAlignments"
+    TableHeaderBlock:
+      allOf:
+        - $ref: "#/components/schemas/BlockNode"
+        - $ref: "#/components/schemas/TableAlignments"
+    TableCellBlock:
+      allOf:
+        - $ref: "#/components/schemas/BlockNode"
+        - type: object
+          properties:
+            alignment:
+              $ref: "#/components/schemas/AlignmentKind"
+    TableRowBlock:
+      allOf:
+        - $ref: "#/components/schemas/BlockNode"
+        - $ref: "#/components/schemas/TableAlignments"
+    ConflictError:
+      type: object
+      properties:
+        status:
+          example: 409
+        title:
+          example: Conflict
+        type:
+          example: https://httpstatuses.com/409
+        instance:
+          example: kong:trace:1234567890
+        detail:
+          example: Conflict
+      allOf:
+        - $ref: "#/components/schemas/BaseError"
+    CreateRuntimeGroupRequest:
+      title: CreateRuntimeGroupRequest
+      description: The request schema for the create runtime group request.
+      type: object
+      additionalProperties: false
+      properties:
+        name:
+          type: string
+          example: Test Runtime Group
+          description: The name of the runtime group.
+        description:
+          type: string
+          example: A test runtime group for exploration.
+          description: The description of the runtime group in Konnect.
+        cluster_type:
+          type: string
+          description: >-
+            The ClusterType value of the cluster associated with the Runtime Group.
+          example: CLUSTER_TYPE_HYBRID
+          enum:
+            - CLUSTER_TYPE_HYBRID
+            - CLUSTER_TYPE_K8S_INGRESS_CONTROLLER
+            - CLUSTER_TYPE_COMPOSITE
+        auth_type:
+          type: string
+          description: >-
+            The auth type value of the cluster associated with the Runtime Group.
+          example: pinned_client_certs
+          enum:
+            - pinned_client_certs
+            - pki_client_certs
+        labels:
+          $ref: "#/components/schemas/Labels"
+      required:
+        - name
+    UpdateRuntimeGroupRequest:
+      title: UpdateRuntimeGroupRequest
+      description: The request schema for the update runtime group request.
+      type: object
+      additionalProperties: false
+      properties:
+        name:
+          type: string
+          example: Test Runtime Group
+          description: The name of the runtime group.
+        description:
+          type: string
+          example: A test runtime group for exploration.
+          description: The description of the runtime group in Konnect.
+        auth_type:
+          type: string
+          description: >-
+            The auth type value of the cluster associated with the Runtime Group.
+          example: pinned_client_certs
+          enum:
+            - pinned_client_certs
+            - pki_client_certs
+        labels:
+          $ref: "#/components/schemas/Labels"
+    RuntimeGroup:
+      x-speakeasy-entity: RuntimeGroup
+      allOf:
+        - $ref: "#/components/schemas/RuntimeGroupSummary"
+        - type: object
+          properties:
+            labels:
+              $ref: "#/components/schemas/Labels"
+            config:
+              x-speakeasy-param-suppress-computed-diff: true
+              type: object
+              description: CP configuration object for related access endpoints.
+              properties:
+                control_plane_endpoint:
+                  type: string
+                  format: url
+                  example: https://acfe5f253f.cp0.konghq.com
+                  description: Control Plane Endpoint.
+                telemetry_endpoint:
+                  type: string
+                  format: url
+                  example: https://acfe5f253f.tp0.konghq.com
+                  description: Telemetry Endpoint.
+            created_at:
+              x-speakeasy-terraform-ignore: true
+              type: string
+              format: date-time
+              example: "2022-11-04T20:10:06.927Z"
+              description: >-
+                An ISO-8604 timestamp representation of runtime group creation date.
+            updated_at:
+              x-speakeasy-terraform-ignore: true
+              type: string
+              format: date-time
+              example: "2022-11-04T20:10:06.927Z"
+              description: >-
+                An ISO-8604 timestamp representation of runtime group update date.
+      x-examples:
+        Example 1:
+          id: 7f9fd312-a987-4628-b4c5-bb4f4fddd5f7
+          name: Test Runtime Group
+          description: A test runtime group for exploration.
+          labels:
+            test: "true"
+          config:
+            control_plane_endpoint: https://acfe5f253f.cp0.konghq.com
+            telemetry_endpoint: https://acfe5f253f.tp0.konghq.com
+            cluster_type: CLUSTER_TYPE_HYBRID
+            auth_type: pinned_client_certs
+          created_at: "2022-11-04T20:10:06.927Z"
+          updated_at: "2022-11-04T20:10:06.927Z"
+    RuntimeGroupSummary:
+      title: RuntimeGroupSummary
+      type: object
+      description: >-
+        The runtime group object contains information about a Kong control plane.
+      additionalProperties: false
+      properties:
+        id:
+          x-speakeasy-param-suppress-computed-diff: true
+          type: string
+          format: uuid
+          example: 7f9fd312-a987-4628-b4c5-bb4f4fddd5f7
+          description: The runtime group ID.
+        name:
+          type: string
+          example: Test Runtime Group
+          description: The name of the runtime group.
+        description:
+          type: string
+          example: A test runtime group for exploration.
+          description: The description of the runtime group in Konnect.
+        labels:
+          $ref: "#/components/schemas/Labels"
+        config:
+          type: object
+          description: CP configuration object for related access endpoints.
+          additionalProperties: false
+          properties:
+            control_plane_endpoint:
+              type: string
+              format: url
+              example: https://acfe5f253f.cp0.konghq.com
+              description: Control Plane Endpoint.
+            telemetry_endpoint:
+              type: string
+              format: url
+              example: https://acfe5f253f.tp0.konghq.com
+              description: Telemetry Endpoint.
+            auth_type:
+              type: string
+              description: >-
+                The auth type value of the cluster associated with the Runtime Group.
+              example: pinned_client_certs
+              enum:
+                - pinned_client_certs
+                - pki_client_certs
+          required:
+            - control_plane_endpoint
+            - telemetry_endpoint
+            - cluster_type
+            - auth_type
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+    CompositeStatus:
+      title: CompositeStatus
+      type: object
+      description: >-
+        The Composite Status object contains information about the status of a composite runtime group.
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: 7f9fd312-a987-4628-b4c5-bb4f4fddd5f7
+          description: The composite runtime group ID.
+        created_at:
+          type: string
+          format: date-time
+          example: "2022-11-04T20:10:06.927Z"
+          description: >-
+            An ISO-8604 timestamp representation of composite runtime group status creation date.
+        conflicts:
+          type: array
+          maxItems: 256
+          items:
+            $ref: "#/components/schemas/CompositeConflict"
+        state:
+          type: string
+          description: The state of the composite runtime group.
+          example: COMPOSITE_STATE_CONFLICT
+          enum:
+            - COMPOSITE_STATE_OK
+            - COMPOSITE_STATE_CONFLICT
+            - COMPOSITE_STATE_UNKNOWN
+    CompositeConflict:
+      title: CompositeConflict
+      type: object
+      description: >-
+        The Composite Conflict object contains information about a conflict in a composite runtime group.
+      properties:
+        cluster_id:
+          type: string
+          format: uuid
+          example: 7f9fd312-a987-4628-b4c5-bb4f4fddd5f7
+          description: The ID of a runtime group member of a composite runtime group.
+        description:
+          type: string
+          example: >-
+            conflicting entity found: ID=38d790ad-8b08-4ff5-a074-2e1e9e64d8bd, Name=foo
+          description: The description of the conflict.
+        resource:
+          $ref: "#/components/schemas/CompositeConflictResource"
+    CompositeConflictResource:
+      title: CompositeConflictResource
+      type: object
+      description: A resource causing a conflict in a composite runtime group.
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: 7f9fd312-a987-4628-b4c5-bb4f4fddd5f7
+          description: The ID of the resource.
+        type:
+          type: string
+          example: service
+          description: The type of the resource.
+      required:
+        - id
+        - type
+    Labels:
+      x-speakeasy-type-override: any
+      title: Labels
+      type: object
+      example:
+        test: "true"
+      description: >-
+        Labels to facilitate tagged search on runtime groups. Keys must be of length 1-63 characters, and cannot start with 'kong', 'konnect', 'mesh', 'kic', or '_'.
+      additionalProperties:
         type: string
-        example: test
-    FilterByNameNotEquals:
-      name: filter[name][neq]
-      description: >-
-        Filter by non-equality comparison of the name property with a supplied value.
-      in: query
-      required: false
-      schema:
-        type: string
-        example: test
-    FilterByIdEquality:
-      name: filter[id][eq]
-      description: >-
-        Filter by direct equality comparison of the id property with a supplied value.
-      in: query
-      required: false
-      schema:
-        type: string
-        example: 7f9fd312-a987-4628-b4c5-bb4f4fddd5f7
-    FilterByIdEqualityShort:
-      name: filter[id]
-      description: >-
-        Filter by direct equality comparison (short-hand) of the id property with a supplied value.
-      in: query
-      required: false
-      schema:
-        type: string
-        example: 7f9fd312-a987-4628-b4c5-bb4f4fddd5f7
-    FilterByClusterTypeEquality:
-      name: filter[cluster_type][eq]
-      description: >-
-        Filter by direct equality comparison of the cluster_type property with a supplied value.
-      in: query
-      required: false
-      schema:
-        type: string
-      example: CLUSTER_TYPE_HYBRID
-    FilterByClusterTypeEqualityShort:
-      name: filter[cluster_type]
-      description: >-
-        Filter by direct equality comparison (short-hand) of the cluster_type property with a supplied value.
-      in: query
-      required: false
-      schema:
-        type: string
-        example: CLUSTER_TYPE_HYBRID
-    FilterByClusterTypeNotEquals:
-      name: filter[cluster_type][neq]
-      description: >-
-        Filter by non-equality comparison of the cluster_type property with a supplied value.
-      in: query
-      required: false
-      schema:
-        type: string
-        example: test
-    PageSize:
-      name: page[size]
-      description: >-
-        The maximum number of items to include per page. The last page of a collection may include fewer items.
-      required: false
-      in: query
-      allowEmptyValue: true
-      schema:
-        type: integer
-        example: 10
-    PageNumber:
-      name: page[number]
-      description: Determines which page of the entities to retrieve.
-      required: false
-      in: query
-      allowEmptyValue: true
-      schema:
-        type: integer
-        example: 1
+        pattern: ^[a-z0-9A-Z]{1}([a-z0-9A-Z\-\.\_]*[a-z0-9A-Z]+)?$
+        minLength: 1
+        maxLength: 63
+  requestBodies:
+    service-request:
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Service"
+    CreateAPIProductRequest:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/CreateAPIProductDTO"
+          examples:
+            CreateAPIProductRequestMinimalExample:
+              $ref: "#/components/examples/CreateAPIProductRequestMinimalExample"
+            CreateAPIProductRequestExample:
+              $ref: "#/components/examples/CreateAPIProductRequestExample"
+    UpdateAPIProductRequest:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/UpdateAPIProductDTO"
+          examples:
+            UpdateAPIProductRequestExample:
+              $ref: "#/components/examples/UpdateAPIProductRequestExample"
+            PublishAPIProductToPortalExample:
+              $ref: "#/components/examples/PublishAPIProductToPortalExample"
+    CreateAPIProductVersionRequest:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/CreateAPIProductVersionDTO"
+          examples:
+            UnlinkedAPIProductVersion:
+              $ref: >-
+                #/components/examples/CreateAPIProductVersionRequestMinimalExample
+            LinkedAPIProductVersion:
+              $ref: >-
+                #/components/examples/CreateLinkedAPIProductVersionRequestExample
+    UpdateAPIProductVersionRequest:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/UpdateAPIProductVersionDTO"
+          examples:
+            PublishAPIProductVersion:
+              $ref: "#/components/examples/PublishApiProductVersionRequestExample"
+            LinkAPIProductVersionRequest:
+              $ref: "#/components/examples/LinkAPIProductVersionRequestExample"
+            UnlinkAPIProductVersionRequest:
+              $ref: "#/components/examples/UnlinkAPIProductVersionRequestExample"
+            DeprecateAPIProductVersionRequest:
+              $ref: "#/components/examples/DeprecateAPIProductVersionRequestExample"
   responses:
+    service-response:
+      description: >-
+        The service response object is returned when creating a new service or retreiving an existing service.
+      content:
+        application/json:
+          schema:
+            type: object
+            x-examples:
+              Example 1:
+                connect_timeout: 6000
+                created_at: 1684437851
+                enabled: true
+                host: example.com
+                id: ebf4e826-b17a-4e23-9d58-2621c9faa135
+                name: my-service
+                path: /some_api
+                port: 80
+                protocol: http
+                read_timeout: 6000
+                retries: 5
+                updated_at: 1684437851
+                write_timeout: 6000
+            properties:
+              connect_timeout:
+                type: integer
+              created_at:
+                type: integer
+                description: Unix epoch when the resource was last created.
+              enabled:
+                type: boolean
+                description: Service enabled boolean
+              host:
+                type: string
+              id:
+                type: string
+              name:
+                type: string
+              path:
+                type: string
+              port:
+                type: integer
+              protocol:
+                type: string
+              read_timeout:
+                type: integer
+              retries:
+                type: integer
+              updated_at:
+                type: integer
+              write_timeout:
+                type: integer
+          examples:
+            Returned Service:
+              value:
+                connect_timeout: 0
+                created_at: 0
+                enabled: true
+                host: string
+                id: string
+                name: string
+                path: string
+                port: 0
+                protocol: string
+                read_timeout: 0
+                retries: 0
+                updated_at: 0
+                write_timeout: 0
+    ApiProductUnauthorized:
+      description: Unauthorized
+      content:
+        application/problem+json:
+          schema:
+            $ref: "#/components/schemas/UnauthorizedError"
+          examples:
+            UnauthorizedExample:
+              $ref: "#/components/examples/UnauthorizedExample"
+    ApiProductNotFound:
+      description: Not Found
+      content:
+        application/problem+json:
+          schema:
+            $ref: "#/components/schemas/NotFoundError"
+          examples:
+            NotFoundExample:
+              $ref: "#/components/examples/NotFoundExample"
+    Forbidden:
+      description: Forbidden
+      content:
+        application/problem+json:
+          schema:
+            $ref: "#/components/schemas/ForbiddenError"
+          examples:
+            ForbiddenExample:
+              $ref: "#/components/examples/ForbiddenExample"
+            UnauthorizedExample:
+              $ref: "#/components/examples/ForbiddenExample"
+    APIProductResponse:
+      description: API product
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/APIProduct"
+          examples:
+            Create API Product Response:
+              $ref: "#/components/examples/APIProductExample"
+    APIProductVersionResponse:
+      description: API product
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/APIProductVersion"
+          examples:
+            Create API Product Response:
+              $ref: "#/components/examples/APIProductVersionExample"
+    UnsupportedMediaType:
+      description: Unsupported Media Type
+      content:
+        application/problem+json:
+          schema:
+            $ref: "#/components/schemas/UnsupportedMediaTypeError"
+          examples:
+            UnsupportedMediaTypeExample:
+              $ref: "#/components/examples/UnsupportedMediaTypeExample"
     RetrieveRuntimeGroupResponse:
       description: A response to retrieving a single runtime group.
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/RuntimeGroup'
+            $ref: "#/components/schemas/RuntimeGroup"
           examples:
             Single runtime group response:
-              $ref: '#/components/examples/RuntimeGroupExample'
+              $ref: "#/components/examples/RuntimeGroupExample"
     CreateRuntimeGroupResponse:
       description: A response to creating a runtime group.
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/RuntimeGroup'
+            $ref: "#/components/schemas/RuntimeGroup"
           examples:
             Create Runtime Group Response:
-              $ref: '#/components/examples/RuntimeGroupExample'
+              $ref: "#/components/examples/RuntimeGroupExample"
     UpdateRuntimeGroupResponse:
       description: A response to updating a runtime group.
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/RuntimeGroup'
+            $ref: "#/components/schemas/RuntimeGroup"
           examples:
             Update Runtime Group Response:
-              $ref: '#/components/examples/RuntimeGroupExample'
-    ListRuntimeGroupsResponse:
-      description: A paginated list response for a collection of runtime groups.
-      content:
-        application/json:
-          schema:
-            title: ListRuntimeGroupsResponse
-            type: object
-            additionalProperties: false
-            properties:
-              meta:
-                $ref: '#/components/schemas/PaginatedMeta'
-              data:
-                type: array
-                items:
-                  $ref: '#/components/schemas/RuntimeGroup'
-            required:
-              - meta
-              - data
-          examples: {}
+              $ref: "#/components/examples/RuntimeGroupExample"
     RuntimeGroupsBadRequest:
       description: Bad Request
       content:
         application/problem+json:
           schema:
-            $ref: '#/components/schemas/BadRequestError'
+            $ref: "#/components/schemas/BadRequestError"
           examples:
             Request Format Invalid:
-              $ref: '#/components/examples/400RequestFormatInvalidExample'
+              $ref: "#/components/examples/400RequestFormatInvalidExample"
             Cannot Be Blank:
-              $ref: '#/components/examples/400CannotBeBlankExample'
+              $ref: "#/components/examples/400CannotBeBlankExample"
             Invalid ID Format:
-              $ref: '#/components/examples/400InvalidIDFormatExample'
+              $ref: "#/components/examples/400InvalidIDFormatExample"
             Usage Limits Reached:
-              $ref: '#/components/examples/400UsageLimitsReachedExample'
+              $ref: "#/components/examples/400UsageLimitsReachedExample"
             Unknown Property:
-              $ref: '#/components/examples/400UnknownPropertyExample'
+              $ref: "#/components/examples/400UnknownPropertyExample"
     RuntimeGroupPermissionDenied:
       description: Permission denied
       content:
         application/problem+json:
           schema:
-            $ref: '#/components/schemas/ForbiddenError'
+            $ref: "#/components/schemas/ForbiddenError"
           examples:
             Permission Denied:
-              $ref: '#/components/examples/403PermissionDeniedExample'
+              $ref: "#/components/examples/403PermissionDeniedExample"
     RuntimeGroupUnauthenticated:
       description: Unauthenticated
       content:
         application/problem+json:
           schema:
-            $ref: '#/components/schemas/UnauthorizedError'
+            $ref: "#/components/schemas/UnauthorizedError"
           examples:
             Unauthorized:
-              $ref: '#/components/examples/401UnauthenticatedExample'
+              $ref: "#/components/examples/401UnauthenticatedExample"
     RuntimeGroupNotFound:
       description: Not Found
       content:
         application/problem+json:
           schema:
-            $ref: '#/components/schemas/NotFoundError'
+            $ref: "#/components/schemas/NotFoundError"
           examples:
             Not Found:
-              $ref: '#/components/examples/404NotFoundExample'
+              $ref: "#/components/examples/404NotFoundExample"
     RuntimeGroupConflict:
       description: Conflict
       content:
         application/problem+json:
           schema:
-            $ref: '#/components/schemas/ConflictError'
+            $ref: "#/components/schemas/ConflictError"
           examples:
             Conflict:
-              $ref: '#/components/examples/409ConflictExample'
+              $ref: "#/components/examples/409ConflictExample"
     InternalServerError:
       description: Internal Server Error
       content:
@@ -522,7 +2154,7 @@ components:
               - instance
           examples:
             Internal Server Error:
-              $ref: '#/components/examples/500InternalErrorExample'
+              $ref: "#/components/examples/500InternalErrorExample"
     ServiceUnavailable:
       description: Service Unavailable
       content:
@@ -557,566 +2189,15 @@ components:
               - instance
           examples:
             Service Unavailable:
-              $ref: '#/components/examples/503PermissionReadFailureExample'
-    ListCompositeMemberships:
-      description: >-
-        A paginated list response for a collection of composite runtime group memberships.
-      content:
-        application/json:
-          schema:
-            type: object
-            properties:
-              meta:
-                $ref: '#/components/schemas/PaginatedMeta'
-              data:
-                type: array
-                description: >-
-                  Array of runtime groups summary who are a child to this composite runtime group.
-                items:
-                  $ref: '#/components/schemas/RuntimeGroupSummary'
-          examples:
-            List Composite Memberships Example:
-              $ref: '#/components/examples/ListCompositeMembershipsExample'
-    GetCompositeStatus:
-      description: Status of a composite runtime group, including existing conflicts.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/CompositeStatus'
-          examples:
-            Composite Conflict Status Example:
-              $ref: '#/components/examples/CompositeConflictStatusExample'
-            Composite No Conflict Status Example:
-              $ref: '#/components/examples/CompositeNoConflictStatusExample'
-    BadRequest:
-      description: Bad Request
-      content:
-        application/problem+json:
-          schema:
-            $ref: '#/components/schemas/BadRequestError'
-    Unauthorized:
-      description: Unauthorized
-      content:
-        application/problem+json:
-          schema:
-            $ref: '#/components/schemas/UnauthorizedError'
-          examples:
-            UnauthorizedExample:
-              $ref: '#/components/examples/UnauthorizedExample'
-    Forbidden:
-      description: Forbidden
-      content:
-        application/problem+json:
-          schema:
-            $ref: '#/components/schemas/ForbiddenError'
-          examples:
-            UnauthorizedExample:
-              $ref: '#/components/examples/ForbiddenExample'
-    NotFound:
-      description: Not Found
-      content:
-        application/problem+json:
-          schema:
-            $ref: '#/components/schemas/NotFoundError'
-          examples:
-            NotFoundExample:
-              $ref: '#/components/examples/NotFoundExample'
-  schemas:
-    CreateRuntimeGroupRequest:
-      title: CreateRuntimeGroupRequest
-      description: The request schema for the create runtime group request.
-      type: object
-      additionalProperties: false
-      properties:
-        name:
-          type: string
-          example: Test Runtime Group
-          description: The name of the runtime group.
-        description:
-          type: string
-          example: A test runtime group for exploration.
-          description: The description of the runtime group in Konnect.
-        cluster_type:
-          type: string
-          description: >-
-            The ClusterType value of the cluster associated with the Runtime Group.
-          example: CLUSTER_TYPE_HYBRID
-          enum:
-            - CLUSTER_TYPE_HYBRID
-            - CLUSTER_TYPE_K8S_INGRESS_CONTROLLER
-            - CLUSTER_TYPE_COMPOSITE
-        labels:
-          $ref: '#/components/schemas/Labels'
-      required:
-        - name
-    UpdateRuntimeGroupRequest:
-      title: UpdateRuntimeGroupRequest
-      description: The request schema for the update runtime group request.
-      type: object
-      additionalProperties: false
-      properties:
-        name:
-          type: string
-          example: Test Runtime Group
-          description: The name of the runtime group.
-        description:
-          type: string
-          example: A test runtime group for exploration.
-          description: The description of the runtime group in Konnect.
-        labels:
-          $ref: '#/components/schemas/Labels'
-    RuntimeGroup:
-      x-speakeasy-entity: RuntimeGroup
-      allOf:
-        - $ref: '#/components/schemas/RuntimeGroupSummary'
-        - type: object
-          properties:
-            labels:
-              $ref: '#/components/schemas/Labels'
-            config:
-              x-speakeasy-param-suppress-computed-diff: true
-              type: object
-              description: CP configuration object for related access endpoints.
-              properties:
-                control_plane_endpoint:
-                  type: string
-                  format: url
-                  example: https://acfe5f253f.cp0.konghq.com
-                  description: Control Plane Endpoint.
-                  readOnly: true
-                telemetry_endpoint:
-                  type: string
-                  format: url
-                  example: https://acfe5f253f.tp0.konghq.com
-                  description: Telemetry Endpoint.
-                  readOnly: true
-            created_at:
-              x-speakeasy-terraform-ignore: true
-              type: string
-              format: date-time
-              example: '2022-11-04T20:10:06.927Z'
-              description: >-
-                An ISO-8604 timestamp representation of runtime group creation date.
-              readOnly: true
-            updated_at:
-              x-speakeasy-terraform-ignore: true
-              type: string
-              format: date-time
-              example: '2022-11-04T20:10:06.927Z'
-              description: >-
-                An ISO-8604 timestamp representation of runtime group update date.
-              readOnly: true
-      x-examples:
-        Example 1:
-          id: 7f9fd312-a987-4628-b4c5-bb4f4fddd5f7
-          name: Test Runtime Group
-          description: A test runtime group for exploration.
-          labels:
-            test: 'true'
-          config:
-            control_plane_endpoint: https://acfe5f253f.cp0.konghq.com
-            telemetry_endpoint: https://acfe5f253f.tp0.konghq.com
-            cluster_type: CLUSTER_TYPE_HYBRID
-          created_at: '2022-11-04T20:10:06.927Z'
-          updated_at: '2022-11-04T20:10:06.927Z'
-    RuntimeGroupSummary:
-      title: RuntimeGroupSummary
-      type: object
-      description: >-
-        The runtime group object contains information about a Kong control plane.
-      additionalProperties: false
-      properties:
-        id:
-          x-speakeasy-param-suppress-computed-diff: true
-          type: string
-          format: uuid
-          example: 7f9fd312-a987-4628-b4c5-bb4f4fddd5f7
-          description: The runtime group ID.
-          readOnly: true
-        name:
-          type: string
-          example: Test Runtime Group
-          description: The name of the runtime group.
-        description:
-          type: string
-          example: A test runtime group for exploration.
-          description: The description of the runtime group in Konnect.
-        labels:
-          $ref: '#/components/schemas/Labels'
-        config:
-          type: object
-          description: CP configuration object for related access endpoints.
-          additionalProperties: false
-          properties:
-            control_plane_endpoint:
-              type: string
-              format: url
-              example: https://acfe5f253f.cp0.konghq.com
-              description: Control Plane Endpoint.
-              readOnly: true
-            telemetry_endpoint:
-              type: string
-              format: url
-              example: https://acfe5f253f.tp0.konghq.com
-              description: Telemetry Endpoint.
-              readOnly: true
-            cluster_type:
-              type: string
-              description: >-
-                The ClusterType value of the cluster associated with the Runtime Group.
-              example: CLUSTER_TYPE_HYBRID
-              enum:
-                - CLUSTER_TYPE_HYBRID
-                - CLUSTER_TYPE_K8S_INGRESS_CONTROLLER
-                - CLUSTER_TYPE_COMPOSITE
-              readOnly: true
-          required:
-            - control_plane_endpoint
-            - telemetry_endpoint
-            - cluster_type
-        created_at:
-          type: string
-          format: date-time
-        updated_at:
-          type: string
-          format: date-time
-    CompositeStatus:
-      title: CompositeStatus
-      type: object
-      description: >-
-        The Composite Status object contains information about the status of a composite runtime group.
-      properties:
-        id:
-          type: string
-          format: uuid
-          example: 7f9fd312-a987-4628-b4c5-bb4f4fddd5f7
-          description: The composite runtime group ID.
-          readOnly: true
-        created_at:
-          type: string
-          format: date-time
-          example: '2022-11-04T20:10:06.927Z'
-          description: >-
-            An ISO-8604 timestamp representation of composite runtime group status creation date.
-          readOnly: true
-        updated_at:
-          type: string
-          format: date-time
-          example: '2022-11-04T20:10:06.927Z'
-          description: >-
-            An ISO-8604 timestamp representation of composite runtime group status update date.
-          readOnly: true
-        conflicts:
-          type: array
-          maxItems: 256
-          items:
-            $ref: '#/components/schemas/CompositeConflict'
-        state:
-          type: string
-          description: The state of the composite runtime group.
-          example: COMPOSITE_STATE_CONFLICT
-          readOnly: true
-          enum:
-            - COMPOSITE_STATE_OK
-            - COMPOSITE_STATE_CONFLICT
-            - COMPOSITE_STATE_UNKNOWN
-    CompositeConflict:
-      title: CompositeConflict
-      type: object
-      description: >-
-        The Composite Conflict object contains information about a conflict in a composite runtime group.
-      properties:
-        cluster_id:
-          type: string
-          format: uuid
-          example: 7f9fd312-a987-4628-b4c5-bb4f4fddd5f7
-          description: The ID of a runtime group member of a composite runtime group.
-          readOnly: true
-        description:
-          type: string
-          example: >-
-            conflicting entity found: ID=38d790ad-8b08-4ff5-a074-2e1e9e64d8bd, Name=foo
-          description: The description of the conflict.
-          readOnly: true
-        resource:
-          $ref: '#/components/schemas/CompositeConflictResource'
-    CompositeConflictResource:
-      title: CompositeConflictResource
-      type: object
-      description: A resource causing a conflict in a composite runtime group.
-      properties:
-        id:
-          type: string
-          format: uuid
-          example: 7f9fd312-a987-4628-b4c5-bb4f4fddd5f7
-          description: The ID of the resource.
-          readOnly: true
-        type:
-          type: string
-          example: service
-          description: The type of the resource.
-          readOnly: true
-      required:
-        - id
-        - type
-    Labels:
-      x-speakeasy-type-override: any
-      title: Labels
-      type: object
-      example:
-        test: 'true'
-      description: >-
-        Labels to facilitate tagged search on runtime groups. Keys must be of length 1-63 characters, and cannot start with 'kong', 'konnect', 'mesh', 'kic', or '_'.
-      additionalProperties:
-        type: string
-        pattern: ^[a-z0-9A-Z]{1}([a-z0-9A-Z\-\.\_]*[a-z0-9A-Z]+)?$
-        minLength: 1
-        maxLength: 63
-    PageMeta:
-      type: object
-      description: >-
-        Contains pagination query parameters and the total number of objects returned.
-      required:
-        - number
-        - size
-        - total
-      properties:
-        number:
-          type: number
-          example: 1
-        size:
-          type: number
-          example: 10
-        total:
-          type: number
-          example: 100
-    PaginatedMeta:
-      type: object
-      title: PaginatedMeta
-      description: returns the pagination information
-      properties:
-        page:
-          $ref: '#/components/schemas/PageMeta'
-      required:
-        - page
-    BaseError:
-      type: object
-      title: Error
-      description: standard error
-      required:
-        - status
-        - title
-        - instance
-        - detail
-      properties:
-        status:
-          type: integer
-          description: >
-            The HTTP status code of the error. Useful when passing the response
-
-            body to child properties in a frontend UI. Must be returned as an integer.
-
-          readOnly: true
-        title:
-          type: string
-          description: |
-            A short, human-readable summary of the problem. It should not
-            change between occurences of a problem, except for localization.
-            Should be provided as "Sentence case" for direct use in the UI.
-          readOnly: true
-        type:
-          type: string
-          description: The error type.
-          readOnly: true
-        instance:
-          type: string
-          description: |
-            Used to return the correlation ID back to the user, in the format
-            kong:trace:<correlation_id>. This helps us find the relevant logs
-            when a customer reports an issue.
-          readOnly: true
-        detail:
-          type: string
-          description: >
-            A human readable explanation specific to this occurence of the problem.
-
-            This field may contain request/entity data to help the user understand
-
-            what went wrong. Enclose variable values in square brackets. Should be
-
-            provided as "Sentence case" for direct use in the UI.
-
-          readOnly: true
-    InvalidRules:
-      description: invalid parameters rules
-      type: string
-      readOnly: true
-      nullable: true
-      enum:
-        - required
-        - enum
-        - min_length
-        - max_length
-        - min_digits
-        - min_lowercase
-        - min_uppercase
-        - min_symbols
-        - is_array
-        - is_base64
-        - is_boolean
-        - is_date_time
-        - is_integer
-        - is_null
-        - is_number
-        - is_object
-        - is_string
-        - is_uuid
-        - unknown_property
-        - is_label
-        - matches_regex
-    InvalidParameterChoiceItem:
-      type: object
-      properties:
-        field:
-          type: string
-          example: name
-          readOnly: true
-        rule:
-          $ref: '#/components/schemas/InvalidRules'
-        reason:
-          type: string
-          example: is a required field
-          readOnly: true
-        choices:
-          type: array
-          uniqueItems: true
-          nullable: true
-          items: {}
-          readOnly: true
-      required:
-        - field
-        - reason
-    InvalidParameterDependentItem:
-      type: object
-      properties:
-        field:
-          type: string
-          example: name
-          readOnly: true
-        rule:
-          description: invalid parameters rules
-          type: string
-          readOnly: true
-          nullable: true
-          enum:
-            - dependent_fields
-        reason:
-          type: string
-          example: is a required field
-          readOnly: true
-        dependents:
-          type: array
-          uniqueItems: true
-          nullable: true
-          items: {}
-          readOnly: true
-      required:
-        - field
-        - rule
-        - reason
-        - dependents
-    InvalidParameters:
-      type: array
-      nullable: false
-      uniqueItems: true
-      minItems: 1
-      description: invalid parameters
-      items:
-        $ref: '#/components/schemas/InvalidParameterChoiceItem'
-    BadRequestError:
-      type: object
-      required:
-        - invalid_parameters
-      properties:
-        status:
-          example: 400
-        title:
-          example: Bad Request
-        type:
-          example: https://httpstatuses.com/400
-        instance:
-          example: kong:trace:1234567890
-        detail:
-          example: Invalid request body
-        invalid_parameters:
-          $ref: '#/components/schemas/InvalidParameters'
-      allOf:
-        - $ref: '#/components/schemas/BaseError'
-    UnauthorizedError:
-      type: object
-      properties:
-        status:
-          example: 401
-        title:
-          example: Unauthorized
-        type:
-          example: https://httpstatuses.com/401
-        instance:
-          example: kong:trace:1234567890
-        detail:
-          example: Invalid credentials
-      allOf:
-        - $ref: '#/components/schemas/BaseError'
-    ForbiddenError:
-      type: object
-      properties:
-        status:
-          example: 403
-        title:
-          example: Forbidden
-        type:
-          example: https://httpstatuses.com/403
-        instance:
-          example: kong:trace:1234567890
-        detail:
-          example: Forbidden
-      allOf:
-        - $ref: '#/components/schemas/BaseError'
-    ConflictError:
-      type: object
-      properties:
-        status:
-          example: 409
-        title:
-          example: Conflict
-        type:
-          example: https://httpstatuses.com/409
-        instance:
-          example: kong:trace:1234567890
-        detail:
-          example: Conflict
-      allOf:
-        - $ref: '#/components/schemas/BaseError'
-    NotFoundError:
-      type: object
-      properties:
-        status:
-          example: 404
-        title:
-          example: Not Found
-        type:
-          example: https://httpstatuses.com/404
-        instance:
-          example: kong:trace:1234567890
-        detail:
-          example: Not found
-      allOf:
-        - $ref: '#/components/schemas/BaseError'
+              $ref: "#/components/examples/503PermissionReadFailureExample"
   securitySchemes:
+    konnectAccessToken:
+      type: http
+      scheme: bearer
+      description: "The Konnect access token is meant to be used by the Konnect dashboard and the decK CLI to \nauthenticate with."
     personalAccessToken:
       type: http
       scheme: bearer
-      bearerFormat: Token
       description: >
         The personal access token is meant to be used as an alternative to basic-auth when accessing Konnect via APIs.
 
@@ -1126,6 +2207,7 @@ components:
 
         `curl -X GET 'https://global.api.konghq.com/v2/users/' --header 'Authorization: Bearer kpat_xgfT...'`
 
+      bearerFormat: Token
     systemAccountAccessToken:
       type: http
       scheme: bearer
@@ -1140,6 +2222,269 @@ components:
         `curl -X GET 'https://global.api.konghq.com/v2/users/' --header 'Authorization: Bearer spat_i2Ej...'`
 
   examples:
+    APIProductExample:
+      value:
+        id: e7a4f6c0-5777-4a37-bcb9-2d37d3b362ee
+        name: API Product
+        description: Text describing the API product
+        portal_ids: []
+        created_at: "2023-01-01T00:00:00.000Z"
+        updated_at: "2023-01-01T00:00:00.000Z"
+        labels:
+          env: test
+    APIProductVersionExample:
+      value:
+        id: 9f5061ce-78f6-4452-9108-ad7c02821fd5
+        name: v1
+        gateway_service:
+          id: 09b4786a-3e48-4631-8f6b-62d1d8e1a7f3
+        publish_status: unpublished
+        deprecated: false
+        created_at: "2023-01-01T00:00:00.000Z"
+        updated_at: "2023-01-01T00:00:00.000Z"
+    APIProductVersionSpecExample:
+      value:
+        id: 7710d5c4-d902-410b-992f-18b814155b53
+        name: oas.yaml
+        content: My YAML or JSON formatted OAS content
+        created_at: "2023-01-01T00:00:00.000Z"
+        updated_at: "2023-01-01T00:00:00.000Z"
+    ListAPIProductVersionSpecExample:
+      value:
+        data:
+          - id: 7710d5c4-d902-410b-992f-18b814155b53
+            name: oas.yaml
+            content: My YAML or JSON formatted OAS content
+            created_at: "2023-01-01T00:00:00.000Z"
+            updated_at: "2023-01-01T00:00:00.000Z"
+        meta:
+          page:
+            number: 1
+            size: 1
+            total: 1
+    CreateAPIProductRequestExample:
+      summary: Create API Product Request
+      value:
+        name: API Product
+        description: Text describing the API product
+        labels:
+          env: test
+    CreateAPIProductRequestMinimalExample:
+      summary: Create API Product Request (Minimal)
+      value:
+        name: API Product
+    UpdateAPIProductRequestExample:
+      summary: Update API Product Request
+      value:
+        name: API Product with Update Name
+        description: Updated text describing the API product
+    PublishAPIProductToPortalExample:
+      summary: Publish API Product to Portal
+      value:
+        portal_ids:
+          - 07087c41-495a-4599-bc98-4904f1b46654
+    CreateAPIProductVersionRequestMinimalExample:
+      summary: Create API Product Request (Minimal)
+      value:
+        name: v1
+    CreateLinkedAPIProductVersionRequestExample:
+      summary: Create API Product Request
+      value:
+        name: v1
+        publish_status: unpublished
+        deprecated: false
+        gateway_service:
+          id: 09b4786a-3e48-4631-8f6b-62d1d8e1a7f3
+    CreateAPIProductVersionSpecificationRequestExample:
+      summary: Create API Product Version Specification Request
+      value:
+        name: oas.yaml
+        content: TXkgWUFNTCBvciBKU09OIGZvcm1hdHRlZCBPQVMgY29udGVudA==
+    PublishApiProductVersionRequestExample:
+      summary: Publish API Product Version
+      value:
+        publish_status: published
+    LinkAPIProductVersionRequestExample:
+      summary: Link API Product Version
+      value:
+        gateway_service:
+          id: 09b4786a-3e48-4631-8f6b-62d1d8e1a7f3
+    UnlinkAPIProductVersionRequestExample:
+      summary: Unlink API Product Version
+      value:
+        gateway_service: null
+    DeprecateAPIProductVersionRequestExample:
+      summary: Deprecate API Product Version and Notify Developers
+      value:
+        deprecated: true
+        notify: true
+    UpdateAPIProductVersionSpecNameRequestExample:
+      summary: Update API Product Version Name
+      value:
+        name: oas.yaml
+    UpdateAPIProductVersionSpecContentRequestExample:
+      summary: Update API Product Version Content
+      value:
+        content: TXkgWUFNTCBvciBKU09OIGZvcm1hdHRlZCBPQVMgY29udGVudA==
+    UpdateAPIProductVersionSpecRequestExample:
+      summary: Update API Product Version Name and Content
+      value:
+        name: oas.yaml
+        content: TXkgWUFNTCBvciBKU09OIGZvcm1hdHRlZCBPQVMgY29udGVudA==
+    APIProductDocumentExample:
+      value:
+        id: de5c9818-be5c-42e6-b514-e3d4bc30ddeb
+        parent_document_id: null
+        title: API Product Document
+        slug: api-product-document
+        status: published
+        ast:
+          - children:
+              - text: API Product Document Header
+                type: text
+            level: 1
+            type: heading
+          - children:
+              - children:
+                  - text: API product document content
+                    type: text
+                type: paragraph
+        metadata: {}
+        created_at: "2023-01-01T00:00:00.000Z"
+        updated_at: "2023-01-01T00:00:00.000Z"
+    APIProductDocumentTreeExample:
+      value:
+        data:
+          - id: de5c9818-be5c-42e6-b514-e3d4bc30ddeb
+            parent_document_id: null
+            slug: api-product-document
+            status: published
+            title: API Product Document
+            metadata: {}
+            children:
+              - children: []
+                id: d1da26c9-02a8-4492-868e-b069e2efa221
+                metadata: {}
+                parent_document_id: de5c9818-be5c-42e6-b514-e3d4bc30ddeb
+                slug: api-product-document-child
+                status: published
+                title: API Product Document Child
+        meta:
+          page:
+            number: 1
+            size: 1
+            total: 10
+    ListAPIProductDocumentSummaryExample:
+      value:
+        data:
+          - id: de5c9818-be5c-42e6-b514-e3d4bc30ddeb
+            parent_document_id: null
+            slug: api-product-document
+            status: published
+            title: API Product Document
+        meta:
+          page:
+            number: 1
+            size: 1
+            total: 10
+    CreateAPIProductDocumentRequestExample:
+      summary: Create API Product Document Request
+      value:
+        slug: api-product-document
+        status: published
+        title: API Product Document
+        content: >-
+          IyBBUEkgUHJvZHVjdCBEb2N1bWVudCBIZWFkZXIKQVBJIHByb2R1Y3QgZG9jdW1lbnQgY29udGVudA==
+        parent_document_id: 417a2aed-9a75-4eca-a943-fa7d88ed6a73
+        metadata:
+          author: John Doe
+    CreateAPIProductDocumentRequestMinimalExample:
+      summary: Create API Product Document Request (Minimal)
+      value:
+        slug: api-product-document
+        status: published
+        title: API Product Document
+        content: >-
+          IyBBUEkgUHJvZHVjdCBEb2N1bWVudCBIZWFkZXIKQVBJIHByb2R1Y3QgZG9jdW1lbnQgY29udGVudA==
+    UpdateAPIProductDocumentAttributesRequestExample:
+      summary: Update API Product Document Attributes Request
+      value:
+        parent_document_id: dd4e1b98-3629-4dd3-acc0-759a726ffee2
+        slug: api-product-document
+        status: published
+        title: API Product Document
+        metadata:
+          author: Jane Doe
+    UpdateAPIProductDocumentContentRequestExample:
+      summary: Update API Product Document Content Request
+      value:
+        content: >-
+          IyBBUEkgUHJvZHVjdCBEb2N1bWVudCBIZWFkZXIKQVBJIHByb2R1Y3QgZG9jdW1lbnQgY29udGVudCB1cGRhdGVk
+    UpdateAPIProductDocumentAttributesAndContentRequestExample:
+      summary: Update API Product Document Attributes and Content Request
+      value:
+        parent_document_id: dd4e1b98-3629-4dd3-acc0-759a726ffee2
+        slug: api-product-document
+        status: published
+        title: API Product Document
+        content: >-
+          IyBBUEkgUHJvZHVjdCBEb2N1bWVudCBIZWFkZXIKQVBJIHByb2R1Y3QgZG9jdW1lbnQgY29udGVudCB1cGRhdGVk
+        metadata:
+          author: Jane Doe
+    APIProductNameBadRequestExample:
+      value:
+        status: 400
+        title: Invalid Request
+        instance: kong:trace:8405749052424858251
+        detail: Invalid Parameters
+        invalid_parameters:
+          - field: name
+            rule: min_length
+            choices: []
+            reason: name must be longer than or equal to 1 characters
+    UnauthorizedExample:
+      value:
+        status: 401
+        title: Unauthorized
+        instance: kong:trace:8347343766220159418
+        detail: Unauthorized
+    NotFoundExample:
+      value:
+        status: 404
+        title: Not Found
+        instance: kong:trace:6816496025408232265
+        detail: Not Found
+    ForbiddenExample:
+      value:
+        status: 403
+        title: Forbidden
+        instance: kong:trace:2723154947768991354
+        detail: You do not have permission to perform this action
+    SlugConflictExample:
+      value:
+        status: 409
+        title: Conflict
+        instance: kong:trace:3169213858331814220
+    VersionSpecConflictExample:
+      value:
+        status: 409
+        title: Conflict
+        instance: kong:trace:3169213858331814220
+        detail: >-
+          Specification for API product version '9f5061ce-78f6-4452-9108-ad7c02821fd5' already exists
+    VersionSpecHiddenConflictExample:
+      value:
+        status: 409
+        title: Conflict
+        instance: kong:trace:9039922446017540182
+        detail: >-
+          Key (service_version_id, path)=(23380be0-c15e-4ca8-bcf7-43aadddc91b1, hidden.yaml) already exists.
+    UnsupportedMediaTypeExample:
+      value:
+        status: 415
+        title: Unsupported Media Type
+        instance: kong:trace:8347343766220159418
+        detail: "This API only supports requests with `Content-Type: application/json`"
     400RequestFormatInvalidExample:
       value:
         status: 400
@@ -1223,24 +2568,25 @@ components:
         description: A test runtime group for exploration.
         cluster_type: CLUSTER_TYPE_K8S_INGRESS_CONTROLLER
         labels:
-          test: 'true'
+          test: "true"
     UpdateRuntimeGroupRequestExample:
       value:
         name: Test Runtime Group
         description: A test runtime group for exploration.
         labels:
-          otherTest: 'true'
+          otherTest: "true"
     RuntimeGroupExample:
       value:
         id: 7f9fd312-a987-4628-b4c5-bb4f4fddd5f7
         name: Test Runtime Group
         description: A test runtime group for exploration.
         labels:
-          test: 'true'
+          test: "true"
         config:
           control_plane_endpoint: https://acfe5f253f.cp0.konghq.com
           telemetry_endpoint: https://acfe5f253f.tp0.konghq.com
           cluster_type: CLUSTER_TYPE_HYBRID
+          auth_type: pinned_client_certs
     CompositeConflictStatusExample:
       value:
         id: 7f9fd312-a987-4628-b4c5-bb4f4fddd5f7
@@ -1258,8 +2604,8 @@ components:
               id: 15f3ab7d-7202-498a-95b4-334f783dbcdd
               type: service
         state: COMPOSITE_STATE_CONFLICT
-        created_at: '2022-11-04T20:10:06.927Z'
-        updated_at: '2022-11-04T20:10:06.927Z'
+        created_at: "2022-11-04T20:10:06.927Z"
+        updated_at: "2022-11-04T20:10:06.927Z"
     CompositeNoConflictStatusExample:
       value:
         id: 7f9fd312-a987-4628-b4c5-bb4f4fddd5f7
@@ -1277,8 +2623,8 @@ components:
               id: 15f3ab7d-7202-498a-95b4-334f783dbcdd
               type: service
         state: COMPOSITE_STATE_CONFLICT
-        created_at: '2022-11-04T20:10:06.927Z'
-        updated_at: '2022-11-04T20:10:06.927Z'
+        created_at: "2022-11-04T20:10:06.927Z"
+        updated_at: "2022-11-04T20:10:06.927Z"
     ListCompositeMembershipsExample:
       value:
         meta:
@@ -1296,8 +2642,9 @@ components:
               control_plane_endpoint: https://9e0353434a.us.cp0.konghq.com
               telemetry_endpoint: https://9e0353434a.us.tp0.konghq.com
               cluster_type: CLUSTER_TYPE_HYBRID
-            created_at: '2023-03-20T22:23:45.873Z'
-            updated_at: '2023-03-30T16:17:55.073Z'
+              auth_type: pinned_client_certs
+            created_at: "2023-03-20T22:23:45.873Z"
+            updated_at: "2023-03-30T16:17:55.073Z"
           - id: e4a1917c-bb26-4aa1-9a3e-50ee366f13db
             name: Composite Member 2
             description: Child RG
@@ -1308,74 +2655,53 @@ components:
               control_plane_endpoint: https://05459046af.us.cp0.konghq.com
               telemetry_endpoint: https://05459046af.us.tp0.konghq.com
               cluster_type: CLUSTER_TYPE_HYBRID
-            created_at: '2023-03-23T22:25:30.907Z'
-            updated_at: '2023-03-30T16:18:12.067Z'
-    UnauthorizedExample:
-      value:
-        status: 401
-        title: Unauthorized
-        instance: kong:trace:8347343766220159418
-        detail: Unauthorized
-    ForbiddenExample:
-      value:
-        status: 403
-        title: Forbidden
-        instance: kong:trace:2723154947768991354
-        detail: You do not have permission to perform this action
-    NotFoundExample:
-      value:
-        status: 404
-        title: Not Found
-        instance: kong:trace:6816496025408232265
-        detail: Not Found
-  requestBodies:
-    CompositeMemebershipAdd:
-      content:
-        application/json:
-          schema:
-            type: object
-            properties:
-              members:
-                type: array
-                items:
-                  type: object
-                  properties:
-                    id:
-                      type: string
-          examples:
-            Example 1:
-              value:
-                members:
-                  - id: 1beb9ad3-d21b-4090-b6e3-574784d1166d
-                  - id: 778a0474-687d-41af-8e51-a0488d790586
-                  - id: fa85f8e8-2e5a-496e-b6d0-4e534eaab459
-      description: >-
-        Request body for adding a list of child runtime groups to a composite runtime group membership.
-    CompositeMembershipRemove:
-      content:
-        application/json:
-          schema:
-            type: object
-            properties:
-              members:
-                type: array
-                items:
-                  type: object
-                  properties:
-                    id:
-                      type: string
-          examples:
-            Example 1:
-              value:
-                members:
-                  - id: 1beb9ad3-d21b-4090-b6e3-574784d1166d
-                  - id: 778a0474-687d-41af-8e51-a0488d790586
-                  - id: fa85f8e8-2e5a-496e-b6d0-4e534eaab459
-      description: >-
-        Request body for removing a list of child runtime groups from a composite runtime group membership.
+              auth_type: pinned_client_certs
+            created_at: "2023-03-23T22:25:30.907Z"
+            updated_at: "2023-03-30T16:18:12.067Z"
 security:
+  - konnectAccessToken: []
   - personalAccessToken: []
   - systemAccountAccessToken: []
 tags:
+  - description: Gateway services
+    name: Services
+  - description: Gateway routes
+    name: Routes
+  - description: Plugins
+    name: Plugins
+  - description: Consumers
+    name: Consumers
+  - description: Consumer Groups
+    name: consumer-groups
+  - description: Certificates
+    name: Certificates
+  - description: SNIs
+    name: SNIs
+  - description: CA certificates
+    name: CA Certificates
+  - description: Upstreams
+    name: Upstreams
+  - description: Vaults
+    name: Vaults
+  - description: Keys
+    name: Keys
+  - description: Key-sets
+    name: Key-sets
+  - description: Information routes
+    name: Information
+  - description: Debug routes
+    name: Debug
+  - description: Target routes
+    name: Targets
+  - description: Tag rotues
+    name: Tags
+  - description: DP Nodes
+    name: DP Nodes
+  - description: DP Certificates
+    name: DP Certificates
+  - name: API Products
+  - name: API Product Documentation
+  - name: API Product Versions
+  - name: API Product Version Specification
   - name: Runtime Groups
   - name: Composite Runtime Groups
