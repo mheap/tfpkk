@@ -3,13 +3,13 @@ info:
   contact:
     email: support@konghq.com
     name: Kong
-    url: https://cloud.konghq.com
+    url: https://konghq.com
   description: The Konnect platform API
   license:
     name: Apache 2.0
     url: https://www.apache.org/licenses/LICENSE-2.0.html
   title: Konnect API
-  version: 2.0.0
+  version: 0.1.0
 servers:
   - url: https://global.api.konghq.com/v2
   - url: https://us.api.konghq.com/v2
@@ -19,13 +19,90 @@ externalDocs:
   description: Documentation for Kong Gateway and its APIs
   url: https://docs.konghq.com
 paths:
+  /runtime-groups/{runtimeGroupId}/core-entities/routes:
+    post:
+      x-speakeasy-entity-operation: Route#create
+      description: Create a new route
+      operationId: create-route
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Route'
+          description: Successfully created route
+        '400':
+          content:
+            application/json:
+              schema:
+                type: object
+          description: Invalid route
+      summary: Create a new route
+      tags:
+        - Routes
+      requestBody:
+        $ref: '#/components/requestBodies/route-request'
+    parameters:
+      - $ref: '#/components/parameters/runtimeGroupId'
+  /runtime-groups/{runtimeGroupId}/core-entities/routes/{route_id}:
+    parameters:
+      - $ref: '#/components/parameters/runtimeGroupId'
+      - $ref: '#/components/parameters/route_id'
+    delete:
+      x-speakeasy-entity-operation: Route#delete
+      description: Delete a route.
+      operationId: delete-route
+      responses:
+        '204':
+          description: Successfully deleted route or the resource didn't exist
+      summary: Delete a route
+      tags:
+        - Routes
+    get:
+      x-speakeasy-entity-operation: Route#read
+      description: Get a route using ID or name.
+      operationId: get-route
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Route'
+          description: Successfully fetched route
+        '404':
+          description: Resource does not exist
+      summary: Fetch a route
+      tags:
+        - Routes
+    put:
+      x-speakeasy-entity-operation: Route#read
+      description: Create or Update route using ID or name.
+      operationId: upsert-route
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Route'
+          description: Successfully upserted route
+        '400':
+          content:
+            application/json:
+              schema:
+                type: object
+          description: Invalid route
+      summary: Update a route
+      tags:
+        - Routes
+      requestBody:
+        $ref: '#/components/requestBodies/route-request'
   /runtime-groups/{runtimeGroupId}/core-entities/services:
     post:
       x-speakeasy-entity-operation: Service#create
       description: Create a new service
       operationId: create-service
       responses:
-        "201":
+        '201':
           content:
             application/json:
               schema:
@@ -89,7 +166,7 @@ paths:
                     updated_at: 1684437851
                     write_timeout: 6000
           description: Successfully created service
-        "400":
+        '400':
           content:
             application/json:
               schema:
@@ -99,19 +176,19 @@ paths:
       tags:
         - Services
       requestBody:
-        $ref: "#/components/requestBodies/service-request"
+        $ref: '#/components/requestBodies/service-request'
     parameters:
-      - $ref: "#/components/parameters/runtimeGroupId"
+      - $ref: '#/components/parameters/runtimeGroupId'
   /runtime-groups/{runtimeGroupId}/core-entities/services/{service_id}:
     parameters:
-      - $ref: "#/components/parameters/runtimeGroupId"
-      - $ref: "#/components/parameters/service_id"
+      - $ref: '#/components/parameters/runtimeGroupId'
+      - $ref: '#/components/parameters/service_id'
     delete:
       x-speakeasy-entity-operation: Service#delete
       description: Delete a service
       operationId: delete-service
       responses:
-        "204":
+        '204':
           description: Successfully deleted service or the resource didn't exist
       summary: Delete a service
       tags:
@@ -121,9 +198,9 @@ paths:
       description: Get a service using ID or name.
       operationId: get-service
       responses:
-        "200":
-          $ref: "#/components/responses/service-response"
-        "404":
+        '200':
+          $ref: '#/components/responses/service-response'
+        '404':
           description: Resource does not exist
       summary: Fetch a service
       tags:
@@ -133,9 +210,9 @@ paths:
       description: Create or Update service using ID or name.
       operationId: upsert-service
       responses:
-        "200":
-          $ref: "#/components/responses/service-response"
-        "400":
+        '200':
+          $ref: '#/components/responses/service-response'
+        '400':
           content:
             application/json:
               schema:
@@ -145,7 +222,7 @@ paths:
       tags:
         - Services
       requestBody:
-        $ref: "#/components/requestBodies/service-request"
+        $ref: '#/components/requestBodies/service-request'
   /api-products:
     post:
       x-speakeasy-entity-operation: ApiProduct#create
@@ -157,27 +234,27 @@ paths:
 
       operationId: create-api-product
       responses:
-        "201":
-          $ref: "#/components/responses/APIProductResponse"
-        "400":
+        '201':
+          $ref: '#/components/responses/APIProductResponse'
+        '400':
           description: Bad Request
           content:
             application/problem+json:
               schema:
-                $ref: "#/components/schemas/BadRequestError"
+                $ref: '#/components/schemas/BadRequestError'
               examples:
                 APIProductNameBadRequestExample:
-                  $ref: "#/components/examples/APIProductNameBadRequestExample"
-        "401":
-          $ref: "#/components/responses/ApiProductUnauthorized"
-        "403":
-          $ref: "#/components/responses/Forbidden"
-        "415":
-          $ref: "#/components/responses/UnsupportedMediaType"
+                  $ref: '#/components/examples/APIProductNameBadRequestExample'
+        '401':
+          $ref: '#/components/responses/ApiProductUnauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '415':
+          $ref: '#/components/responses/UnsupportedMediaType'
       tags:
         - API Products
       requestBody:
-        $ref: "#/components/requestBodies/CreateAPIProductRequest"
+        $ref: '#/components/requestBodies/CreateAPIProductRequest'
   /api-products/{id}:
     parameters:
       - schema:
@@ -194,14 +271,14 @@ paths:
       description: Returns an API product.
       operationId: get-api-product
       responses:
-        "200":
-          $ref: "#/components/responses/APIProductResponse"
-        "401":
-          $ref: "#/components/responses/ApiProductUnauthorized"
-        "403":
-          $ref: "#/components/responses/Forbidden"
-        "404":
-          $ref: "#/components/responses/ApiProductNotFound"
+        '200':
+          $ref: '#/components/responses/APIProductResponse'
+        '401':
+          $ref: '#/components/responses/ApiProductUnauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/ApiProductNotFound'
       tags:
         - API Products
     patch:
@@ -210,43 +287,43 @@ paths:
       description: Updates an API product.
       operationId: update-api-product
       responses:
-        "200":
-          $ref: "#/components/responses/APIProductResponse"
-        "400":
+        '200':
+          $ref: '#/components/responses/APIProductResponse'
+        '400':
           description: Bad Request
           content:
             application/problem+json:
               schema:
-                $ref: "#/components/schemas/BadRequestError"
+                $ref: '#/components/schemas/BadRequestError'
               examples:
                 APIProductNameBadRequestExample:
-                  $ref: "#/components/examples/APIProductNameBadRequestExample"
-        "401":
-          $ref: "#/components/responses/ApiProductUnauthorized"
-        "403":
-          $ref: "#/components/responses/Forbidden"
-        "404":
-          $ref: "#/components/responses/ApiProductNotFound"
-        "415":
-          $ref: "#/components/responses/UnsupportedMediaType"
+                  $ref: '#/components/examples/APIProductNameBadRequestExample'
+        '401':
+          $ref: '#/components/responses/ApiProductUnauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/ApiProductNotFound'
+        '415':
+          $ref: '#/components/responses/UnsupportedMediaType'
       tags:
         - API Products
       requestBody:
-        $ref: "#/components/requestBodies/UpdateAPIProductRequest"
+        $ref: '#/components/requestBodies/UpdateAPIProductRequest'
     delete:
       x-speakeasy-entity-operation: ApiProduct#delete
       summary: Delete API Product
       description: Removes an individual API product.
       operationId: delete-api-product
       responses:
-        "204":
+        '204':
           description: API product was deleted successfully.
-        "401":
-          $ref: "#/components/responses/ApiProductUnauthorized"
-        "403":
-          $ref: "#/components/responses/Forbidden"
-        "404":
-          $ref: "#/components/responses/ApiProductNotFound"
+        '401':
+          $ref: '#/components/responses/ApiProductUnauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/ApiProductNotFound'
       tags:
         - API Products
   /api-products/{apiProductId}/product-versions:
@@ -265,29 +342,29 @@ paths:
       description: Creates a version of an API product.
       operationId: create-api-product-version
       responses:
-        "201":
-          $ref: "#/components/responses/APIProductVersionResponse"
-        "400":
+        '201':
+          $ref: '#/components/responses/APIProductVersionResponse'
+        '400':
           description: Bad Request
           content:
             application/problem+json:
               schema:
-                $ref: "#/components/schemas/BadRequestError"
+                $ref: '#/components/schemas/BadRequestError'
               examples:
                 APIProductVersionNameBadRequestExample:
-                  $ref: "#/components/examples/APIProductNameBadRequestExample"
-        "401":
-          $ref: "#/components/responses/ApiProductUnauthorized"
-        "403":
-          $ref: "#/components/responses/Forbidden"
-        "404":
-          $ref: "#/components/responses/ApiProductNotFound"
-        "415":
-          $ref: "#/components/responses/UnsupportedMediaType"
+                  $ref: '#/components/examples/APIProductNameBadRequestExample'
+        '401':
+          $ref: '#/components/responses/ApiProductUnauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/ApiProductNotFound'
+        '415':
+          $ref: '#/components/responses/UnsupportedMediaType'
       tags:
         - API Product Versions
       requestBody:
-        $ref: "#/components/requestBodies/CreateAPIProductVersionRequest"
+        $ref: '#/components/requestBodies/CreateAPIProductVersionRequest'
   /api-products/{apiProductId}/product-versions/{id}:
     parameters:
       - schema:
@@ -312,14 +389,14 @@ paths:
       description: Returns a version of an API product.
       operationId: get-api-product-version
       responses:
-        "200":
-          $ref: "#/components/responses/APIProductVersionResponse"
-        "401":
-          $ref: "#/components/responses/ApiProductUnauthorized"
-        "403":
-          $ref: "#/components/responses/Forbidden"
-        "404":
-          $ref: "#/components/responses/ApiProductNotFound"
+        '200':
+          $ref: '#/components/responses/APIProductVersionResponse'
+        '401':
+          $ref: '#/components/responses/ApiProductUnauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/ApiProductNotFound'
       tags:
         - API Product Versions
     patch:
@@ -328,43 +405,43 @@ paths:
       description: Updates an API product version.
       operationId: update-api-product-version
       responses:
-        "200":
-          $ref: "#/components/responses/APIProductVersionResponse"
-        "400":
+        '200':
+          $ref: '#/components/responses/APIProductVersionResponse'
+        '400':
           description: Bad Request
           content:
             application/problem+json:
               schema:
-                $ref: "#/components/schemas/BadRequestError"
+                $ref: '#/components/schemas/BadRequestError'
               examples:
                 APIProductVersionNameBadRequestExample:
-                  $ref: "#/components/examples/APIProductNameBadRequestExample"
-        "401":
-          $ref: "#/components/responses/ApiProductUnauthorized"
-        "403":
-          $ref: "#/components/responses/Forbidden"
-        "404":
-          $ref: "#/components/responses/ApiProductNotFound"
-        "415":
-          $ref: "#/components/responses/UnsupportedMediaType"
+                  $ref: '#/components/examples/APIProductNameBadRequestExample'
+        '401':
+          $ref: '#/components/responses/ApiProductUnauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/ApiProductNotFound'
+        '415':
+          $ref: '#/components/responses/UnsupportedMediaType'
       tags:
         - API Product Versions
       requestBody:
-        $ref: "#/components/requestBodies/UpdateAPIProductVersionRequest"
+        $ref: '#/components/requestBodies/UpdateAPIProductVersionRequest'
     delete:
       x-speakeasy-entity-operation: ApiProductVersion#delete
       summary: Delete API Product Version
       description: Removes an API product version.
       operationId: delete-api-product-version
       responses:
-        "204":
+        '204':
           description: API product version was deleted successfully.
-        "401":
-          $ref: "#/components/responses/ApiProductUnauthorized"
-        "403":
-          $ref: "#/components/responses/Forbidden"
-        "404":
-          $ref: "#/components/responses/ApiProductNotFound"
+        '401':
+          $ref: '#/components/responses/ApiProductUnauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/ApiProductNotFound'
       tags:
         - API Product Versions
   /runtime-groups:
@@ -374,20 +451,20 @@ paths:
       summary: Create Runtime Group
       operationId: create-runtime-group
       responses:
-        "201":
-          $ref: "#/components/responses/CreateRuntimeGroupResponse"
-        "400":
-          $ref: "#/components/responses/RuntimeGroupsBadRequest"
-        "401":
-          $ref: "#/components/responses/RuntimeGroupUnauthenticated"
-        "403":
-          $ref: "#/components/responses/RuntimeGroupPermissionDenied"
-        "409":
-          $ref: "#/components/responses/RuntimeGroupConflict"
-        "500":
-          $ref: "#/components/responses/InternalServerError"
-        "503":
-          $ref: "#/components/responses/ServiceUnavailable"
+        '201':
+          $ref: '#/components/responses/CreateRuntimeGroupResponse'
+        '400':
+          $ref: '#/components/responses/RuntimeGroupsBadRequest'
+        '401':
+          $ref: '#/components/responses/RuntimeGroupUnauthenticated'
+        '403':
+          $ref: '#/components/responses/RuntimeGroupPermissionDenied'
+        '409':
+          $ref: '#/components/responses/RuntimeGroupConflict'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
       tags:
         - Runtime Groups
       requestBody:
@@ -395,10 +472,10 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/CreateRuntimeGroupRequest"
+              $ref: '#/components/schemas/CreateRuntimeGroupRequest'
             examples:
               Example Request Body:
-                $ref: "#/components/examples/CreateRuntimeGroupRequestExample"
+                $ref: '#/components/examples/CreateRuntimeGroupRequestExample'
       description: Create a runtime group in the Konnect Organization.
   /runtime-groups/{id}:
     parameters:
@@ -414,18 +491,18 @@ paths:
       x-speakeasy-entity-operation: RuntimeGroup#read
       summary: Fetch Runtime Group
       responses:
-        "200":
-          $ref: "#/components/responses/RetrieveRuntimeGroupResponse"
-        "400":
-          $ref: "#/components/responses/RuntimeGroupsBadRequest"
-        "401":
-          $ref: "#/components/responses/RuntimeGroupUnauthenticated"
-        "403":
-          $ref: "#/components/responses/RuntimeGroupPermissionDenied"
-        "404":
-          $ref: "#/components/responses/RuntimeGroupNotFound"
-        "503":
-          $ref: "#/components/responses/ServiceUnavailable"
+        '200':
+          $ref: '#/components/responses/RetrieveRuntimeGroupResponse'
+        '400':
+          $ref: '#/components/responses/RuntimeGroupsBadRequest'
+        '401':
+          $ref: '#/components/responses/RuntimeGroupUnauthenticated'
+        '403':
+          $ref: '#/components/responses/RuntimeGroupPermissionDenied'
+        '404':
+          $ref: '#/components/responses/RuntimeGroupNotFound'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
       operationId: get-runtime-group
       description: Returns information about a team from a given team ID.
       tags:
@@ -435,30 +512,30 @@ paths:
       summary: Update Runtime Group
       operationId: update-runtime-group
       responses:
-        "200":
-          $ref: "#/components/responses/UpdateRuntimeGroupResponse"
-        "400":
-          $ref: "#/components/responses/RuntimeGroupsBadRequest"
-        "401":
-          $ref: "#/components/responses/RuntimeGroupUnauthenticated"
-        "403":
-          $ref: "#/components/responses/RuntimeGroupPermissionDenied"
-        "404":
-          $ref: "#/components/responses/RuntimeGroupNotFound"
-        "500":
-          $ref: "#/components/responses/InternalServerError"
-        "503":
-          $ref: "#/components/responses/ServiceUnavailable"
+        '200':
+          $ref: '#/components/responses/UpdateRuntimeGroupResponse'
+        '400':
+          $ref: '#/components/responses/RuntimeGroupsBadRequest'
+        '401':
+          $ref: '#/components/responses/RuntimeGroupUnauthenticated'
+        '403':
+          $ref: '#/components/responses/RuntimeGroupPermissionDenied'
+        '404':
+          $ref: '#/components/responses/RuntimeGroupNotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
       description: Update an individual runtime group.
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/UpdateRuntimeGroupRequest"
+              $ref: '#/components/schemas/UpdateRuntimeGroupRequest'
             examples:
               Example Request Body:
-                $ref: "#/components/examples/UpdateRuntimeGroupRequestExample"
+                $ref: '#/components/examples/UpdateRuntimeGroupRequestExample'
       tags:
         - Runtime Groups
     delete:
@@ -466,23 +543,86 @@ paths:
       summary: Delete Runtime Group
       operationId: delete-runtime-group
       responses:
-        "204":
+        '204':
           description: No Content
-        "400":
-          $ref: "#/components/responses/RuntimeGroupsBadRequest"
-        "401":
-          $ref: "#/components/responses/RuntimeGroupUnauthenticated"
-        "403":
-          $ref: "#/components/responses/RuntimeGroupPermissionDenied"
-        "404":
-          $ref: "#/components/responses/RuntimeGroupNotFound"
-        "500":
-          $ref: "#/components/responses/InternalServerError"
-        "503":
-          $ref: "#/components/responses/ServiceUnavailable"
+        '400':
+          $ref: '#/components/responses/RuntimeGroupsBadRequest'
+        '401':
+          $ref: '#/components/responses/RuntimeGroupUnauthenticated'
+        '403':
+          $ref: '#/components/responses/RuntimeGroupPermissionDenied'
+        '404':
+          $ref: '#/components/responses/RuntimeGroupNotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
       description: Delete an individual runtime group.
       tags:
         - Runtime Groups
+  /portals/{portalId}:
+    x-speakeasy-entity-operation: Portal#read
+    parameters:
+      - $ref: '#/components/parameters/PortalId'
+    patch:
+      x-speakeasy-entity-operation: Portal#create,update
+      summary: Update One Portal
+      description: >-
+        Updates the configuration for a single portal including the visibility and custom domain settings.
+      operationId: update-portal
+      x-unstable: true
+      x-internal: true
+      requestBody:
+        $ref: '#/components/requestBodies/UpdatePortal'
+      tags:
+        - Portals
+      responses:
+        '200':
+          $ref: '#/components/responses/UpdatePortal'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /portals/{portalId}/authentication-settings:
+    parameters:
+      - $ref: '#/components/parameters/PortalId'
+    get:
+      x-speakeasy-entity-operation: PortalAuth#read
+      x-unstable: true
+      summary: Get Auth Settings
+      description: >-
+        Returns authentication configuration, which determines how users can log in and how they are assigned to teams.
+      operationId: get-portal-authentication-settings
+      tags:
+        - Portal Auth Settings
+      responses:
+        '200':
+          $ref: '#/components/responses/PortalAuthenticationSettings'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+    patch:
+      x-speakeasy-entity-operation: PortalAuth#create,update
+      x-unstable: true
+      summary: Update Auth Settings
+      description: Updates authentication configuration.
+      operationId: update-portal-authentication-settings
+      requestBody:
+        $ref: '#/components/requestBodies/UpdatePortalAuthenticationSettings'
+      tags:
+        - Portal Auth Settings
+      responses:
+        '200':
+          $ref: '#/components/responses/PortalAuthenticationSettings'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
 components:
   parameters:
     service_id:
@@ -503,7 +643,139 @@ components:
         example: 9524ec7d-36d9-465d-a8c5-83a3c9390458
       description: >-
         The ID of your runtime group. This variable is available in the Konnect manager
+    route_id:
+      x-speakeasy-match: id
+      name: route_id
+      in: path
+      required: true
+      schema:
+        type: string
+        example: e94215b0-9198-42ce-bf0b-98afff31b2a7
+      description: The unique identifier or the name of the route to retrieve.
+    PortalId:
+      schema:
+        type: string
+        format: uuid
+      name: portalId
+      in: path
+      required: true
+      description: ID of the portal.
   schemas:
+    Route:
+      x-speakeasy-entity: Route
+      description: >-
+        Route entities define rules to match client requests. Every request matching a given route will be proxied to its associated service.
+      example:
+        hosts:
+          - foo.example.com
+          - foo.example.us
+        id: 56c4566c-14cc-4132-9011-4139fcbbe50a
+        name: example-route
+        paths:
+          - /v1
+          - /v2
+        service:
+          id: bd380f99-659d-415e-b0e7-72ea05df3218
+      type: object
+      title: Route
+      properties:
+        created_at:
+          description: Unix epoch when the resource was created.
+          type: integer
+        headers:
+          description: >-
+            One or more lists of values indexed by header name that will cause this route to match if present in the request. The `Host` header cannot be used with this attribute: hosts should be specified using the `hosts` attribute. When `headers` contains only one value and that value starts with the special prefix `~*`, the value is interpreted as a regular expression.
+          type: object
+        hosts:
+          description: >-
+            A list of domain names that match this route. Note that the hosts value is case sensitive.
+          type: array
+          items:
+            type: string
+            example: foo.example.com
+        https_redirect_status_code:
+          default: 426
+          description: >-
+            The status code Kong responds with when all properties of a route match except the protocol i.e. if the protocol of the request is `HTTP` instead of `HTTPS`. `Location` header is injected by Kong if the field is set to 301, 302, 307 or 308. Note: This config applies only if the route is configured to only accept the `https` protocol.
+          type: integer
+        id:
+          type: string
+          example: 56c4566c-14cc-4132-9011-4139fcbbe50a
+        methods:
+          description: A list of HTTP methods that match this route.
+          type: array
+          items:
+            type: string
+        name:
+          description: >-
+            The name of the route. Route names must be unique, and they are case sensitive. For example, there can be two different routes named test and Test.
+          type: string
+        path_handling:
+          default: v0
+          description: >-
+            Controls how the service path, route path and requested path are combined when sending a request to the upstream. See above for a detailed description of each behavior.
+          type: string
+        paths:
+          description: A list of paths that match this route.
+          type: array
+          items:
+            type: string
+        preserve_host:
+          default: false
+          description: >-
+            When matching a route via one of the `hosts` domain names, use the request `Host` header in the upstream request headers. If set to `false`, the upstream `Host` header will be that of the service's `host`.
+          type: boolean
+        protocols:
+          default:
+            - http
+            - https
+          description: >-
+            An array of the protocols this route should allow. See the [route Object](#route-object) section for a list of accepted protocols. When set to only `https`, HTTP requests are answered with an upgrade error. When set to only `http`, HTTPS requests are answered with an error.
+          type: array
+          items:
+            type: string
+        regex_priority:
+          default: 0
+          description: >-
+            A number used to choose which route resolves a given request when several routes match it using regexes simultaneously. When two routes match the path and have the same `regex_priority`, the older one (lowest `created_at`) is used. Note that the priority for non-regex routes is different (longer non-regex routes are matched before shorter ones).
+          type: integer
+        request_buffering:
+          default: true
+          description: >-
+            Whether to enable request body buffering or not. With HTTP 1.1, it may make sense to turn this off on services that receive data with chunked transfer encoding.
+          type: boolean
+        response_buffering:
+          default: true
+          description: >-
+            Whether to enable response body buffering or not. With HTTP 1.1, it may make sense to turn this off on services that send data with chunked transfer encoding.
+          type: boolean
+        service:
+          additionalProperties: false
+          description: >-
+            The service this route is associated to. This is where the route proxies traffic to.
+          type: object
+          properties:
+            id:
+              type: string
+        snis:
+          description: A list of SNIs that match this route when using stream routing.
+          type: array
+          items:
+            type: string
+        strip_path:
+          default: true
+          description: >-
+            When matching a route via one of the `paths`, strip the matching prefix from the upstream request URL.
+          type: boolean
+        tags:
+          description: >-
+            An optional set of strings associated with the route for grouping and filtering.
+          type: array
+          items:
+            type: string
+        updated_at:
+          description: Unix epoch when the resource was last updated.
+          type: integer
     Service:
       x-speakeasy-entity: Service
       description: >-
@@ -647,13 +919,13 @@ components:
       type: object
       properties:
         name:
-          $ref: "#/components/schemas/StringFieldFilter"
+          $ref: '#/components/schemas/StringFieldFilter'
     APIProductVersionFilterParameters:
       title: APIProductVersionFilterParameters
       type: object
       properties:
         name:
-          $ref: "#/components/schemas/StringFieldFilter"
+          $ref: '#/components/schemas/StringFieldFilter'
     SortQuery:
       title: SortQuery
       type: string
@@ -686,16 +958,19 @@ components:
           format: uuid
           example: b9e81174-b5bb-4638-a3c3-8afe61a0abf8
           description: The API product ID.
+          readOnly: true
         name:
           type: string
           description: The name of the API product
           example: My Name
         description:
           type: string
+          nullable: true
           description: The description of the API product
           example: MyDescription
         portal_ids:
           type: array
+          nullable: false
           uniqueItems: true
           minItems: 0
           description: >-
@@ -705,11 +980,11 @@ components:
             format: uuid
             example: 25a2624c-49fc-4764-99e1-224ed819f200
         created_at:
-          $ref: "#/components/schemas/CreatedAt"
+          $ref: '#/components/schemas/CreatedAt'
         updated_at:
-          $ref: "#/components/schemas/UpdatedAt"
+          $ref: '#/components/schemas/UpdatedAt'
         labels:
-          $ref: "#/components/schemas/APIProductLabels"
+          $ref: '#/components/schemas/APIProductLabels'
     APIProductDocumentSummary:
       title: API Product Document Summary
       type: object
@@ -726,9 +1001,11 @@ components:
           format: uuid
           example: de5c9818-be5c-42e6-b514-e3d4bc30ddeb
           description: The API product document identifier.
+          readOnly: true
         parent_document_id:
           type: string
           format: uuid
+          nullable: true
           description: The parent API product document identifier.
           example: null
         slug:
@@ -737,7 +1014,7 @@ components:
           description: API product document slug
           example: api-product-document
         status:
-          $ref: "#/components/schemas/PublishStatus"
+          $ref: '#/components/schemas/PublishStatus'
         title:
           type: string
           description: API product document title
@@ -763,6 +1040,7 @@ components:
         parent_document_id:
           type: string
           format: uuid
+          nullable: true
         title:
           type: string
         slug:
@@ -777,11 +1055,11 @@ components:
         ast:
           type: array
           items:
-            $ref: "#/components/schemas/AnyNode"
+            $ref: '#/components/schemas/AnyNode'
         created_at:
-          $ref: "#/components/schemas/CreatedAt"
+          $ref: '#/components/schemas/CreatedAt'
         updated_at:
-          $ref: "#/components/schemas/UpdatedAt"
+          $ref: '#/components/schemas/UpdatedAt'
     APIProductVersion:
       x-speakeasy-entity: ApiProductVersion
       title: API Product Version
@@ -789,6 +1067,7 @@ components:
       additionalProperties: false
       required:
         - name
+        - gateway_service
         - publish_status
       properties:
         id:
@@ -801,7 +1080,7 @@ components:
           description: The version of the API product
           example: FirstVersion
         gateway_service:
-          $ref: "#/components/schemas/GatewayServicePayload"
+          $ref: '#/components/schemas/GatewayServicePayload'
         publish_status:
           type: string
           description: The publish status of the API product version
@@ -814,9 +1093,9 @@ components:
           description: Indicates if this API product version is deprecated
           example: false
         created_at:
-          $ref: "#/components/schemas/CreatedAt"
+          $ref: '#/components/schemas/CreatedAt'
         updated_at:
-          $ref: "#/components/schemas/UpdatedAt"
+          $ref: '#/components/schemas/UpdatedAt'
     APIProductVersionSpec:
       title: API Product Version Spec
       type: object
@@ -833,6 +1112,7 @@ components:
           format: uuid
           example: 7710d5c4-d902-410b-992f-18b814155b53
           description: The API product version specification identifier.
+          readOnly: true
         name:
           type: string
           description: The name of the API product version specification
@@ -842,9 +1122,9 @@ components:
           description: The contents of the API product version specification
           example: My YAML or JSON formatted OAS content
         created_at:
-          $ref: "#/components/schemas/CreatedAt"
+          $ref: '#/components/schemas/CreatedAt'
         updated_at:
-          $ref: "#/components/schemas/UpdatedAt"
+          $ref: '#/components/schemas/UpdatedAt'
     CreateAPIProductDTO:
       title: Create API Product Request
       description: The request schema to create an API product.
@@ -861,11 +1141,12 @@ components:
           description: The name of the API product.
         description:
           type: string
+          nullable: true
           example: Text describing the API product
           description: The description of the API product.
           default: null
         labels:
-          $ref: "#/components/schemas/APIProductLabels"
+          $ref: '#/components/schemas/APIProductLabels'
     UpdateAPIProductDTO:
       title: Update API Product Request
       description: The request schema for updating an API product.
@@ -880,12 +1161,14 @@ components:
           description: The name for the API product.
         description:
           type: string
+          nullable: true
           example: Text describing the API product
           description: The description of the API product.
         labels:
-          $ref: "#/components/schemas/APIProductLabels"
+          $ref: '#/components/schemas/APIProductLabels'
         portal_ids:
           type: array
+          nullable: false
           uniqueItems: true
           minItems: 0
           description: >-
@@ -895,6 +1178,7 @@ components:
             format: uuid
             example: 25a2624c-49fc-4764-99e1-224ed819f200
     CreateAPIProductVersionDTO:
+      x-speakeasy-entity: ApiProductVersion
       title: Create API Product Version Request
       description: The request schema to create a version of an API product.
       type: object
@@ -904,11 +1188,13 @@ components:
       properties:
         name:
           type: string
+          nullable: false
           minLength: 1
           example: v1
           description: The version name of the API product version.
         publish_status:
           type: string
+          nullable: false
           description: The publish status of the API product version.
           enum:
             - unpublished
@@ -917,11 +1203,12 @@ components:
           default: unpublished
         deprecated:
           type: boolean
+          nullable: false
           description: Indicates if the version of the API product is deprecated.
           example: false
           default: false
         gateway_service:
-          $ref: "#/components/schemas/GatewayServicePayload"
+          $ref: '#/components/schemas/GatewayServicePayload'
     CreateAPIProductVersionSpecDTO:
       title: Create API Product Version Specification Request
       description: >-
@@ -934,6 +1221,7 @@ components:
       properties:
         name:
           type: string
+          nullable: false
           pattern: ^.+(?:\.yaml|\.yml|\.json)$
           minLength: 1
           maxLength: 255
@@ -958,6 +1246,7 @@ components:
         parent_document_id:
           type: string
           format: uuid
+          nullable: true
           description: parent document id
           example: dd4e1b98-3629-4dd3-acc0-759a726ffee2
           default: null
@@ -969,7 +1258,7 @@ components:
             document slug. must be unique accross documents belonging to an api product
           example: path-for-seo
         status:
-          $ref: "#/components/schemas/PublishStatus"
+          $ref: '#/components/schemas/PublishStatus'
         title:
           type: string
           minLength: 1
@@ -982,6 +1271,7 @@ components:
           example: YmFzZTY0LWVuY29kZWQgdGV4dCBzdHJpbmc=
         metadata:
           type: object
+          nullable: false
           description: metadata of the document
           example:
             author: John Doe
@@ -994,6 +1284,7 @@ components:
         parent_document_id:
           type: string
           format: uuid
+          nullable: true
           description: >
             Parent document Id. If this value is explicitly set to null, the
 
@@ -1008,7 +1299,7 @@ components:
             document slug. must be unique accross documents belonging to an api product
           example: path-for-seo
         status:
-          $ref: "#/components/schemas/PublishStatus"
+          $ref: '#/components/schemas/PublishStatus'
         title:
           type: string
           minLength: 1
@@ -1021,7 +1312,9 @@ components:
           example: YmFzZTY0LWVuY29kZWQgdGV4dCBzdHJpbmc=
         metadata:
           type: object
+          nullable: false
     UpdateAPIProductVersionDTO:
+      x-speakeasy-entity: ApiProductVersion
       title: Update API Product Version Request
       description: The request schema for updating a version of an API product.
       type: object
@@ -1058,9 +1351,34 @@ components:
 
           example: true
         gateway_service:
-          $ref: "#/components/schemas/GatewayServicePayload"
+          $ref: '#/components/schemas/GatewayServicePayload'
+    UpdateAPIProductVersionSpecDTO:
+      title: Update API Product Version Specification Request
+      description: >-
+        The request schema for updating a specification for a version of an API product.
+      type: object
+      additionalProperties: false
+      properties:
+        name:
+          type: string
+          nullable: false
+          pattern: ^.+(?:\.yaml|\.yml|\.json)$
+          minLength: 1
+          maxLength: 255
+          example: oas.yaml
+          description: The name of the API product version specification
+        content:
+          type: string
+          format: byte
+          minLength: 1
+          example: TXkgWUFNTCBvciBKU09OIGZvcm1hdHRlZCBPQVMgY29udGVudA==
+          description: The base64 encoded contents of the API product version specification
     GatewayServicePayload:
       type: object
+      additionalProperties: false
+      required:
+        - id
+        - control_plane_id
       properties:
         id:
           type: string
@@ -1091,8 +1409,8 @@ components:
       title: StringFieldFilter
       description: Filter a string value field either by exact match or partial contains.
       oneOf:
-        - $ref: "#/components/schemas/StringFieldEqualsFilter"
-        - $ref: "#/components/schemas/StringFieldContainsFilter"
+        - $ref: '#/components/schemas/StringFieldEqualsFilter'
+        - $ref: '#/components/schemas/StringFieldContainsFilter'
     PageMeta:
       type: object
       description: >-
@@ -1117,19 +1435,21 @@ components:
       description: returns the pagination information
       properties:
         page:
-          $ref: "#/components/schemas/PageMeta"
+          $ref: '#/components/schemas/PageMeta'
       required:
         - page
     CreatedAt:
       type: string
       format: date-time
-      example: "2022-11-04T20:10:06.927Z"
+      example: '2022-11-04T20:10:06.927Z'
       description: An ISO-8601 timestamp representation of entity creation date.
+      readOnly: true
     UpdatedAt:
       type: string
       format: date-time
-      example: "2022-11-04T20:10:06.927Z"
+      example: '2022-11-04T20:10:06.927Z'
       description: An ISO-8601 timestamp representation of entity update date.
+      readOnly: true
     BaseError:
       type: object
       title: Error
@@ -1147,21 +1467,25 @@ components:
 
             body to child properties in a frontend UI. Must be returned as an integer.
 
+          readOnly: true
         title:
           type: string
           description: |
             A short, human-readable summary of the problem. It should not
             change between occurences of a problem, except for localization.
             Should be provided as "Sentence case" for direct use in the UI.
+          readOnly: true
         type:
           type: string
           description: The error type.
+          readOnly: true
         instance:
           type: string
           description: |
             Used to return the correlation ID back to the user, in the format
             kong:trace:<correlation_id>. This helps us find the relevant logs
             when a customer reports an issue.
+          readOnly: true
         detail:
           type: string
           description: >
@@ -1173,9 +1497,12 @@ components:
 
             provided as "Sentence case" for direct use in the UI.
 
+          readOnly: true
     InvalidRules:
       description: invalid parameters rules
       type: string
+      readOnly: true
+      nullable: true
       enum:
         - required
         - enum
@@ -1204,15 +1531,19 @@ components:
         field:
           type: string
           example: name
+          readOnly: true
         rule:
-          $ref: "#/components/schemas/InvalidRules"
+          $ref: '#/components/schemas/InvalidRules'
         reason:
           type: string
           example: is a required field
+          readOnly: true
         choices:
           type: array
           uniqueItems: true
+          nullable: true
           items: {}
+          readOnly: true
       required:
         - field
         - reason
@@ -1222,18 +1553,24 @@ components:
         field:
           type: string
           example: name
+          readOnly: true
         rule:
           description: invalid parameters rules
           type: string
+          readOnly: true
+          nullable: true
           enum:
             - dependent_fields
         reason:
           type: string
           example: is a required field
+          readOnly: true
         dependents:
           type: array
           uniqueItems: true
+          nullable: true
           items: {}
+          readOnly: true
       required:
         - field
         - rule
@@ -1241,13 +1578,14 @@ components:
         - dependents
     InvalidParameters:
       type: array
+      nullable: false
       uniqueItems: true
       minItems: 1
       description: invalid parameters
       items:
         oneOf:
-          - $ref: "#/components/schemas/InvalidParameterChoiceItem"
-          - $ref: "#/components/schemas/InvalidParameterDependentItem"
+          - $ref: '#/components/schemas/InvalidParameterChoiceItem'
+          - $ref: '#/components/schemas/InvalidParameterDependentItem'
     BadRequestError:
       type: object
       required:
@@ -1264,9 +1602,9 @@ components:
         detail:
           example: Invalid request body
         invalid_parameters:
-          $ref: "#/components/schemas/InvalidParameters"
+          $ref: '#/components/schemas/InvalidParameters'
       allOf:
-        - $ref: "#/components/schemas/BaseError"
+        - $ref: '#/components/schemas/BaseError'
     UnauthorizedError:
       type: object
       properties:
@@ -1281,7 +1619,7 @@ components:
         detail:
           example: Invalid credentials
       allOf:
-        - $ref: "#/components/schemas/BaseError"
+        - $ref: '#/components/schemas/BaseError'
     ForbiddenError:
       type: object
       properties:
@@ -1296,7 +1634,7 @@ components:
         detail:
           example: Forbidden
       allOf:
-        - $ref: "#/components/schemas/BaseError"
+        - $ref: '#/components/schemas/BaseError'
     NotFoundError:
       type: object
       properties:
@@ -1311,7 +1649,7 @@ components:
         detail:
           example: Not found
       allOf:
-        - $ref: "#/components/schemas/BaseError"
+        - $ref: '#/components/schemas/BaseError'
     UnsupportedMediaTypeError:
       type: object
       properties:
@@ -1326,7 +1664,7 @@ components:
         detail:
           example: UnsupportedMediaType
       allOf:
-        - $ref: "#/components/schemas/BaseError"
+        - $ref: '#/components/schemas/BaseError'
     PublishStatus:
       description: document publish status
       type: string
@@ -1353,6 +1691,7 @@ components:
           type: string
           format: uuid
           example: dd4e1b98-3629-4dd3-acc0-759a726ffee2
+          nullable: true
         title:
           type: string
         slug:
@@ -1365,7 +1704,7 @@ components:
           example:
             author: John Doe
         status:
-          $ref: "#/components/schemas/PublishStatus"
+          $ref: '#/components/schemas/PublishStatus'
     BaseNode:
       type: object
       required:
@@ -1375,62 +1714,62 @@ components:
           type: string
     AnyNode:
       oneOf:
-        - $ref: "#/components/schemas/DocumentBlock"
-        - $ref: "#/components/schemas/HeadingBlock"
-        - $ref: "#/components/schemas/BlockQuoteBlock"
-        - $ref: "#/components/schemas/ParagraphBlock"
-        - $ref: "#/components/schemas/TextBlock"
-        - $ref: "#/components/schemas/BreakBlock"
-        - $ref: "#/components/schemas/CodeBlock"
-        - $ref: "#/components/schemas/ListBlock"
-        - $ref: "#/components/schemas/ListItemBlock"
-        - $ref: "#/components/schemas/Text"
-        - $ref: "#/components/schemas/Emphasis"
-        - $ref: "#/components/schemas/Code"
-        - $ref: "#/components/schemas/Link"
-        - $ref: "#/components/schemas/Image"
-        - $ref: "#/components/schemas/StrikeThrough"
-        - $ref: "#/components/schemas/TableBlock"
-        - $ref: "#/components/schemas/TableHeaderBlock"
-        - $ref: "#/components/schemas/TableCellBlock"
-        - $ref: "#/components/schemas/TableRowBlock"
-        - $ref: "#/components/schemas/TaskCheckbox"
+        - $ref: '#/components/schemas/DocumentBlock'
+        - $ref: '#/components/schemas/HeadingBlock'
+        - $ref: '#/components/schemas/BlockQuoteBlock'
+        - $ref: '#/components/schemas/ParagraphBlock'
+        - $ref: '#/components/schemas/TextBlock'
+        - $ref: '#/components/schemas/BreakBlock'
+        - $ref: '#/components/schemas/CodeBlock'
+        - $ref: '#/components/schemas/ListBlock'
+        - $ref: '#/components/schemas/ListItemBlock'
+        - $ref: '#/components/schemas/Text'
+        - $ref: '#/components/schemas/Emphasis'
+        - $ref: '#/components/schemas/Code'
+        - $ref: '#/components/schemas/Link'
+        - $ref: '#/components/schemas/Image'
+        - $ref: '#/components/schemas/StrikeThrough'
+        - $ref: '#/components/schemas/TableBlock'
+        - $ref: '#/components/schemas/TableHeaderBlock'
+        - $ref: '#/components/schemas/TableCellBlock'
+        - $ref: '#/components/schemas/TableRowBlock'
+        - $ref: '#/components/schemas/TaskCheckbox'
       discriminator:
         propertyName: type
         mapping:
-          document: "#/components/schemas/DocumentBlock"
-          heading: "#/components/schemas/HeadingBlock"
-          blockquote: "#/components/schemas/BlockQuoteBlock"
-          paragraph: "#/components/schemas/ParagraphBlock"
-          text_block: "#/components/schemas/TextBlock"
-          break: "#/components/schemas/BreakBlock"
-          code_block: "#/components/schemas/CodeBlock"
-          list: "#/components/schemas/ListBlock"
-          list_item: "#/components/schemas/ListItemBlock"
-          text: "#/components/schemas/Text"
-          emphasis: "#/components/schemas/Emphasis"
-          code: "#/components/schemas/Code"
-          link: "#/components/schemas/Link"
-          image: "#/components/schemas/Image"
-          strikethrough: "#/components/schemas/StrikeThrough"
-          task_checkbox: "#/components/schemas/TaskCheckbox"
-          table: "#/components/schemas/TableBlock"
-          table_header: "#/components/schemas/TableHeaderBlock"
-          table_cell: "#/components/schemas/TableCellBlock"
-          table_row: "#/components/schemas/TableRowBlock"
+          document: '#/components/schemas/DocumentBlock'
+          heading: '#/components/schemas/HeadingBlock'
+          blockquote: '#/components/schemas/BlockQuoteBlock'
+          paragraph: '#/components/schemas/ParagraphBlock'
+          text_block: '#/components/schemas/TextBlock'
+          break: '#/components/schemas/BreakBlock'
+          code_block: '#/components/schemas/CodeBlock'
+          list: '#/components/schemas/ListBlock'
+          list_item: '#/components/schemas/ListItemBlock'
+          text: '#/components/schemas/Text'
+          emphasis: '#/components/schemas/Emphasis'
+          code: '#/components/schemas/Code'
+          link: '#/components/schemas/Link'
+          image: '#/components/schemas/Image'
+          strikethrough: '#/components/schemas/StrikeThrough'
+          task_checkbox: '#/components/schemas/TaskCheckbox'
+          table: '#/components/schemas/TableBlock'
+          table_header: '#/components/schemas/TableHeaderBlock'
+          table_cell: '#/components/schemas/TableCellBlock'
+          table_row: '#/components/schemas/TableRowBlock'
     BlockNode:
       allOf:
-        - $ref: "#/components/schemas/BaseNode"
+        - $ref: '#/components/schemas/BaseNode'
         - type: object
           properties:
             children:
               description: List of children nodes of the current node
               type: array
               items:
-                $ref: "#/components/schemas/AnyNode"
+                $ref: '#/components/schemas/AnyNode'
     DocumentBlock:
       allOf:
-        - $ref: "#/components/schemas/BlockNode"
+        - $ref: '#/components/schemas/BlockNode'
         - type: object
           properties:
             version:
@@ -1445,7 +1784,7 @@ components:
                 text: Hello World
     HeadingBlock:
       allOf:
-        - $ref: "#/components/schemas/BlockNode"
+        - $ref: '#/components/schemas/BlockNode'
         - type: object
           properties:
             level:
@@ -1455,26 +1794,26 @@ components:
               maximum: 6
     BlockQuoteBlock:
       allOf:
-        - $ref: "#/components/schemas/BlockNode"
+        - $ref: '#/components/schemas/BlockNode'
     ParagraphBlock:
       allOf:
-        - $ref: "#/components/schemas/BlockNode"
+        - $ref: '#/components/schemas/BlockNode'
     TextBlock:
       allOf:
-        - $ref: "#/components/schemas/BlockNode"
+        - $ref: '#/components/schemas/BlockNode'
     BreakBlock:
       allOf:
-        - $ref: "#/components/schemas/BlockNode"
+        - $ref: '#/components/schemas/BlockNode'
     CodeBlock:
       allOf:
-        - $ref: "#/components/schemas/BlockNode"
+        - $ref: '#/components/schemas/BlockNode'
         - type: object
           properties:
             lang:
               type: string
     ListBlock:
       allOf:
-        - $ref: "#/components/schemas/BlockNode"
+        - $ref: '#/components/schemas/BlockNode'
         - type: object
           properties:
             isOrdered:
@@ -1482,11 +1821,11 @@ components:
               type: boolean
     ListItemBlock:
       allOf:
-        - $ref: "#/components/schemas/BlockNode"
+        - $ref: '#/components/schemas/BlockNode'
     Text:
       allOf:
-        - $ref: "#/components/schemas/BaseNode"
-        - $ref: "#/components/schemas/BlockNode"
+        - $ref: '#/components/schemas/BaseNode'
+        - $ref: '#/components/schemas/BlockNode'
         - type: object
           properties:
             text:
@@ -1511,8 +1850,8 @@ components:
               type: boolean
     Emphasis:
       allOf:
-        - $ref: "#/components/schemas/BaseNode"
-        - $ref: "#/components/schemas/BlockNode"
+        - $ref: '#/components/schemas/BaseNode'
+        - $ref: '#/components/schemas/BlockNode'
         - type: object
           properties:
             level:
@@ -1525,11 +1864,11 @@ components:
                 2 - bold
     Code:
       allOf:
-        - $ref: "#/components/schemas/BaseNode"
-        - $ref: "#/components/schemas/BlockNode"
+        - $ref: '#/components/schemas/BaseNode'
+        - $ref: '#/components/schemas/BlockNode'
     Link:
       allOf:
-        - $ref: "#/components/schemas/BaseNode"
+        - $ref: '#/components/schemas/BaseNode'
         - type: object
           properties:
             href:
@@ -1540,7 +1879,7 @@ components:
               type: string
     Image:
       allOf:
-        - $ref: "#/components/schemas/BaseNode"
+        - $ref: '#/components/schemas/BaseNode'
         - type: object
           properties:
             url:
@@ -1554,10 +1893,10 @@ components:
               type: string
     StrikeThrough:
       allOf:
-        - $ref: "#/components/schemas/BaseNode"
+        - $ref: '#/components/schemas/BaseNode'
     TaskCheckbox:
       allOf:
-        - $ref: "#/components/schemas/BaseNode"
+        - $ref: '#/components/schemas/BaseNode'
         - type: object
           properties:
             checked:
@@ -1577,29 +1916,30 @@ components:
       properties:
         alignments:
           type: array
+          nullable: true
           items:
-            $ref: "#/components/schemas/AlignmentKind"
+            $ref: '#/components/schemas/AlignmentKind'
       required:
         - alignments
     TableBlock:
       allOf:
-        - $ref: "#/components/schemas/BlockNode"
-        - $ref: "#/components/schemas/TableAlignments"
+        - $ref: '#/components/schemas/BlockNode'
+        - $ref: '#/components/schemas/TableAlignments'
     TableHeaderBlock:
       allOf:
-        - $ref: "#/components/schemas/BlockNode"
-        - $ref: "#/components/schemas/TableAlignments"
+        - $ref: '#/components/schemas/BlockNode'
+        - $ref: '#/components/schemas/TableAlignments'
     TableCellBlock:
       allOf:
-        - $ref: "#/components/schemas/BlockNode"
+        - $ref: '#/components/schemas/BlockNode'
         - type: object
           properties:
             alignment:
-              $ref: "#/components/schemas/AlignmentKind"
+              $ref: '#/components/schemas/AlignmentKind'
     TableRowBlock:
       allOf:
-        - $ref: "#/components/schemas/BlockNode"
-        - $ref: "#/components/schemas/TableAlignments"
+        - $ref: '#/components/schemas/BlockNode'
+        - $ref: '#/components/schemas/TableAlignments'
     ConflictError:
       type: object
       properties:
@@ -1614,7 +1954,7 @@ components:
         detail:
           example: Conflict
       allOf:
-        - $ref: "#/components/schemas/BaseError"
+        - $ref: '#/components/schemas/BaseError'
     CreateRuntimeGroupRequest:
       title: CreateRuntimeGroupRequest
       description: The request schema for the create runtime group request.
@@ -1647,7 +1987,7 @@ components:
             - pinned_client_certs
             - pki_client_certs
         labels:
-          $ref: "#/components/schemas/Labels"
+          $ref: '#/components/schemas/Labels'
       required:
         - name
     UpdateRuntimeGroupRequest:
@@ -1673,15 +2013,15 @@ components:
             - pinned_client_certs
             - pki_client_certs
         labels:
-          $ref: "#/components/schemas/Labels"
+          $ref: '#/components/schemas/Labels'
     RuntimeGroup:
       x-speakeasy-entity: RuntimeGroup
       allOf:
-        - $ref: "#/components/schemas/RuntimeGroupSummary"
+        - $ref: '#/components/schemas/RuntimeGroupSummary'
         - type: object
           properties:
             labels:
-              $ref: "#/components/schemas/Labels"
+              $ref: '#/components/schemas/Labels'
             config:
               x-speakeasy-param-suppress-computed-diff: true
               type: object
@@ -1692,39 +2032,43 @@ components:
                   format: url
                   example: https://acfe5f253f.cp0.konghq.com
                   description: Control Plane Endpoint.
+                  readOnly: true
                 telemetry_endpoint:
                   type: string
                   format: url
                   example: https://acfe5f253f.tp0.konghq.com
                   description: Telemetry Endpoint.
+                  readOnly: true
             created_at:
               x-speakeasy-terraform-ignore: true
               type: string
               format: date-time
-              example: "2022-11-04T20:10:06.927Z"
+              example: '2022-11-04T20:10:06.927Z'
               description: >-
                 An ISO-8604 timestamp representation of runtime group creation date.
+              readOnly: true
             updated_at:
               x-speakeasy-terraform-ignore: true
               type: string
               format: date-time
-              example: "2022-11-04T20:10:06.927Z"
+              example: '2022-11-04T20:10:06.927Z'
               description: >-
                 An ISO-8604 timestamp representation of runtime group update date.
+              readOnly: true
       x-examples:
         Example 1:
           id: 7f9fd312-a987-4628-b4c5-bb4f4fddd5f7
           name: Test Runtime Group
           description: A test runtime group for exploration.
           labels:
-            test: "true"
+            test: 'true'
           config:
             control_plane_endpoint: https://acfe5f253f.cp0.konghq.com
             telemetry_endpoint: https://acfe5f253f.tp0.konghq.com
             cluster_type: CLUSTER_TYPE_HYBRID
             auth_type: pinned_client_certs
-          created_at: "2022-11-04T20:10:06.927Z"
-          updated_at: "2022-11-04T20:10:06.927Z"
+          created_at: '2022-11-04T20:10:06.927Z'
+          updated_at: '2022-11-04T20:10:06.927Z'
     RuntimeGroupSummary:
       title: RuntimeGroupSummary
       type: object
@@ -1738,6 +2082,7 @@ components:
           format: uuid
           example: 7f9fd312-a987-4628-b4c5-bb4f4fddd5f7
           description: The runtime group ID.
+          readOnly: true
         name:
           type: string
           example: Test Runtime Group
@@ -1747,7 +2092,7 @@ components:
           example: A test runtime group for exploration.
           description: The description of the runtime group in Konnect.
         labels:
-          $ref: "#/components/schemas/Labels"
+          $ref: '#/components/schemas/Labels'
         config:
           type: object
           description: CP configuration object for related access endpoints.
@@ -1758,11 +2103,23 @@ components:
               format: url
               example: https://acfe5f253f.cp0.konghq.com
               description: Control Plane Endpoint.
+              readOnly: true
             telemetry_endpoint:
               type: string
               format: url
               example: https://acfe5f253f.tp0.konghq.com
               description: Telemetry Endpoint.
+              readOnly: true
+            cluster_type:
+              type: string
+              description: >-
+                The ClusterType value of the cluster associated with the Runtime Group.
+              example: CLUSTER_TYPE_HYBRID
+              enum:
+                - CLUSTER_TYPE_HYBRID
+                - CLUSTER_TYPE_K8S_INGRESS_CONTROLLER
+                - CLUSTER_TYPE_COMPOSITE
+              readOnly: true
             auth_type:
               type: string
               description: >-
@@ -1771,6 +2128,7 @@ components:
               enum:
                 - pinned_client_certs
                 - pki_client_certs
+              readOnly: true
           required:
             - control_plane_endpoint
             - telemetry_endpoint
@@ -1793,21 +2151,31 @@ components:
           format: uuid
           example: 7f9fd312-a987-4628-b4c5-bb4f4fddd5f7
           description: The composite runtime group ID.
+          readOnly: true
         created_at:
           type: string
           format: date-time
-          example: "2022-11-04T20:10:06.927Z"
+          example: '2022-11-04T20:10:06.927Z'
           description: >-
             An ISO-8604 timestamp representation of composite runtime group status creation date.
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          example: '2022-11-04T20:10:06.927Z'
+          description: >-
+            An ISO-8604 timestamp representation of composite runtime group status update date.
+          readOnly: true
         conflicts:
           type: array
           maxItems: 256
           items:
-            $ref: "#/components/schemas/CompositeConflict"
+            $ref: '#/components/schemas/CompositeConflict'
         state:
           type: string
           description: The state of the composite runtime group.
           example: COMPOSITE_STATE_CONFLICT
+          readOnly: true
           enum:
             - COMPOSITE_STATE_OK
             - COMPOSITE_STATE_CONFLICT
@@ -1823,13 +2191,15 @@ components:
           format: uuid
           example: 7f9fd312-a987-4628-b4c5-bb4f4fddd5f7
           description: The ID of a runtime group member of a composite runtime group.
+          readOnly: true
         description:
           type: string
           example: >-
             conflicting entity found: ID=38d790ad-8b08-4ff5-a074-2e1e9e64d8bd, Name=foo
           description: The description of the conflict.
+          readOnly: true
         resource:
-          $ref: "#/components/schemas/CompositeConflictResource"
+          $ref: '#/components/schemas/CompositeConflictResource'
     CompositeConflictResource:
       title: CompositeConflictResource
       type: object
@@ -1840,10 +2210,12 @@ components:
           format: uuid
           example: 7f9fd312-a987-4628-b4c5-bb4f4fddd5f7
           description: The ID of the resource.
+          readOnly: true
         type:
           type: string
           example: service
           description: The type of the resource.
+          readOnly: true
       required:
         - id
         - type
@@ -1852,7 +2224,7 @@ components:
       title: Labels
       type: object
       example:
-        test: "true"
+        test: 'true'
       description: >-
         Labels to facilitate tagged search on runtime groups. Keys must be of length 1-63 characters, and cannot start with 'kong', 'konnect', 'mesh', 'kic', or '_'.
       additionalProperties:
@@ -1860,40 +2232,1104 @@ components:
         pattern: ^[a-z0-9A-Z]{1}([a-z0-9A-Z\-\.\_]*[a-z0-9A-Z]+)?$
         minLength: 1
         maxLength: 63
+    PortalClaimMappings:
+      type: object
+      minProperties: 0
+      maxProperties: 3
+      properties:
+        name:
+          type: string
+          example: name
+          default: name
+        email:
+          type: string
+          example: email
+          default: email
+        groups:
+          type: string
+          default: groups
+          example: custom-group-claim
+    PortalOIDCConfig:
+      type: object
+      properties:
+        issuer:
+          type: string
+        client_id:
+          type: string
+        scopes:
+          type: array
+          default:
+            - email
+            - openid
+            - profile
+          items:
+            type: string
+            default: openid
+        claim_mappings:
+          $ref: '#/components/schemas/PortalClaimMappings'
+      required:
+        - issuer
+        - client_id
+    PortalAuthenticationSettings:
+      x-speakeasy-entity: PortalAuth
+      type: object
+      properties:
+        basic_auth_enabled:
+          type: boolean
+          example: true
+          description: The organization has basic auth enabled.
+        oidc_auth_enabled:
+          type: boolean
+          example: false
+          description: The organization has OIDC disabled.
+        oidc_team_mapping_enabled:
+          type: boolean
+          example: true
+          description: IdP groups determine the Portal Teams a developer has.
+        konnect_mapping_enabled:
+          type: boolean
+          example: false
+          description: A Konnect Identity Admin assigns teams to a developer.
+        oidc_config:
+          $ref: '#/components/schemas/PortalOIDCConfig'
+      required:
+        - basic_auth_enabled
+        - konnect_mapping_enabled
+        - oidc_auth_enabled
+        - oidc_team_mapping_enabled
+    AssignedPortalRoleCollection:
+      type: object
+      required:
+        - meta
+        - data
+      properties:
+        meta:
+          $ref: '#/components/schemas/PaginatedMeta'
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/PortalAssignedRole'
+      example:
+        meta:
+          page:
+            number: 1
+            size: 10
+            total: 100
+        data:
+          - id: b02e23c5-8ee4-4e5a-99f4-43329923adce
+            role_name: API Viewer
+            entity_id: 437c7192-fea0-4f35-8478-c8d57783f8c1
+            entity_type_name: Services
+            entity_region: us
+          - id: b02e23c5-8ee4-4e5a-99f4-43329923adce
+            role_name: API Consumer
+            entity_id: 437c7192-fea0-4f35-8478-c8d57783f8c1
+            entity_type: Services
+            entity_region: us
+          - id: 869d9402-f117-4f9a-840f-69acaf70a81a
+            role_name: API Viewer
+            entity_id: 18ee2573-dec0-4b83-be99-fa7700bcdc61
+            entity_type_name: Services
+            entity_region: us
+    PortalTeamCollection:
+      type: object
+      required:
+        - data
+        - meta
+      properties:
+        meta:
+          $ref: '#/components/schemas/PaginatedMeta'
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/PortalTeam'
+      example:
+        meta:
+          page:
+            number: 1
+            size: 10
+            total: 10
+        data:
+          - id: 7f9fd312-a987-4628-b4c5-bb4f4fddd5f7
+            name: Partner
+            description: Team with access to Partner APIs
+            created_at: '2022-02-07T17:46:57.52Z'
+            updated_at: '2022-09-25T13:00:00.00Z'
+    RolesDocument:
+      type: object
+      properties:
+        services:
+          type: object
+          required:
+            - name
+            - roles
+          properties:
+            name:
+              type: string
+              enum:
+                - Services
+            roles:
+              type: object
+              required:
+                - apiviewer
+                - apiconsumer
+              properties:
+                apiviewer:
+                  type: object
+                  required:
+                    - name
+                    - description
+                  properties:
+                    name:
+                      type: string
+                      enum:
+                        - API Viewer
+                    description:
+                      type: string
+                      enum:
+                        - >-
+                          API Viewers have read-only access to the documentation of a service in a portal
+                apiconsumer:
+                  type: object
+                  required:
+                    - name
+                    - description
+                  properties:
+                    name:
+                      type: string
+                      enum:
+                        - API Consumer
+                    description:
+                      type: string
+                      enum:
+                        - API Consumers can make calls to the given service
+      required:
+        - services
+      example:
+        services:
+          name: Services
+          roles:
+            apiviewer:
+              name: API Viewer
+              description: >-
+                API Viewers have read-only access to the documentation of a service in a portal
+            apiconsumer:
+              name: API Consumer
+              description: API Consumers can make calls to the given service
+    DeveloperCollection:
+      type: object
+      properties:
+        meta:
+          $ref: '#/components/schemas/PaginatedMeta'
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Developer'
+      example:
+        meta:
+          page:
+            number: 1
+            size: 10
+            total: 10
+        data:
+          - id: 7f9fd312-a987-4628-b4c5-bb4f4fddd5f7
+            email: james.woods@email.com
+            full_name: James Woods
+            preferred_name: Jimmy
+            active: true
+            created_at: '2022-08-17T17:46:57.52Z'
+            updated_at: '2022-10-03T17:00:00.00Z'
+    AddDeveloperToTeamRequest:
+      type: object
+      properties:
+        id:
+          type: string
+          example: df120cb4-f60b-47bc-a2f8-6a28e6a3c63b
+          format: uuid
+          writeOnly: true
+      required:
+        - id
+    PortalAssignRoleRequest:
+      type: object
+      description: An assigned role associates a service and an action to a team.
+      properties:
+        role_name:
+          type: string
+          example: API Viewer
+        entity_id:
+          type: string
+          format: uuid
+          example: e67490ce-44dc-4cbd-b65e-b52c746fc26a
+        entity_type_name:
+          type: string
+          example: Services
+        entity_region:
+          type: string
+          enum:
+            - us
+            - eu
+            - '*'
+          example: eu
+      example:
+        role_name: API Viewer
+        entity_id: 18ee2573-dec0-4b83-be99-fa7700bcdc61
+        entity_type_name: Services
+        entity_region: us
+    PortalAuthenticationSettingsUpdateRequest:
+      x-speakeasy-entity: PortalAuth
+      type: object
+      properties:
+        basic_auth_enabled:
+          type: boolean
+          example: true
+          description: The organization has basic auth enabled.
+        oidc_auth_enabled:
+          type: boolean
+          example: false
+          description: The organization has OIDC disabled.
+        oidc_team_mapping_enabled:
+          type: boolean
+          example: true
+          description: >-
+            Whether IdP groups determine the Konnect Portal teams a developer has.
+        konnect_mapping_enabled:
+          type: boolean
+          example: false
+          description: Whether a Konnect Identity Admin assigns teams to a developer.
+        oidc_issuer:
+          type: string
+        oidc_client_id:
+          type: string
+        oidc_client_secret:
+          type: string
+        oidc_scopes:
+          type: array
+          default:
+            - email
+            - openid
+            - profile
+          items:
+            type: string
+            default: openid
+        oidc_claim_mappings:
+          $ref: '#/components/schemas/PortalClaimMappings'
+    PortalTeamGroupMappingsUpdateRequest:
+      type: object
+      example:
+        data:
+          - team_id: af91db4c-6e51-403e-a2bf-33d27ae50c0a
+            groups:
+              - Service Developer
+      properties:
+        data:
+          type: array
+          description: The IdP groups to map to the given team.
+          items:
+            type: object
+            properties:
+              team_id:
+                type: string
+                format: uuid
+              groups:
+                type: array
+                items:
+                  type: string
+    PortalUpdateTeamRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          example: IDM - Developers
+          pattern: ^[\w \W]+$
+          writeOnly: true
+        description:
+          type: string
+          maxLength: 250
+          example: The Identity Management (IDM) API team.
+          writeOnly: true
+      example:
+        name: IDM - Developers
+        description: The Identity Management (IDM) API team.
+    PortalCreateTeamRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          example: IDM - Developers
+          pattern: ^[\w \W]+$
+          writeOnly: true
+        description:
+          type: string
+          maxLength: 250
+          example: The Identity Management (IDM) team.
+          writeOnly: true
+      required:
+        - name
+      example:
+        name: IDM - Developers
+        description: The Identity Management (IDM) team.
+    PortalTeam:
+      title: Team
+      type: object
+      description: A team is a group of developers.
+      example:
+        id: 7f9fd312-a987-4628-b4c5-bb4f4fddd5f7
+        name: IDM - Developers
+        description: The developers for the IDM API.
+        created_at: '1992-02-07T17:46:57.52Z'
+        updated_at: '2022-08-31T17:00:00.52Z'
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: 7f9fd312-a987-4628-b4c5-bb4f4fddd5f7
+          readOnly: true
+        name:
+          type: string
+          pattern: ^[\w \W]+$
+          example: IDM - Developers
+          maxLength: 250
+        description:
+          type: string
+          example: The developers for the IDM API.
+          maxLength: 250
+        created_at:
+          type: string
+          format: date-time
+          example: '1992-02-07T17:46:57.52Z'
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          example: '2022-02-07T17:00:00.52Z'
+          readOnly: true
+    PortalTeamGroupMapping:
+      title: PortalTeamGroupMapping
+      type: object
+      description: A map of Konnect Team to IdP groups.
+      example:
+        team_id: 6801e673-cc10-498a-94cd-4271de07a0d3
+        groups:
+          - Tech Leads
+          - API Engineers
+      properties:
+        team_id:
+          type: string
+          format: uuid
+          example: 6801e673-cc10-498a-94cd-4271de07a0d3
+          description: The Konnect team ID.
+        groups:
+          type: array
+          uniqueItems: true
+          description: The IdP groups that are mapped to the specified team.
+          items:
+            type: string
+            example: API Engineers
+    PortalAssignedRole:
+      title: AssignedRole
+      type: object
+      description: An assigned role associates a service and an action to a team.
+      example:
+        id: 1a3c2169-27f8-4594-926b-41df3432d5dc
+        role_name: API Viewer
+        entity_id: 18ee2573-dec0-4b83-be99-fa7700bcdc61
+        entity_type_name: Services
+        entity_region: us
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: eaf7adf1-32c8-4bbf-b960-d1f8456afe67
+        role_name:
+          type: string
+          example: API Viewer
+        entity_id:
+          type: string
+          format: uuid
+          example: 817d0422-45c9-4d88-8d64-45aef05c1ae7
+        entity_type_name:
+          type: string
+          example: Services
+        entity_region:
+          type: string
+          enum:
+            - us
+            - eu
+            - '*'
+          example: eu
+    Developer:
+      title: Developer
+      type: object
+      description: A developer is an individual who can use a developer portal.
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: 7f9fd312-a987-4628-b4c5-bb4f4fddd5f7
+          readOnly: true
+        email:
+          type: string
+          format: email
+          example: developer@email.com
+          maxLength: 250
+        full_name:
+          type: string
+          pattern: ^[\w \W]+$
+          example: API Developer
+          maxLength: 250
+        status:
+          type: string
+          default: pending
+          readOnly: true
+        portal_id:
+          type: string
+          example: 51d313f4-e13d-43d0-a2b4-8d4bf2aa172b
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          example: '2022-02-07T17:46:57.52Z'
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          example: '2022-10-08T17:00:00.52Z'
+          readOnly: true
+      example:
+        id: 7f9fd312-a987-4628-b4c5-bb4f4fddd5f7
+        email: user@email.com
+        full_name: API Developer
+        preferred_name: apidev
+        status: active
+        portal_id: 51d313f4-e13d-43d0-a2b4-8d4bf2aa172b
+        created_at: '2022-02-07T17:46:57.52Z'
+        updated_at: '2022-10-08T17:00:00.52Z'
+    ListPortalsResponse:
+      additionalProperties: false
+      type: object
+      required:
+        - data
+        - meta
+      properties:
+        meta:
+          $ref: '#/components/schemas/PaginatedMeta'
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Portal'
+    ListPortalProductsResponse:
+      additionalProperties: false
+      type: object
+      required:
+        - data
+        - meta
+      properties:
+        meta:
+          $ref: '#/components/schemas/PaginatedMeta'
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/APIProduct'
+    GetPortalResponse:
+      $ref: '#/components/schemas/Portal'
+    CreatePortalResponse:
+      $ref: '#/components/schemas/Portal'
+    UpdatePortalResponse:
+      $ref: '#/components/schemas/Portal'
+    GetAppearanceDefaultsResponse:
+      $ref: '#/components/schemas/AppearanceDefaults'
+    GetPortalAppearanceResponse:
+      allOf:
+        - $ref: '#/components/schemas/PortalAppearance'
+        - type: object
+          required:
+            - theme_name
+            - use_custom_fonts
+            - custom_theme
+            - custom_fonts
+            - text
+            - images
+    UpdatePortalAppearanceResponse:
+      allOf:
+        - $ref: '#/components/schemas/PortalAppearance'
+        - type: object
+          required:
+            - theme_name
+            - use_custom_fonts
+            - custom_theme
+            - custom_fonts
+            - text
+            - images
+    ListDevelopersResponse:
+      additionalProperties: false
+      type: object
+      required:
+        - data
+        - meta
+      properties:
+        meta:
+          $ref: '#/components/schemas/PaginatedMeta'
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/PortalDeveloper'
+    ListApplicationsResponse:
+      additionalProperties: false
+      type: object
+      required:
+        - data
+        - meta
+      properties:
+        meta:
+          $ref: '#/components/schemas/PaginatedMeta'
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Application'
+    UpdateDeveloperResponse:
+      $ref: '#/components/schemas/PortalDeveloper'
+    GetDeveloperResponse:
+      $ref: '#/components/schemas/PortalDeveloper'
+    GetApplicationResponse:
+      $ref: '#/components/schemas/Application'
+    ListApplicationRegistrationsResponse:
+      additionalProperties: false
+      type: object
+      required:
+        - data
+        - meta
+      properties:
+        meta:
+          $ref: '#/components/schemas/PaginatedMeta'
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/ApplicationRegistration'
+    GetApplicationRegistrationResponse:
+      $ref: '#/components/schemas/ApplicationRegistration'
+    UpdateApplicationRegistrationResponse:
+      $ref: '#/components/schemas/ApplicationRegistration'
+    VerifyPortalDomainsResponse:
+      additionalProperties: false
+      type: object
+      required:
+        - is_cname_verified
+        - is_ssl_issued
+      properties:
+        is_cname_verified:
+          type: boolean
+          readOnly: true
+        is_ssl_issued:
+          type: boolean
+          readOnly: true
+    PortalDeveloper:
+      additionalProperties: false
+      type: object
+      required:
+        - id
+        - created_at
+        - updated_at
+        - email
+        - full_name
+        - status
+      properties:
+        id:
+          $ref: '#/components/schemas/UUID'
+        created_at:
+          $ref: '#/components/schemas/CreatedAt'
+        updated_at:
+          $ref: '#/components/schemas/UpdatedAt'
+        email:
+          type: string
+          format: email
+          maxLength: 255
+        full_name:
+          type: string
+          maxLength: 255
+        status:
+          $ref: '#/components/schemas/DeveloperStatus'
+    Application:
+      additionalProperties: false
+      type: object
+      required:
+        - id
+        - created_at
+        - updated_at
+        - name
+        - description
+        - reference_id
+        - client_provider_id
+        - developer_id
+      properties:
+        id:
+          $ref: '#/components/schemas/UUID'
+        created_at:
+          $ref: '#/components/schemas/CreatedAt'
+        updated_at:
+          $ref: '#/components/schemas/UpdatedAt'
+        name:
+          type: string
+        description:
+          type: string
+          nullable: true
+        reference_id:
+          type: string
+          readOnly: true
+        client_provider_id:
+          $ref: '#/components/schemas/NullableUUID'
+        developer_id:
+          type: string
+          format: uuid
+          readOnly: true
+    ApplicationRegistration:
+      additionalProperties: false
+      type: object
+      required:
+        - id
+        - created_at
+        - updated_at
+        - status
+        - product_version_id
+        - application_id
+        - developer_id
+      properties:
+        id:
+          $ref: '#/components/schemas/UUID'
+        created_at:
+          $ref: '#/components/schemas/CreatedAt'
+        updated_at:
+          $ref: '#/components/schemas/UpdatedAt'
+        status:
+          $ref: '#/components/schemas/ApplicationRegistrationStatus'
+        product_version_id:
+          $ref: '#/components/schemas/UUID'
+        application_id:
+          $ref: '#/components/schemas/UUID'
+        developer_id:
+          $ref: '#/components/schemas/UUID'
+    Portal:
+      x-speakeasy-entity: Portal
+      additionalProperties: false
+      type: object
+      required:
+        - id
+        - created_at
+        - updated_at
+        - name
+        - default_domain
+        - is_public
+        - rbac_enabled
+        - auto_approve_applications
+        - auto_approve_developers
+        - custom_domain
+        - custom_client_domain
+      properties:
+        id:
+          $ref: '#/components/schemas/UUID'
+        created_at:
+          $ref: '#/components/schemas/CreatedAt'
+        updated_at:
+          $ref: '#/components/schemas/UpdatedAt'
+        name:
+          type: string
+          maxLength: 255
+          minLength: 1
+        default_domain:
+          type: string
+          format: hostname
+          readOnly: true
+        is_public:
+          type: boolean
+        rbac_enabled:
+          type: boolean
+        auto_approve_applications:
+          type: boolean
+        auto_approve_developers:
+          type: boolean
+        custom_domain:
+          nullable: true
+          type: string
+          format: hostname
+        custom_client_domain:
+          nullable: true
+          type: string
+          format: hostname
+    UpdatePortalRequest:
+      additionalProperties: false
+      type: object
+      properties:
+        is_public:
+          type: boolean
+        rbac_enabled:
+          type: boolean
+        auto_approve_applications:
+          type: boolean
+        auto_approve_developers:
+          type: boolean
+        custom_domain:
+          type: string
+          format: hostname
+          maxLength: 1024
+        custom_client_domain:
+          type: string
+          format: hostname
+          maxLength: 1024
+    UpdateDeveloperRequest:
+      additionalProperties: false
+      type: object
+      properties:
+        status:
+          $ref: '#/components/schemas/DeveloperStatus'
+    UpdateApplicationRegistrationRequest:
+      additionalProperties: false
+      type: object
+      properties:
+        status:
+          $ref: '#/components/schemas/ApplicationRegistrationStatus'
+    UpdatePortalAppearanceRequest:
+      $ref: '#/components/schemas/PortalAppearance'
+    AppearanceDefaults:
+      additionalProperties: false
+      type: object
+      readOnly: true
+      required:
+        - themes
+        - fonts
+        - text
+      properties:
+        themes:
+          $ref: '#/components/schemas/AppearanceDefaultThemes'
+        fonts:
+          $ref: '#/components/schemas/AppearanceFonts'
+        text:
+          $ref: '#/components/schemas/AppearanceTextVariables'
+    AppearanceDefaultThemes:
+      additionalProperties: false
+      type: object
+      readOnly: true
+      required:
+        - mint_rocket
+        - dark_mode
+      properties:
+        mint_rocket:
+          $ref: '#/components/schemas/AppearanceThemeVariables'
+        dark_mode:
+          $ref: '#/components/schemas/AppearanceThemeVariables'
+    AppearanceColorVariable:
+      type: object
+      additionalProperties: false
+      required:
+        - value
+        - description
+      properties:
+        value:
+          type: string
+          maxLength: 255
+        description:
+          type: string
+          maxLength: 512
+    AppearanceThemeColorVariables:
+      type: object
+      additionalProperties: false
+      required:
+        - section
+        - text
+        - button
+      properties:
+        section:
+          type: object
+          additionalProperties: false
+          required:
+            - header
+            - body
+            - hero
+            - accent
+            - tertiary
+            - stroke
+            - footer
+          properties:
+            header:
+              $ref: '#/components/schemas/AppearanceColorVariable'
+            body:
+              $ref: '#/components/schemas/AppearanceColorVariable'
+            hero:
+              $ref: '#/components/schemas/AppearanceColorVariable'
+            accent:
+              $ref: '#/components/schemas/AppearanceColorVariable'
+            tertiary:
+              $ref: '#/components/schemas/AppearanceColorVariable'
+            stroke:
+              $ref: '#/components/schemas/AppearanceColorVariable'
+            footer:
+              $ref: '#/components/schemas/AppearanceColorVariable'
+        text:
+          type: object
+          additionalProperties: false
+          required:
+            - header
+            - hero
+            - primary
+            - secondary
+            - accent
+            - link
+            - footer
+          properties:
+            header:
+              $ref: '#/components/schemas/AppearanceColorVariable'
+            hero:
+              $ref: '#/components/schemas/AppearanceColorVariable'
+            primary:
+              $ref: '#/components/schemas/AppearanceColorVariable'
+            secondary:
+              $ref: '#/components/schemas/AppearanceColorVariable'
+            accent:
+              $ref: '#/components/schemas/AppearanceColorVariable'
+            link:
+              $ref: '#/components/schemas/AppearanceColorVariable'
+            footer:
+              $ref: '#/components/schemas/AppearanceColorVariable'
+        button:
+          type: object
+          additionalProperties: false
+          required:
+            - primary_fill
+            - primary_text
+          properties:
+            primary_fill:
+              $ref: '#/components/schemas/AppearanceColorVariable'
+            primary_text:
+              $ref: '#/components/schemas/AppearanceColorVariable'
+    AppearanceThemeVariables:
+      description: >-
+        Groups of variables for configuring visual details of the portal user interface. Set theme_name to 'custom' to use custom values for theme variables.
+      type: object
+      additionalProperties: false
+      required:
+        - colors
+      properties:
+        colors:
+          $ref: '#/components/schemas/AppearanceThemeColorVariables'
+    NullableAppearanceThemeVariables:
+      description: >-
+        Groups of variables for configuring visual details of the portal user interface. Set theme_name to 'custom' to use custom values for theme variables.
+      type: object
+      additionalProperties: false
+      required:
+        - colors
+      properties:
+        colors:
+          $ref: '#/components/schemas/AppearanceThemeColorVariables'
+      nullable: true
+    AppearanceFonts:
+      description: >-
+        Font selections to render text in the portal user interface. Must set use_custom_fonts to true to enable using custom font values.
+      type: object
+      additionalProperties: false
+      required:
+        - base
+        - code
+        - headings
+      properties:
+        base:
+          $ref: '#/components/schemas/AppearanceFontName'
+        code:
+          $ref: '#/components/schemas/AppearanceFontName'
+        headings:
+          $ref: '#/components/schemas/AppearanceFontName'
+    NullableAppearanceFonts:
+      description: >-
+        Font selections to render text in the portal user interface. Must set use_custom_fonts to true to enable using custom font values.
+      type: object
+      additionalProperties: false
+      required:
+        - base
+        - code
+        - headings
+      properties:
+        base:
+          $ref: '#/components/schemas/AppearanceFontName'
+        code:
+          $ref: '#/components/schemas/AppearanceFontName'
+        headings:
+          $ref: '#/components/schemas/AppearanceFontName'
+      nullable: true
+    AppearanceFontName:
+      type: string
+      enum:
+        - Roboto
+        - Inter
+        - Open Sans
+        - Lato
+        - Slabo 27px
+        - Slabo 13px
+        - Oswald
+        - Source Sans Pro
+        - Montserrat
+        - Raleway
+        - PT Sans
+        - Lora
+        - Roboto Mono
+        - Inconsolata
+        - Source Code Pro
+        - PT Mono
+        - Ubuntu Mono
+        - IBM Plex Mono
+    AppearanceImage:
+      type: object
+      additionalProperties: false
+      nullable: true
+      required:
+        - data
+      properties:
+        data:
+          type: string
+        filename:
+          type: string
+          maxLength: 512
+    AppearanceImages:
+      description: A collection of binary image data to customize images in the portal
+      type: object
+      additionalProperties: false
+      nullable: true
+      properties:
+        logo:
+          $ref: '#/components/schemas/AppearanceImage'
+        favicon:
+          $ref: '#/components/schemas/AppearanceImage'
+        catalog_cover:
+          $ref: '#/components/schemas/AppearanceImage'
+    AppearanceTextVariables:
+      description: Values to display for customizable text in the portal user interface
+      type: object
+      additionalProperties: false
+      required:
+        - catalog
+      properties:
+        catalog:
+          type: object
+          additionalProperties: false
+          required:
+            - welcome_message
+            - primary_header
+          properties:
+            welcome_message:
+              type: string
+              maxLength: 512
+            primary_header:
+              type: string
+              maxLength: 512
+    NullableAppearanceTextVariables:
+      description: Values to display for customizable text in the portal user interface
+      type: object
+      additionalProperties: false
+      required:
+        - catalog
+      properties:
+        catalog:
+          type: object
+          additionalProperties: false
+          required:
+            - welcome_message
+            - primary_header
+          properties:
+            welcome_message:
+              type: string
+              maxLength: 512
+            primary_header:
+              type: string
+              maxLength: 512
+      nullable: true
+    PortalAppearance:
+      additionalProperties: false
+      type: object
+      properties:
+        theme_name:
+          $ref: '#/components/schemas/PortalTheme'
+        custom_theme:
+          $ref: '#/components/schemas/NullableAppearanceThemeVariables'
+        custom_fonts:
+          $ref: '#/components/schemas/NullableAppearanceFonts'
+        use_custom_fonts:
+          description: >-
+            If true, fonts in custom_fonts will be used over the theme's default fonts
+          type: boolean
+        text:
+          $ref: '#/components/schemas/NullableAppearanceTextVariables'
+        images:
+          $ref: '#/components/schemas/AppearanceImages'
+    DeveloperStatus:
+      type: string
+      enum:
+        - approved
+        - pending
+        - revoked
+        - rejected
+    ApplicationRegistrationStatus:
+      type: string
+      enum:
+        - approved
+        - pending
+        - revoked
+        - rejected
+    PortalTheme:
+      description: >-
+        Select a pre-existing default theme or specify 'custom' to use custom_theme variables.
+      type: string
+      enum:
+        - mint_rocket
+        - dark_mode
+        - custom
+    UUID:
+      type: string
+      format: uuid
+      example: 5f9fd312-a987-4628-b4c5-bb4f4fddd5f7
+      description: Contains a unique identifier used for this resource.
+      readOnly: true
+    NullableUUID:
+      type: string
+      format: uuid
+      example: 5f9fd312-a987-4628-b4c5-bb4f4fddd5f7
+      description: Contains a unique identifier for a resource.
+      nullable: true
   requestBodies:
+    route-request:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Route'
     service-request:
       content:
         application/json:
           schema:
-            $ref: "#/components/schemas/Service"
+            $ref: '#/components/schemas/Service'
     CreateAPIProductRequest:
       required: true
       content:
         application/json:
           schema:
-            $ref: "#/components/schemas/CreateAPIProductDTO"
+            $ref: '#/components/schemas/CreateAPIProductDTO'
           examples:
             CreateAPIProductRequestMinimalExample:
-              $ref: "#/components/examples/CreateAPIProductRequestMinimalExample"
+              $ref: '#/components/examples/CreateAPIProductRequestMinimalExample'
             CreateAPIProductRequestExample:
-              $ref: "#/components/examples/CreateAPIProductRequestExample"
+              $ref: '#/components/examples/CreateAPIProductRequestExample'
     UpdateAPIProductRequest:
       required: true
       content:
         application/json:
           schema:
-            $ref: "#/components/schemas/UpdateAPIProductDTO"
+            $ref: '#/components/schemas/UpdateAPIProductDTO'
           examples:
             UpdateAPIProductRequestExample:
-              $ref: "#/components/examples/UpdateAPIProductRequestExample"
+              $ref: '#/components/examples/UpdateAPIProductRequestExample'
             PublishAPIProductToPortalExample:
-              $ref: "#/components/examples/PublishAPIProductToPortalExample"
+              $ref: '#/components/examples/PublishAPIProductToPortalExample'
     CreateAPIProductVersionRequest:
       required: true
       content:
         application/json:
           schema:
-            $ref: "#/components/schemas/CreateAPIProductVersionDTO"
+            $ref: '#/components/schemas/CreateAPIProductVersionDTO'
           examples:
             UnlinkedAPIProductVersion:
               $ref: >-
@@ -1906,16 +3342,29 @@ components:
       content:
         application/json:
           schema:
-            $ref: "#/components/schemas/UpdateAPIProductVersionDTO"
+            $ref: '#/components/schemas/UpdateAPIProductVersionDTO'
           examples:
             PublishAPIProductVersion:
-              $ref: "#/components/examples/PublishApiProductVersionRequestExample"
+              $ref: '#/components/examples/PublishApiProductVersionRequestExample'
             LinkAPIProductVersionRequest:
-              $ref: "#/components/examples/LinkAPIProductVersionRequestExample"
+              $ref: '#/components/examples/LinkAPIProductVersionRequestExample'
             UnlinkAPIProductVersionRequest:
-              $ref: "#/components/examples/UnlinkAPIProductVersionRequestExample"
+              $ref: '#/components/examples/UnlinkAPIProductVersionRequestExample'
             DeprecateAPIProductVersionRequest:
-              $ref: "#/components/examples/DeprecateAPIProductVersionRequestExample"
+              $ref: '#/components/examples/DeprecateAPIProductVersionRequestExample'
+    UpdatePortalAuthenticationSettings:
+      description: The request schema to update an organization's authentication settings.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/PortalAuthenticationSettingsUpdateRequest'
+    UpdatePortal:
+      description: Update a portal
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/UpdatePortalRequest'
   responses:
     service-response:
       description: >-
@@ -1989,137 +3438,137 @@ components:
       content:
         application/problem+json:
           schema:
-            $ref: "#/components/schemas/UnauthorizedError"
+            $ref: '#/components/schemas/UnauthorizedError'
           examples:
             UnauthorizedExample:
-              $ref: "#/components/examples/UnauthorizedExample"
+              $ref: '#/components/examples/UnauthorizedExample'
     ApiProductNotFound:
       description: Not Found
       content:
         application/problem+json:
           schema:
-            $ref: "#/components/schemas/NotFoundError"
+            $ref: '#/components/schemas/NotFoundError'
           examples:
             NotFoundExample:
-              $ref: "#/components/examples/NotFoundExample"
+              $ref: '#/components/examples/NotFoundExample'
     Forbidden:
       description: Forbidden
       content:
         application/problem+json:
           schema:
-            $ref: "#/components/schemas/ForbiddenError"
+            $ref: '#/components/schemas/ForbiddenError'
           examples:
             ForbiddenExample:
-              $ref: "#/components/examples/ForbiddenExample"
+              $ref: '#/components/examples/ForbiddenExample'
             UnauthorizedExample:
-              $ref: "#/components/examples/ForbiddenExample"
+              $ref: '#/components/examples/ForbiddenExample'
     APIProductResponse:
       description: API product
       content:
         application/json:
           schema:
-            $ref: "#/components/schemas/APIProduct"
+            $ref: '#/components/schemas/APIProduct'
           examples:
             Create API Product Response:
-              $ref: "#/components/examples/APIProductExample"
+              $ref: '#/components/examples/APIProductExample'
     APIProductVersionResponse:
       description: API product
       content:
         application/json:
           schema:
-            $ref: "#/components/schemas/APIProductVersion"
+            $ref: '#/components/schemas/APIProductVersion'
           examples:
             Create API Product Response:
-              $ref: "#/components/examples/APIProductVersionExample"
+              $ref: '#/components/examples/APIProductVersionExample'
     UnsupportedMediaType:
       description: Unsupported Media Type
       content:
         application/problem+json:
           schema:
-            $ref: "#/components/schemas/UnsupportedMediaTypeError"
+            $ref: '#/components/schemas/UnsupportedMediaTypeError'
           examples:
             UnsupportedMediaTypeExample:
-              $ref: "#/components/examples/UnsupportedMediaTypeExample"
+              $ref: '#/components/examples/UnsupportedMediaTypeExample'
     RetrieveRuntimeGroupResponse:
       description: A response to retrieving a single runtime group.
       content:
         application/json:
           schema:
-            $ref: "#/components/schemas/RuntimeGroup"
+            $ref: '#/components/schemas/RuntimeGroup'
           examples:
             Single runtime group response:
-              $ref: "#/components/examples/RuntimeGroupExample"
+              $ref: '#/components/examples/RuntimeGroupExample'
     CreateRuntimeGroupResponse:
       description: A response to creating a runtime group.
       content:
         application/json:
           schema:
-            $ref: "#/components/schemas/RuntimeGroup"
+            $ref: '#/components/schemas/RuntimeGroup'
           examples:
             Create Runtime Group Response:
-              $ref: "#/components/examples/RuntimeGroupExample"
+              $ref: '#/components/examples/RuntimeGroupExample'
     UpdateRuntimeGroupResponse:
       description: A response to updating a runtime group.
       content:
         application/json:
           schema:
-            $ref: "#/components/schemas/RuntimeGroup"
+            $ref: '#/components/schemas/RuntimeGroup'
           examples:
             Update Runtime Group Response:
-              $ref: "#/components/examples/RuntimeGroupExample"
+              $ref: '#/components/examples/RuntimeGroupExample'
     RuntimeGroupsBadRequest:
       description: Bad Request
       content:
         application/problem+json:
           schema:
-            $ref: "#/components/schemas/BadRequestError"
+            $ref: '#/components/schemas/BadRequestError'
           examples:
             Request Format Invalid:
-              $ref: "#/components/examples/400RequestFormatInvalidExample"
+              $ref: '#/components/examples/400RequestFormatInvalidExample'
             Cannot Be Blank:
-              $ref: "#/components/examples/400CannotBeBlankExample"
+              $ref: '#/components/examples/400CannotBeBlankExample'
             Invalid ID Format:
-              $ref: "#/components/examples/400InvalidIDFormatExample"
+              $ref: '#/components/examples/400InvalidIDFormatExample'
             Usage Limits Reached:
-              $ref: "#/components/examples/400UsageLimitsReachedExample"
+              $ref: '#/components/examples/400UsageLimitsReachedExample'
             Unknown Property:
-              $ref: "#/components/examples/400UnknownPropertyExample"
+              $ref: '#/components/examples/400UnknownPropertyExample'
     RuntimeGroupPermissionDenied:
       description: Permission denied
       content:
         application/problem+json:
           schema:
-            $ref: "#/components/schemas/ForbiddenError"
+            $ref: '#/components/schemas/ForbiddenError'
           examples:
             Permission Denied:
-              $ref: "#/components/examples/403PermissionDeniedExample"
+              $ref: '#/components/examples/403PermissionDeniedExample'
     RuntimeGroupUnauthenticated:
       description: Unauthenticated
       content:
         application/problem+json:
           schema:
-            $ref: "#/components/schemas/UnauthorizedError"
+            $ref: '#/components/schemas/UnauthorizedError'
           examples:
             Unauthorized:
-              $ref: "#/components/examples/401UnauthenticatedExample"
+              $ref: '#/components/examples/401UnauthenticatedExample'
     RuntimeGroupNotFound:
       description: Not Found
       content:
         application/problem+json:
           schema:
-            $ref: "#/components/schemas/NotFoundError"
+            $ref: '#/components/schemas/NotFoundError'
           examples:
             Not Found:
-              $ref: "#/components/examples/404NotFoundExample"
+              $ref: '#/components/examples/404NotFoundExample'
     RuntimeGroupConflict:
       description: Conflict
       content:
         application/problem+json:
           schema:
-            $ref: "#/components/schemas/ConflictError"
+            $ref: '#/components/schemas/ConflictError'
           examples:
             Conflict:
-              $ref: "#/components/examples/409ConflictExample"
+              $ref: '#/components/examples/409ConflictExample'
     InternalServerError:
       description: Internal Server Error
       content:
@@ -2154,7 +3603,7 @@ components:
               - instance
           examples:
             Internal Server Error:
-              $ref: "#/components/examples/500InternalErrorExample"
+              $ref: '#/components/examples/500InternalErrorExample'
     ServiceUnavailable:
       description: Service Unavailable
       content:
@@ -2189,7 +3638,43 @@ components:
               - instance
           examples:
             Service Unavailable:
-              $ref: "#/components/examples/503PermissionReadFailureExample"
+              $ref: '#/components/examples/503PermissionReadFailureExample'
+    BadRequest:
+      description: Bad Request
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/BadRequestError'
+    Unauthorized:
+      description: Unauthorized
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/UnauthorizedError'
+          examples:
+            UnauthorizedExample:
+              $ref: '#/components/examples/UnauthorizedExample'
+    NotFound:
+      description: Not Found
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/NotFoundError'
+          examples:
+            NotFoundExample:
+              $ref: '#/components/examples/NotFoundExample'
+    PortalAuthenticationSettings:
+      description: Response for authentication settings endpoint
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/PortalAuthenticationSettings'
+    UpdatePortal:
+      description: ''
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/UpdatePortalResponse'
   securitySchemes:
     konnectAccessToken:
       type: http
@@ -2228,8 +3713,8 @@ components:
         name: API Product
         description: Text describing the API product
         portal_ids: []
-        created_at: "2023-01-01T00:00:00.000Z"
-        updated_at: "2023-01-01T00:00:00.000Z"
+        created_at: '2023-01-01T00:00:00.000Z'
+        updated_at: '2023-01-01T00:00:00.000Z'
         labels:
           env: test
     APIProductVersionExample:
@@ -2237,26 +3722,28 @@ components:
         id: 9f5061ce-78f6-4452-9108-ad7c02821fd5
         name: v1
         gateway_service:
+          runtime_group_id: e4d9ebb1-26b4-426a-b00e-cb67044f3baf
+          control_plane_id: e4d9ebb1-26b4-426a-b00e-cb67044f3baf
           id: 09b4786a-3e48-4631-8f6b-62d1d8e1a7f3
         publish_status: unpublished
         deprecated: false
-        created_at: "2023-01-01T00:00:00.000Z"
-        updated_at: "2023-01-01T00:00:00.000Z"
+        created_at: '2023-01-01T00:00:00.000Z'
+        updated_at: '2023-01-01T00:00:00.000Z'
     APIProductVersionSpecExample:
       value:
         id: 7710d5c4-d902-410b-992f-18b814155b53
         name: oas.yaml
         content: My YAML or JSON formatted OAS content
-        created_at: "2023-01-01T00:00:00.000Z"
-        updated_at: "2023-01-01T00:00:00.000Z"
+        created_at: '2023-01-01T00:00:00.000Z'
+        updated_at: '2023-01-01T00:00:00.000Z'
     ListAPIProductVersionSpecExample:
       value:
         data:
           - id: 7710d5c4-d902-410b-992f-18b814155b53
             name: oas.yaml
             content: My YAML or JSON formatted OAS content
-            created_at: "2023-01-01T00:00:00.000Z"
-            updated_at: "2023-01-01T00:00:00.000Z"
+            created_at: '2023-01-01T00:00:00.000Z'
+            updated_at: '2023-01-01T00:00:00.000Z'
         meta:
           page:
             number: 1
@@ -2294,6 +3781,7 @@ components:
         publish_status: unpublished
         deprecated: false
         gateway_service:
+          control_plane_id: e4d9ebb1-26b4-426a-b00e-cb67044f3baf
           id: 09b4786a-3e48-4631-8f6b-62d1d8e1a7f3
     CreateAPIProductVersionSpecificationRequestExample:
       summary: Create API Product Version Specification Request
@@ -2308,6 +3796,7 @@ components:
       summary: Link API Product Version
       value:
         gateway_service:
+          control_plane_id: e4d9ebb1-26b4-426a-b00e-cb67044f3baf
           id: 09b4786a-3e48-4631-8f6b-62d1d8e1a7f3
     UnlinkAPIProductVersionRequestExample:
       summary: Unlink API Product Version
@@ -2350,8 +3839,8 @@ components:
                     type: text
                 type: paragraph
         metadata: {}
-        created_at: "2023-01-01T00:00:00.000Z"
-        updated_at: "2023-01-01T00:00:00.000Z"
+        created_at: '2023-01-01T00:00:00.000Z'
+        updated_at: '2023-01-01T00:00:00.000Z'
     APIProductDocumentTreeExample:
       value:
         data:
@@ -2484,7 +3973,7 @@ components:
         status: 415
         title: Unsupported Media Type
         instance: kong:trace:8347343766220159418
-        detail: "This API only supports requests with `Content-Type: application/json`"
+        detail: 'This API only supports requests with `Content-Type: application/json`'
     400RequestFormatInvalidExample:
       value:
         status: 400
@@ -2568,20 +4057,20 @@ components:
         description: A test runtime group for exploration.
         cluster_type: CLUSTER_TYPE_K8S_INGRESS_CONTROLLER
         labels:
-          test: "true"
+          test: 'true'
     UpdateRuntimeGroupRequestExample:
       value:
         name: Test Runtime Group
         description: A test runtime group for exploration.
         labels:
-          otherTest: "true"
+          otherTest: 'true'
     RuntimeGroupExample:
       value:
         id: 7f9fd312-a987-4628-b4c5-bb4f4fddd5f7
         name: Test Runtime Group
         description: A test runtime group for exploration.
         labels:
-          test: "true"
+          test: 'true'
         config:
           control_plane_endpoint: https://acfe5f253f.cp0.konghq.com
           telemetry_endpoint: https://acfe5f253f.tp0.konghq.com
@@ -2604,8 +4093,8 @@ components:
               id: 15f3ab7d-7202-498a-95b4-334f783dbcdd
               type: service
         state: COMPOSITE_STATE_CONFLICT
-        created_at: "2022-11-04T20:10:06.927Z"
-        updated_at: "2022-11-04T20:10:06.927Z"
+        created_at: '2022-11-04T20:10:06.927Z'
+        updated_at: '2022-11-04T20:10:06.927Z'
     CompositeNoConflictStatusExample:
       value:
         id: 7f9fd312-a987-4628-b4c5-bb4f4fddd5f7
@@ -2623,8 +4112,8 @@ components:
               id: 15f3ab7d-7202-498a-95b4-334f783dbcdd
               type: service
         state: COMPOSITE_STATE_CONFLICT
-        created_at: "2022-11-04T20:10:06.927Z"
-        updated_at: "2022-11-04T20:10:06.927Z"
+        created_at: '2022-11-04T20:10:06.927Z'
+        updated_at: '2022-11-04T20:10:06.927Z'
     ListCompositeMembershipsExample:
       value:
         meta:
@@ -2643,8 +4132,8 @@ components:
               telemetry_endpoint: https://9e0353434a.us.tp0.konghq.com
               cluster_type: CLUSTER_TYPE_HYBRID
               auth_type: pinned_client_certs
-            created_at: "2023-03-20T22:23:45.873Z"
-            updated_at: "2023-03-30T16:17:55.073Z"
+            created_at: '2023-03-20T22:23:45.873Z'
+            updated_at: '2023-03-30T16:17:55.073Z'
           - id: e4a1917c-bb26-4aa1-9a3e-50ee366f13db
             name: Composite Member 2
             description: Child RG
@@ -2656,8 +4145,8 @@ components:
               telemetry_endpoint: https://05459046af.us.tp0.konghq.com
               cluster_type: CLUSTER_TYPE_HYBRID
               auth_type: pinned_client_certs
-            created_at: "2023-03-23T22:25:30.907Z"
-            updated_at: "2023-03-30T16:18:12.067Z"
+            created_at: '2023-03-23T22:25:30.907Z'
+            updated_at: '2023-03-30T16:18:12.067Z'
 security:
   - konnectAccessToken: []
   - personalAccessToken: []
@@ -2705,3 +4194,11 @@ tags:
   - name: API Product Version Specification
   - name: Runtime Groups
   - name: Composite Runtime Groups
+  - name: Portals
+    description: APIs related to the Konnect Developer Portal Management API.
+  - name: Portal Teams
+  - name: Portal Team Membership
+  - name: Portal Team Roles
+  - name: Portal Roles
+  - name: Portal Developers
+  - name: Portal Auth Settings
