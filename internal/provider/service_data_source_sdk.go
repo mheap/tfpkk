@@ -4,73 +4,21 @@ package provider
 
 import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"konnect/internal/sdk/pkg/models/operations"
+	"github.com/kong/terraform-provider-konnect/internal/sdk/pkg/models/operations"
 )
 
-func (r *ServiceDataSourceModel) RefreshFromGetResponse(resp *operations.GetService200ApplicationJSON) {
-	if resp.ConnectTimeout != nil {
-		r.ConnectTimeout = types.Int64Value(*resp.ConnectTimeout)
-	} else {
-		r.ConnectTimeout = types.Int64Null()
-	}
-	if resp.CreatedAt != nil {
-		r.CreatedAt = types.Int64Value(*resp.CreatedAt)
-	} else {
-		r.CreatedAt = types.Int64Null()
-	}
-	if resp.Enabled != nil {
-		r.Enabled = types.BoolValue(*resp.Enabled)
-	} else {
-		r.Enabled = types.BoolNull()
-	}
-	if resp.Host != nil {
-		r.Host = types.StringValue(*resp.Host)
-	} else {
-		r.Host = types.StringNull()
-	}
-	if resp.ID != nil {
-		r.ID = types.StringValue(*resp.ID)
-	} else {
-		r.ID = types.StringNull()
-	}
-	if resp.Name != nil {
-		r.Name = types.StringValue(*resp.Name)
-	} else {
-		r.Name = types.StringNull()
-	}
-	if resp.Path != nil {
-		r.Path = types.StringValue(*resp.Path)
-	} else {
-		r.Path = types.StringNull()
-	}
-	if resp.Port != nil {
-		r.Port = types.Int64Value(*resp.Port)
-	} else {
-		r.Port = types.Int64Null()
-	}
-	if resp.Protocol != nil {
-		r.Protocol = types.StringValue(*resp.Protocol)
-	} else {
-		r.Protocol = types.StringNull()
-	}
-	if resp.ReadTimeout != nil {
-		r.ReadTimeout = types.Int64Value(*resp.ReadTimeout)
-	} else {
-		r.ReadTimeout = types.Int64Null()
-	}
-	if resp.Retries != nil {
-		r.Retries = types.Int64Value(*resp.Retries)
-	} else {
-		r.Retries = types.Int64Null()
-	}
-	if resp.UpdatedAt != nil {
-		r.UpdatedAt = types.Int64Value(*resp.UpdatedAt)
-	} else {
-		r.UpdatedAt = types.Int64Null()
-	}
-	if resp.WriteTimeout != nil {
-		r.WriteTimeout = types.Int64Value(*resp.WriteTimeout)
-	} else {
-		r.WriteTimeout = types.Int64Null()
-	}
+func (r *ServiceDataSourceModel) RefreshFromOperationsGetServiceResponseBody(resp *operations.GetServiceResponseBody) {
+	r.ConnectTimeout = types.Int64PointerValue(resp.ConnectTimeout)
+	r.CreatedAt = types.Int64PointerValue(resp.CreatedAt)
+	r.Enabled = types.BoolPointerValue(resp.Enabled)
+	r.Host = types.StringPointerValue(resp.Host)
+	r.ID = types.StringPointerValue(resp.ID)
+	r.Name = types.StringPointerValue(resp.Name)
+	r.Path = types.StringPointerValue(resp.Path)
+	r.Port = types.Int64PointerValue(resp.Port)
+	r.Protocol = types.StringPointerValue(resp.Protocol)
+	r.ReadTimeout = types.Int64PointerValue(resp.ReadTimeout)
+	r.Retries = types.Int64PointerValue(resp.Retries)
+	r.UpdatedAt = types.Int64PointerValue(resp.UpdatedAt)
+	r.WriteTimeout = types.Int64PointerValue(resp.WriteTimeout)
 }

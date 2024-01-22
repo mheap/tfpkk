@@ -5,6 +5,7 @@ package shared
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/kong/terraform-provider-konnect/internal/sdk/pkg/utils"
 )
 
 // CreateAPIProductVersionDTOPublishStatus - The publish status of the API product version.
@@ -38,10 +39,49 @@ func (e *CreateAPIProductVersionDTOPublishStatus) UnmarshalJSON(data []byte) err
 // CreateAPIProductVersionDTO - The request schema to create a version of an API product.
 type CreateAPIProductVersionDTO struct {
 	// Indicates if the version of the API product is deprecated.
-	Deprecated     *bool                  `json:"deprecated,omitempty"`
+	Deprecated     *bool                  `default:"false" json:"deprecated"`
 	GatewayService *GatewayServicePayload `json:"gateway_service,omitempty"`
 	// The version name of the API product version.
 	Name string `json:"name"`
 	// The publish status of the API product version.
-	PublishStatus *CreateAPIProductVersionDTOPublishStatus `json:"publish_status,omitempty"`
+	PublishStatus *CreateAPIProductVersionDTOPublishStatus `default:"unpublished" json:"publish_status"`
+}
+
+func (c CreateAPIProductVersionDTO) MarshalJSON() ([]byte, error) {
+	return utils.MarshalJSON(c, "", false)
+}
+
+func (c *CreateAPIProductVersionDTO) UnmarshalJSON(data []byte) error {
+	if err := utils.UnmarshalJSON(data, &c, "", false, false); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (o *CreateAPIProductVersionDTO) GetDeprecated() *bool {
+	if o == nil {
+		return nil
+	}
+	return o.Deprecated
+}
+
+func (o *CreateAPIProductVersionDTO) GetGatewayService() *GatewayServicePayload {
+	if o == nil {
+		return nil
+	}
+	return o.GatewayService
+}
+
+func (o *CreateAPIProductVersionDTO) GetName() string {
+	if o == nil {
+		return ""
+	}
+	return o.Name
+}
+
+func (o *CreateAPIProductVersionDTO) GetPublishStatus() *CreateAPIProductVersionDTOPublishStatus {
+	if o == nil {
+		return nil
+	}
+	return o.PublishStatus
 }

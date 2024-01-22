@@ -3,15 +3,29 @@
 package operations
 
 import (
-	"konnect/internal/sdk/pkg/models/shared"
+	"github.com/kong/terraform-provider-konnect/internal/sdk/pkg/models/shared"
 	"net/http"
 )
 
 type UpdatePortalAuthenticationSettingsRequest struct {
-	// The request schema to update an organization's authentication settings.
+	// Update a portal's developer authentication settings.
 	PortalAuthenticationSettingsUpdateRequest *shared.PortalAuthenticationSettingsUpdateRequest `request:"mediaType=application/json"`
 	// ID of the portal.
 	PortalID string `pathParam:"style=simple,explode=false,name=portalId"`
+}
+
+func (o *UpdatePortalAuthenticationSettingsRequest) GetPortalAuthenticationSettingsUpdateRequest() *shared.PortalAuthenticationSettingsUpdateRequest {
+	if o == nil {
+		return nil
+	}
+	return o.PortalAuthenticationSettingsUpdateRequest
+}
+
+func (o *UpdatePortalAuthenticationSettingsRequest) GetPortalID() string {
+	if o == nil {
+		return ""
+	}
+	return o.PortalID
 }
 
 type UpdatePortalAuthenticationSettingsResponse struct {
@@ -21,12 +35,61 @@ type UpdatePortalAuthenticationSettingsResponse struct {
 	ContentType string
 	// Forbidden
 	ForbiddenError *shared.ForbiddenError
-	// Response for authentication settings endpoint
-	PortalAuthenticationSettings *shared.PortalAuthenticationSettings
+	// Details about a portal's authentication settings.
+	PortalAuthenticationSettingsResponse *shared.PortalAuthenticationSettingsResponse
 	// HTTP response status code for this operation
 	StatusCode int
 	// Raw HTTP response; suitable for custom response parsing
 	RawResponse *http.Response
 	// Unauthorized
 	UnauthorizedError *shared.UnauthorizedError
+}
+
+func (o *UpdatePortalAuthenticationSettingsResponse) GetBadRequestError() *shared.BadRequestError {
+	if o == nil {
+		return nil
+	}
+	return o.BadRequestError
+}
+
+func (o *UpdatePortalAuthenticationSettingsResponse) GetContentType() string {
+	if o == nil {
+		return ""
+	}
+	return o.ContentType
+}
+
+func (o *UpdatePortalAuthenticationSettingsResponse) GetForbiddenError() *shared.ForbiddenError {
+	if o == nil {
+		return nil
+	}
+	return o.ForbiddenError
+}
+
+func (o *UpdatePortalAuthenticationSettingsResponse) GetPortalAuthenticationSettingsResponse() *shared.PortalAuthenticationSettingsResponse {
+	if o == nil {
+		return nil
+	}
+	return o.PortalAuthenticationSettingsResponse
+}
+
+func (o *UpdatePortalAuthenticationSettingsResponse) GetStatusCode() int {
+	if o == nil {
+		return 0
+	}
+	return o.StatusCode
+}
+
+func (o *UpdatePortalAuthenticationSettingsResponse) GetRawResponse() *http.Response {
+	if o == nil {
+		return nil
+	}
+	return o.RawResponse
+}
+
+func (o *UpdatePortalAuthenticationSettingsResponse) GetUnauthorizedError() *shared.UnauthorizedError {
+	if o == nil {
+		return nil
+	}
+	return o.UnauthorizedError
 }

@@ -4,10 +4,10 @@ package provider
 
 import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"konnect/internal/sdk/pkg/models/shared"
+	"github.com/kong/terraform-provider-konnect/internal/sdk/pkg/models/shared"
 )
 
-func (r *PortalAuthResourceModel) ToCreateSDKType() *shared.PortalAuthenticationSettingsUpdateRequest {
+func (r *PortalAuthResourceModel) ToSharedPortalAuthenticationSettingsUpdateRequest() *shared.PortalAuthenticationSettingsUpdateRequest {
 	basicAuthEnabled := new(bool)
 	if !r.BasicAuthEnabled.IsUnknown() && !r.BasicAuthEnabled.IsNull() {
 		*basicAuthEnabled = r.BasicAuthEnabled.ValueBool()
@@ -94,49 +94,20 @@ func (r *PortalAuthResourceModel) ToCreateSDKType() *shared.PortalAuthentication
 	return &out
 }
 
-func (r *PortalAuthResourceModel) ToGetSDKType() *shared.PortalAuthenticationSettingsUpdateRequest {
-	out := r.ToCreateSDKType()
-	return out
-}
-
-func (r *PortalAuthResourceModel) ToUpdateSDKType() *shared.PortalAuthenticationSettingsUpdateRequest {
-	out := r.ToCreateSDKType()
-	return out
-}
-
-func (r *PortalAuthResourceModel) RefreshFromGetResponse(resp *shared.PortalAuthenticationSettings) {
+func (r *PortalAuthResourceModel) RefreshFromSharedPortalAuthenticationSettingsResponse(resp *shared.PortalAuthenticationSettingsResponse) {
 	r.BasicAuthEnabled = types.BoolValue(resp.BasicAuthEnabled)
 	r.KonnectMappingEnabled = types.BoolValue(resp.KonnectMappingEnabled)
-	r.OidcAuthEnabled = types.BoolValue(resp.OidcAuthEnabled)
-	if r.OidcConfig == nil {
-		r.OidcConfig = &PortalOIDCConfig{}
-	}
 	if resp.OidcConfig == nil {
 		r.OidcConfig = nil
 	} else {
 		r.OidcConfig = &PortalOIDCConfig{}
-		if r.OidcConfig.ClaimMappings == nil {
-			r.OidcConfig.ClaimMappings = &PortalClaimMappings{}
-		}
 		if resp.OidcConfig.ClaimMappings == nil {
 			r.OidcConfig.ClaimMappings = nil
 		} else {
 			r.OidcConfig.ClaimMappings = &PortalClaimMappings{}
-			if resp.OidcConfig.ClaimMappings.Email != nil {
-				r.OidcConfig.ClaimMappings.Email = types.StringValue(*resp.OidcConfig.ClaimMappings.Email)
-			} else {
-				r.OidcConfig.ClaimMappings.Email = types.StringNull()
-			}
-			if resp.OidcConfig.ClaimMappings.Groups != nil {
-				r.OidcConfig.ClaimMappings.Groups = types.StringValue(*resp.OidcConfig.ClaimMappings.Groups)
-			} else {
-				r.OidcConfig.ClaimMappings.Groups = types.StringNull()
-			}
-			if resp.OidcConfig.ClaimMappings.Name != nil {
-				r.OidcConfig.ClaimMappings.Name = types.StringValue(*resp.OidcConfig.ClaimMappings.Name)
-			} else {
-				r.OidcConfig.ClaimMappings.Name = types.StringNull()
-			}
+			r.OidcConfig.ClaimMappings.Email = types.StringPointerValue(resp.OidcConfig.ClaimMappings.Email)
+			r.OidcConfig.ClaimMappings.Groups = types.StringPointerValue(resp.OidcConfig.ClaimMappings.Groups)
+			r.OidcConfig.ClaimMappings.Name = types.StringPointerValue(resp.OidcConfig.ClaimMappings.Name)
 		}
 		r.OidcConfig.ClientID = types.StringValue(resp.OidcConfig.ClientID)
 		r.OidcConfig.Issuer = types.StringValue(resp.OidcConfig.Issuer)
@@ -145,13 +116,6 @@ func (r *PortalAuthResourceModel) RefreshFromGetResponse(resp *shared.PortalAuth
 			r.OidcConfig.Scopes = append(r.OidcConfig.Scopes, types.StringValue(v))
 		}
 	}
+	r.OidcAuthEnabled = types.BoolValue(resp.OidcAuthEnabled)
 	r.OidcTeamMappingEnabled = types.BoolValue(resp.OidcTeamMappingEnabled)
-}
-
-func (r *PortalAuthResourceModel) RefreshFromCreateResponse(resp *shared.PortalAuthenticationSettings) {
-	r.RefreshFromGetResponse(resp)
-}
-
-func (r *PortalAuthResourceModel) RefreshFromUpdateResponse(resp *shared.PortalAuthenticationSettings) {
-	r.RefreshFromGetResponse(resp)
 }

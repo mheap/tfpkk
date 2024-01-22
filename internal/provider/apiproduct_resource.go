@@ -5,16 +5,19 @@ package provider
 import (
 	"context"
 	"fmt"
-	"konnect/internal/sdk"
-
+	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
-	"konnect/internal/sdk/pkg/models/operations"
-	"konnect/internal/validators"
+	"github.com/kong/terraform-provider-konnect/internal/sdk"
+	"github.com/kong/terraform-provider-konnect/internal/sdk/pkg/models/operations"
+	"github.com/kong/terraform-provider-konnect/internal/sdk/pkg/models/shared"
+	"github.com/kong/terraform-provider-konnect/internal/validators"
+	"math/big"
+	"time"
 )
 
 // Ensure provider defined types fully satisfy framework interfaces.
@@ -32,13 +35,14 @@ type APIProductResource struct {
 
 // APIProductResourceModel describes the resource data model.
 type APIProductResourceModel struct {
-	CreatedAt   types.String            `tfsdk:"created_at"`
-	Description types.String            `tfsdk:"description"`
-	ID          types.String            `tfsdk:"id"`
-	Labels      map[string]types.String `tfsdk:"labels"`
-	Name        types.String            `tfsdk:"name"`
-	PortalIds   []types.String          `tfsdk:"portal_ids"`
-	UpdatedAt   types.String            `tfsdk:"updated_at"`
+	CreatedAt    types.String            `tfsdk:"created_at"`
+	Description  types.String            `tfsdk:"description"`
+	ID           types.String            `tfsdk:"id"`
+	Labels       map[string]types.String `tfsdk:"labels"`
+	Name         types.String            `tfsdk:"name"`
+	PortalIds    []types.String          `tfsdk:"portal_ids"`
+	UpdatedAt    types.String            `tfsdk:"updated_at"`
+	VersionCount types.Number            `tfsdk:"version_count"`
 }
 
 func (r *APIProductResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
@@ -51,20 +55,20 @@ func (r *APIProductResource) Schema(ctx context.Context, req resource.SchemaRequ
 
 		Attributes: map[string]schema.Attribute{
 			"created_at": schema.StringAttribute{
-				Computed: true,
+				Computed:    true,
+				Description: `An ISO-8601 timestamp representation of entity creation date.`,
 				Validators: []validator.String{
 					validators.IsRFC3339(),
 				},
-				Description: `An ISO-8601 timestamp representation of entity creation date.`,
 			},
 			"description": schema.StringAttribute{
 				Computed:    true,
 				Optional:    true,
-				Description: `The description of the API product`,
+				Description: `The description of the API product. Default: null`,
 			},
 			"id": schema.StringAttribute{
 				Computed:    true,
-				Description: `The API product ID.`,
+				Description: `API product identifier`,
 			},
 			"labels": schema.MapAttribute{
 				Computed:    true,
@@ -77,19 +81,26 @@ func (r *APIProductResource) Schema(ctx context.Context, req resource.SchemaRequ
 			},
 			"name": schema.StringAttribute{
 				Required:    true,
-				Description: `The name of the API product`,
+				Description: `The name of the API product.`,
 			},
 			"portal_ids": schema.ListAttribute{
 				Computed:    true,
 				ElementType: types.StringType,
 				Description: `The list of portal identifiers which this API product is published to`,
+				Validators: []validator.List{
+					listvalidator.UniqueValues(),
+				},
 			},
 			"updated_at": schema.StringAttribute{
-				Computed: true,
+				Computed:    true,
+				Description: `An ISO-8601 timestamp representation of entity update date.`,
 				Validators: []validator.String{
 					validators.IsRFC3339(),
 				},
-				Description: `An ISO-8601 timestamp representation of entity update date.`,
+			},
+			"version_count": schema.NumberAttribute{
+				Computed:    true,
+				Description: `The number of product versions attached to this API product`,
 			},
 		},
 	}
@@ -117,14 +128,14 @@ func (r *APIProductResource) Configure(ctx context.Context, req resource.Configu
 
 func (r *APIProductResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	var data *APIProductResourceModel
-	var item types.Object
+	var plan types.Object
 
-	resp.Diagnostics.Append(req.Plan.Get(ctx, &item)...)
+	resp.Diagnostics.Append(req.Plan.Get(ctx, &plan)...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	resp.Diagnostics.Append(item.As(ctx, &data, basetypes.ObjectAsOptions{
+	resp.Diagnostics.Append(plan.As(ctx, &data, basetypes.ObjectAsOptions{
 		UnhandledNullAsEmpty:    true,
 		UnhandledUnknownAsEmpty: true,
 	})...)
@@ -133,7 +144,23 @@ func (r *APIProductResource) Create(ctx context.Context, req resource.CreateRequ
 		return
 	}
 
-	request := *data.ToCreateSDKType()
+	description := new(string)
+	if !data.Description.IsUnknown() && !data.Description.IsNull() {
+		*description = data.Description.ValueString()
+	} else {
+		description = nil
+	}
+	labels := make(map[string]string)
+	for labelsKey, labelsValue := range data.Labels {
+		labelsInst := labelsValue.ValueString()
+		labels[labelsKey] = labelsInst
+	}
+	name := data.Name.ValueString()
+	request := shared.CreateAPIProductDTO{
+		Description: description,
+		Labels:      labels,
+		Name:        name,
+	}
 	res, err := r.client.APIProducts.CreateAPIProduct(ctx, request)
 	if err != nil {
 		resp.Diagnostics.AddError("failure to invoke API", err.Error())
@@ -154,7 +181,25 @@ func (r *APIProductResource) Create(ctx context.Context, req resource.CreateRequ
 		resp.Diagnostics.AddError("unexpected response from API. No response body", debugResponse(res.RawResponse))
 		return
 	}
-	data.RefreshFromCreateResponse(res.APIProduct)
+	if res.APIProduct != nil {
+		data.CreatedAt = types.StringValue(res.APIProduct.CreatedAt.Format(time.RFC3339Nano))
+		data.Description = types.StringPointerValue(res.APIProduct.Description)
+		data.ID = types.StringValue(res.APIProduct.ID)
+		if len(res.APIProduct.Labels) > 0 {
+			data.Labels = make(map[string]types.String)
+			for key, value := range res.APIProduct.Labels {
+				data.Labels[key] = types.StringValue(value)
+			}
+		}
+		data.Name = types.StringValue(res.APIProduct.Name)
+		data.PortalIds = nil
+		for _, v := range res.APIProduct.PortalIds {
+			data.PortalIds = append(data.PortalIds, types.StringValue(v))
+		}
+		data.UpdatedAt = types.StringValue(res.APIProduct.UpdatedAt.Format(time.RFC3339Nano))
+		data.VersionCount = types.NumberValue(big.NewFloat(float64(res.APIProduct.VersionCount)))
+	}
+	refreshPlan(ctx, plan, &data, resp.Diagnostics)
 
 	// Save updated data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
@@ -202,7 +247,24 @@ func (r *APIProductResource) Read(ctx context.Context, req resource.ReadRequest,
 		resp.Diagnostics.AddError("unexpected response from API. No response body", debugResponse(res.RawResponse))
 		return
 	}
-	data.RefreshFromGetResponse(res.APIProduct)
+	if res.APIProduct != nil {
+		data.CreatedAt = types.StringValue(res.APIProduct.CreatedAt.Format(time.RFC3339Nano))
+		data.Description = types.StringPointerValue(res.APIProduct.Description)
+		data.ID = types.StringValue(res.APIProduct.ID)
+		if len(res.APIProduct.Labels) > 0 {
+			data.Labels = make(map[string]types.String)
+			for key, value := range res.APIProduct.Labels {
+				data.Labels[key] = types.StringValue(value)
+			}
+		}
+		data.Name = types.StringValue(res.APIProduct.Name)
+		data.PortalIds = nil
+		for _, v := range res.APIProduct.PortalIds {
+			data.PortalIds = append(data.PortalIds, types.StringValue(v))
+		}
+		data.UpdatedAt = types.StringValue(res.APIProduct.UpdatedAt.Format(time.RFC3339Nano))
+		data.VersionCount = types.NumberValue(big.NewFloat(float64(res.APIProduct.VersionCount)))
+	}
 
 	// Save updated data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
@@ -210,12 +272,45 @@ func (r *APIProductResource) Read(ctx context.Context, req resource.ReadRequest,
 
 func (r *APIProductResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
 	var data *APIProductResourceModel
+	var plan types.Object
+
+	resp.Diagnostics.Append(req.Plan.Get(ctx, &plan)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
 	merge(ctx, req, resp, &data)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	updateAPIProductDTO := *data.ToUpdateSDKType()
+	description := new(string)
+	if !data.Description.IsUnknown() && !data.Description.IsNull() {
+		*description = data.Description.ValueString()
+	} else {
+		description = nil
+	}
+	labels := make(map[string]string)
+	for labelsKey, labelsValue := range data.Labels {
+		labelsInst := labelsValue.ValueString()
+		labels[labelsKey] = labelsInst
+	}
+	name := new(string)
+	if !data.Name.IsUnknown() && !data.Name.IsNull() {
+		*name = data.Name.ValueString()
+	} else {
+		name = nil
+	}
+	var portalIds []string = nil
+	for _, portalIdsItem := range data.PortalIds {
+		portalIds = append(portalIds, portalIdsItem.ValueString())
+	}
+	updateAPIProductDTO := shared.UpdateAPIProductDTO{
+		Description: description,
+		Labels:      labels,
+		Name:        name,
+		PortalIds:   portalIds,
+	}
 	id := data.ID.ValueString()
 	request := operations.UpdateAPIProductRequest{
 		UpdateAPIProductDTO: updateAPIProductDTO,
@@ -241,7 +336,25 @@ func (r *APIProductResource) Update(ctx context.Context, req resource.UpdateRequ
 		resp.Diagnostics.AddError("unexpected response from API. No response body", debugResponse(res.RawResponse))
 		return
 	}
-	data.RefreshFromUpdateResponse(res.APIProduct)
+	if res.APIProduct != nil {
+		data.CreatedAt = types.StringValue(res.APIProduct.CreatedAt.Format(time.RFC3339Nano))
+		data.Description = types.StringPointerValue(res.APIProduct.Description)
+		data.ID = types.StringValue(res.APIProduct.ID)
+		if len(res.APIProduct.Labels) > 0 {
+			data.Labels = make(map[string]types.String)
+			for key, value := range res.APIProduct.Labels {
+				data.Labels[key] = types.StringValue(value)
+			}
+		}
+		data.Name = types.StringValue(res.APIProduct.Name)
+		data.PortalIds = nil
+		for _, v := range res.APIProduct.PortalIds {
+			data.PortalIds = append(data.PortalIds, types.StringValue(v))
+		}
+		data.UpdatedAt = types.StringValue(res.APIProduct.UpdatedAt.Format(time.RFC3339Nano))
+		data.VersionCount = types.NumberValue(big.NewFloat(float64(res.APIProduct.VersionCount)))
+	}
+	refreshPlan(ctx, plan, &data, resp.Diagnostics)
 
 	// Save updated data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
@@ -289,5 +402,5 @@ func (r *APIProductResource) Delete(ctx context.Context, req resource.DeleteRequ
 }
 
 func (r *APIProductResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
-	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
+	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("id"), req.ID)...)
 }

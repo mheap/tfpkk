@@ -1,9 +1,9 @@
 resource "konnect_portal" "my_portal" {
-  auto_approve_applications = true
-  auto_approve_developers   = false
-  custom_client_domain      = "weird-depressive.org"
-  custom_domain             = "fantastic-babe.org"
-  is_public                 = false
-  portal_id                 = "8c3b3ed8-234b-4415-9cde-1e1cd2dd1e30"
+  auto_approve_applications = false
+  auto_approve_developers   = true
+  custom_client_domain      = "submissive-neuropsychiatry.biz"
+  custom_domain             = "evergreen-bladder.org"
+  is_public                 = true
+  portal_id                 = "c2314257-8465-41a3-85b4-a87d71693bd3"
   rbac_enabled              = false
 }

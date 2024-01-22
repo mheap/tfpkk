@@ -5,13 +5,14 @@ package provider
 import (
 	"context"
 	"fmt"
-	"konnect/internal/sdk"
-	"konnect/internal/sdk/pkg/models/operations"
-
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
+	"github.com/kong/terraform-provider-konnect/internal/sdk"
+	"github.com/kong/terraform-provider-konnect/internal/sdk/pkg/models/operations"
 )
 
 // Ensure provider defined types fully satisfy framework interfaces.
@@ -29,26 +30,25 @@ type ServiceResource struct {
 
 // ServiceResourceModel describes the resource data model.
 type ServiceResourceModel struct {
-	CaCertificates    []types.String            `tfsdk:"ca_certificates"`
-	ClientCertificate *ServiceClientCertificate `tfsdk:"client_certificate"`
-	ConnectTimeout    types.Int64               `tfsdk:"connect_timeout"`
-	CreatedAt         types.Int64               `tfsdk:"created_at"`
-	Enabled           types.Bool                `tfsdk:"enabled"`
-	Host              types.String              `tfsdk:"host"`
-	ID                types.String              `tfsdk:"id"`
-	Name              types.String              `tfsdk:"name"`
-	Path              types.String              `tfsdk:"path"`
-	Port              types.Int64               `tfsdk:"port"`
-	Protocol          types.String              `tfsdk:"protocol"`
-	ReadTimeout       types.Int64               `tfsdk:"read_timeout"`
-	Retries           types.Int64               `tfsdk:"retries"`
-	RuntimeGroupID    types.String              `tfsdk:"runtime_group_id"`
-	Tags              []types.String            `tfsdk:"tags"`
-	TLSVerify         types.Bool                `tfsdk:"tls_verify"`
-	TLSVerifyDepth    types.Int64               `tfsdk:"tls_verify_depth"`
-	UpdatedAt         types.Int64               `tfsdk:"updated_at"`
-	URL               types.String              `tfsdk:"url"`
-	WriteTimeout      types.Int64               `tfsdk:"write_timeout"`
+	CaCertificates    []types.String  `tfsdk:"ca_certificates"`
+	ClientCertificate *PluginConsumer `tfsdk:"client_certificate"`
+	ConnectTimeout    types.Int64     `tfsdk:"connect_timeout"`
+	ControlPlaneID    types.String    `tfsdk:"control_plane_id"`
+	CreatedAt         types.Int64     `tfsdk:"created_at"`
+	Enabled           types.Bool      `tfsdk:"enabled"`
+	Host              types.String    `tfsdk:"host"`
+	ID                types.String    `tfsdk:"id"`
+	Name              types.String    `tfsdk:"name"`
+	Path              types.String    `tfsdk:"path"`
+	Port              types.Int64     `tfsdk:"port"`
+	Protocol          types.String    `tfsdk:"protocol"`
+	ReadTimeout       types.Int64     `tfsdk:"read_timeout"`
+	Retries           types.Int64     `tfsdk:"retries"`
+	Tags              []types.String  `tfsdk:"tags"`
+	TLSVerify         types.Bool      `tfsdk:"tls_verify"`
+	TLSVerifyDepth    types.String    `tfsdk:"tls_verify_depth"`
+	UpdatedAt         types.Int64     `tfsdk:"updated_at"`
+	WriteTimeout      types.Int64     `tfsdk:"write_timeout"`
 }
 
 func (r *ServiceResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
@@ -63,7 +63,7 @@ func (r *ServiceResource) Schema(ctx context.Context, req resource.SchemaRequest
 			"ca_certificates": schema.ListAttribute{
 				Optional:    true,
 				ElementType: types.StringType,
-				Description: `Array of ` + "`" + `CA Certificate` + "`" + ` object UUIDs that are used to build the trust store while verifying upstream server's TLS certificate. If set to ` + "`" + `null` + "`" + ` when Nginx default is respected. If default CA list in Nginx are not specified and TLS verification is enabled, then handshake with upstream server will always fail (because no CA are trusted).`,
+				Description: `Array of CA Certificate object UUIDs that are used to build the trust store while verifying upstream server’s TLS certificate. If set to null when Nginx default is respected. With form-encoded, the notation is ` + "`" + `ca_certificates[]=4e3ad2e4-0bc4-4638-8e34-c84a417ba39b&ca_certificates[]=51e77dc2-8f3e-4afa-9d0e-0e3bbbcfd515` + "`" + `. With JSON, use an Array.`,
 			},
 			"client_certificate": schema.SingleNestedAttribute{
 				Optional: true,
@@ -72,92 +72,115 @@ func (r *ServiceResource) Schema(ctx context.Context, req resource.SchemaRequest
 						Optional: true,
 					},
 				},
-				Description: `Certificate to be used as client certificate while TLS handshaking to the upstream server.`,
+				Description: `Certificate to be used as client certificate while TLS handshaking to the upstream server. With form-encoded, the notation is ` + "`" + `client_certificate.id=<client_certificate id>` + "`" + `. With JSON, use ` + "`" + `client_certificate:{id:<client_certificate id>}` + "`" + `.`,
 			},
 			"connect_timeout": schema.Int64Attribute{
 				Computed:    true,
 				Optional:    true,
-				Description: `The timeout in milliseconds for establishing a connection to the upstream server.`,
+				Description: `The timeout in milliseconds for establishing a connection to the upstream server. Default: ` + "`" + `60000` + "`" + `. Default: 6000`,
+			},
+			"control_plane_id": schema.StringAttribute{
+				Required:    true,
+				Description: `The UUID of your control plane. This variable is available in the Konnect manager`,
 			},
 			"created_at": schema.Int64Attribute{
-				Computed:    true,
-				Optional:    true,
-				Description: `Unix epoch when the resource was created.`,
+				Computed: true,
 			},
 			"enabled": schema.BoolAttribute{
 				Computed:    true,
 				Optional:    true,
-				Description: `Whether the service is active. If set to ` + "`" + `false` + "`" + `, the proxy behavior will be as if any routes attached to it do not exist (404). Default: ` + "`" + `true` + "`" + `.`,
+				Description: `Whether the service is active. If set to ` + "`" + `false` + "`" + `, the proxy behavior will be as if any routes attached to it do not exist (404). Default: ` + "`" + `true` + "`" + `. Default: true`,
 			},
 			"host": schema.StringAttribute{
-				Computed:    true,
-				Optional:    true,
-				Description: `The host of the upstream server. Note that the host value is case sensitive.`,
+				Required: true,
+				MarkdownDescription: `The host of the upstream server. Note that the host value is case sensitive.` + "\n" +
+					``,
 			},
 			"id": schema.StringAttribute{
-				Computed: true,
-				Optional: true,
+				Computed:    true,
+				Description: `ID or name of the service to delete`,
 			},
 			"name": schema.StringAttribute{
-				Computed:    true,
-				Optional:    true,
-				Description: `The service name.`,
+				Computed: true,
+				Optional: true,
+				MarkdownDescription: `The service name.` + "\n" +
+					``,
 			},
 			"path": schema.StringAttribute{
-				Computed:    true,
-				Optional:    true,
-				Description: `The path to be used in requests to the upstream server.`,
+				Computed: true,
+				Optional: true,
+				MarkdownDescription: `The path to be used in requests to the upstream server.` + "\n" +
+					``,
 			},
 			"port": schema.Int64Attribute{
-				Computed:    true,
-				Optional:    true,
-				Description: `The upstream server port.`,
+				Computed: true,
+				Optional: true,
+				MarkdownDescription: `The upstream server port. Default: ` + "`" + `80` + "`" + `.` + "\n" +
+					`` + "\n" +
+					`Default: 80`,
 			},
 			"protocol": schema.StringAttribute{
-				Computed:    true,
-				Optional:    true,
-				Description: `The protocol used to communicate with the upstream.`,
+				Optional: true,
+				MarkdownDescription: `The protocol used to communicate with the upstream. Accepted values are: ` + "`" + `grpc` + "`" + `, ` + "`" + `grpcs` + "`" + `, ` + "`" + `http` + "`" + `, ` + "`" + `https` + "`" + `, ` + "`" + `tcp` + "`" + `, ` + "`" + `tls` + "`" + `, ` + "`" + `tls_passthrough` + "`" + `, ` + "`" + `udp` + "`" + `, ` + "`" + `ws` + "`" + `` + "\n" +
+					`, ` + "`" + `wss` + "`" + `` + "\n" +
+					`. Default: ` + "`" + `http` + "`" + `.` + "\n" +
+					`must be one of ["grpc", "grpcs", "http", "https", "tcp", "tls ", "tls_passthrough", "udp", "ws", "wss"]; Default: "http"`,
+				Validators: []validator.String{
+					stringvalidator.OneOf(
+						"grpc",
+						"grpcs",
+						"http",
+						"https",
+						"tcp",
+						"tls ",
+						"tls_passthrough",
+						"udp",
+						"ws",
+						"wss",
+					),
+				},
 			},
 			"read_timeout": schema.Int64Attribute{
-				Computed:    true,
-				Optional:    true,
-				Description: `The timeout in milliseconds between two successive read operations for transmitting a request to the upstream server.`,
+				Computed: true,
+				Optional: true,
+				MarkdownDescription: `The timeout in milliseconds between two successive read operations for transmitting a request to the upstream server. Default: ` + "`" + `60000` + "`" + `.` + "\n" +
+					`` + "\n" +
+					`Default: 6000`,
 			},
 			"retries": schema.Int64Attribute{
-				Computed:    true,
-				Optional:    true,
-				Description: `The number of retries to execute upon failure to proxy.`,
-			},
-			"runtime_group_id": schema.StringAttribute{
-				Required:    true,
-				Description: `The ID of your runtime group. This variable is available in the Konnect manager`,
+				Computed: true,
+				Optional: true,
+				MarkdownDescription: `The number of retries to execute upon failure to proxy. Default:` + "`" + `5` + "`" + `.` + "\n" +
+					`` + "\n" +
+					`Default: 5`,
 			},
 			"tags": schema.ListAttribute{
 				Optional:    true,
 				ElementType: types.StringType,
-				Description: `An optional set of strings associated with the service for grouping and filtering.`,
+				MarkdownDescription: `An optional set of strings associated with the service for grouping and filtering.` + "\n" +
+					``,
 			},
 			"tls_verify": schema.BoolAttribute{
-				Optional:    true,
-				Description: `Whether to enable verification of upstream server TLS certificate. If set to ` + "`" + `null` + "`" + `, then the Nginx default is respected.`,
+				Optional: true,
+				MarkdownDescription: `Whether to enable verification of upstream server TLS certificate. If set to null, then the Nginx default is respected.` + "\n" +
+					`` + "\n" +
+					`Default: true`,
 			},
-			"tls_verify_depth": schema.Int64Attribute{
-				Optional:    true,
-				Description: `Maximum depth of chain while verifying Upstream server's TLS certificate. If set to ` + "`" + `null` + "`" + `, then the Nginx default is respected.`,
+			"tls_verify_depth": schema.StringAttribute{
+				Optional: true,
+				MarkdownDescription: `Maximum depth of chain while verifying Upstream server’s TLS certificate. If set to null, then the Nginx default is respected. Default: null.` + "\n" +
+					`` + "\n" +
+					`Default: null`,
 			},
 			"updated_at": schema.Int64Attribute{
-				Computed:    true,
-				Optional:    true,
-				Description: `Unix epoch when the resource was last updated.`,
-			},
-			"url": schema.StringAttribute{
-				Optional:    true,
-				Description: `Helper field to set ` + "`" + `protocol` + "`" + `, ` + "`" + `host` + "`" + `, ` + "`" + `port` + "`" + ` and ` + "`" + `path` + "`" + ` using a URL. This field is write-only and is not returned in responses.`,
+				Computed: true,
 			},
 			"write_timeout": schema.Int64Attribute{
-				Computed:    true,
-				Optional:    true,
-				Description: `The timeout in milliseconds between two successive write operations for transmitting a request to the upstream server.`,
+				Computed: true,
+				Optional: true,
+				MarkdownDescription: `The timeout in milliseconds between two successive write operations for transmitting a request to the upstream server. Default: ` + "`" + `60000` + "`" + `.` + "\n" +
+					`` + "\n" +
+					`Default: 6000`,
 			},
 		},
 	}
@@ -185,14 +208,14 @@ func (r *ServiceResource) Configure(ctx context.Context, req resource.ConfigureR
 
 func (r *ServiceResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	var data *ServiceResourceModel
-	var item types.Object
+	var plan types.Object
 
-	resp.Diagnostics.Append(req.Plan.Get(ctx, &item)...)
+	resp.Diagnostics.Append(req.Plan.Get(ctx, &plan)...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	resp.Diagnostics.Append(item.As(ctx, &data, basetypes.ObjectAsOptions{
+	resp.Diagnostics.Append(plan.As(ctx, &data, basetypes.ObjectAsOptions{
 		UnhandledNullAsEmpty:    true,
 		UnhandledUnknownAsEmpty: true,
 	})...)
@@ -201,11 +224,11 @@ func (r *ServiceResource) Create(ctx context.Context, req resource.CreateRequest
 		return
 	}
 
-	service := data.ToCreateSDKType()
-	runtimeGroupID := data.RuntimeGroupID.ValueString()
+	controlPlaneID := data.ControlPlaneID.ValueString()
+	serviceRequest := data.ToSharedServiceRequest()
 	request := operations.CreateServiceRequest{
-		Service:        service,
-		RuntimeGroupID: runtimeGroupID,
+		ControlPlaneID: controlPlaneID,
+		ServiceRequest: serviceRequest,
 	}
 	res, err := r.client.Services.CreateService(ctx, request)
 	if err != nil {
@@ -223,11 +246,46 @@ func (r *ServiceResource) Create(ctx context.Context, req resource.CreateRequest
 		resp.Diagnostics.AddError(fmt.Sprintf("unexpected response from API. Got an unexpected response code %v", res.StatusCode), debugResponse(res.RawResponse))
 		return
 	}
-	if res.CreateService201ApplicationJSONObject == nil {
+	if res.TwoHundredAndOneApplicationJSONObject == nil {
 		resp.Diagnostics.AddError("unexpected response from API. No response body", debugResponse(res.RawResponse))
 		return
 	}
-	data.RefreshFromCreateResponse(res.CreateService201ApplicationJSONObject)
+	data.RefreshFromOperationsCreateServiceResponseBody(res.TwoHundredAndOneApplicationJSONObject)
+	refreshPlan(ctx, plan, &data, resp.Diagnostics)
+	controlPlaneId1 := data.ControlPlaneID.ValueString()
+	var filterTags *string
+	var offset *string
+	serviceID := data.ID.ValueString()
+	var size *int64
+	request1 := operations.GetServiceRequest{
+		ControlPlaneID: controlPlaneId1,
+		FilterTags:     filterTags,
+		Offset:         offset,
+		ServiceID:      serviceID,
+		Size:           size,
+	}
+	res1, err := r.client.Services.GetService(ctx, request1)
+	if err != nil {
+		resp.Diagnostics.AddError("failure to invoke API", err.Error())
+		if res1 != nil && res1.RawResponse != nil {
+			resp.Diagnostics.AddError("unexpected http request/response", debugResponse(res1.RawResponse))
+		}
+		return
+	}
+	if res1 == nil {
+		resp.Diagnostics.AddError("unexpected response from API", fmt.Sprintf("%v", res1))
+		return
+	}
+	if res1.StatusCode != 200 {
+		resp.Diagnostics.AddError(fmt.Sprintf("unexpected response from API. Got an unexpected response code %v", res1.StatusCode), debugResponse(res1.RawResponse))
+		return
+	}
+	if res1.Object == nil {
+		resp.Diagnostics.AddError("unexpected response from API. No response body", debugResponse(res1.RawResponse))
+		return
+	}
+	data.RefreshFromOperationsGetServiceResponseBody(res1.Object)
+	refreshPlan(ctx, plan, &data, resp.Diagnostics)
 
 	// Save updated data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
@@ -251,11 +309,17 @@ func (r *ServiceResource) Read(ctx context.Context, req resource.ReadRequest, re
 		return
 	}
 
-	runtimeGroupID := data.RuntimeGroupID.ValueString()
+	controlPlaneID := data.ControlPlaneID.ValueString()
+	var filterTags *string
+	var offset *string
 	serviceID := data.ID.ValueString()
+	var size *int64
 	request := operations.GetServiceRequest{
-		RuntimeGroupID: runtimeGroupID,
+		ControlPlaneID: controlPlaneID,
+		FilterTags:     filterTags,
+		Offset:         offset,
 		ServiceID:      serviceID,
+		Size:           size,
 	}
 	res, err := r.client.Services.GetService(ctx, request)
 	if err != nil {
@@ -273,11 +337,11 @@ func (r *ServiceResource) Read(ctx context.Context, req resource.ReadRequest, re
 		resp.Diagnostics.AddError(fmt.Sprintf("unexpected response from API. Got an unexpected response code %v", res.StatusCode), debugResponse(res.RawResponse))
 		return
 	}
-	if res.GetService200ApplicationJSONObject == nil {
+	if res.Object == nil {
 		resp.Diagnostics.AddError("unexpected response from API. No response body", debugResponse(res.RawResponse))
 		return
 	}
-	data.RefreshFromGetResponse(res.GetService200ApplicationJSONObject)
+	data.RefreshFromOperationsGetServiceResponseBody(res.Object)
 
 	// Save updated data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
@@ -285,17 +349,24 @@ func (r *ServiceResource) Read(ctx context.Context, req resource.ReadRequest, re
 
 func (r *ServiceResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
 	var data *ServiceResourceModel
+	var plan types.Object
+
+	resp.Diagnostics.Append(req.Plan.Get(ctx, &plan)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
 	merge(ctx, req, resp, &data)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	service := data.ToUpdateSDKType()
-	runtimeGroupID := data.RuntimeGroupID.ValueString()
+	controlPlaneID := data.ControlPlaneID.ValueString()
+	serviceRequest := data.ToSharedServiceRequest()
 	serviceID := data.ID.ValueString()
 	request := operations.UpsertServiceRequest{
-		Service:        service,
-		RuntimeGroupID: runtimeGroupID,
+		ControlPlaneID: controlPlaneID,
+		ServiceRequest: serviceRequest,
 		ServiceID:      serviceID,
 	}
 	res, err := r.client.Services.UpsertService(ctx, request)
@@ -314,11 +385,46 @@ func (r *ServiceResource) Update(ctx context.Context, req resource.UpdateRequest
 		resp.Diagnostics.AddError(fmt.Sprintf("unexpected response from API. Got an unexpected response code %v", res.StatusCode), debugResponse(res.RawResponse))
 		return
 	}
-	if res.UpsertService200ApplicationJSONObject == nil {
+	if res.TwoHundredApplicationJSONObject == nil {
 		resp.Diagnostics.AddError("unexpected response from API. No response body", debugResponse(res.RawResponse))
 		return
 	}
-	data.RefreshFromUpdateResponse(res.UpsertService200ApplicationJSONObject)
+	data.RefreshFromOperationsUpsertServiceResponseBody(res.TwoHundredApplicationJSONObject)
+	refreshPlan(ctx, plan, &data, resp.Diagnostics)
+	controlPlaneId1 := data.ControlPlaneID.ValueString()
+	var filterTags *string
+	var offset *string
+	serviceId1 := data.ID.ValueString()
+	var size *int64
+	request1 := operations.GetServiceRequest{
+		ControlPlaneID: controlPlaneId1,
+		FilterTags:     filterTags,
+		Offset:         offset,
+		ServiceID:      serviceId1,
+		Size:           size,
+	}
+	res1, err := r.client.Services.GetService(ctx, request1)
+	if err != nil {
+		resp.Diagnostics.AddError("failure to invoke API", err.Error())
+		if res1 != nil && res1.RawResponse != nil {
+			resp.Diagnostics.AddError("unexpected http request/response", debugResponse(res1.RawResponse))
+		}
+		return
+	}
+	if res1 == nil {
+		resp.Diagnostics.AddError("unexpected response from API", fmt.Sprintf("%v", res1))
+		return
+	}
+	if res1.StatusCode != 200 {
+		resp.Diagnostics.AddError(fmt.Sprintf("unexpected response from API. Got an unexpected response code %v", res1.StatusCode), debugResponse(res1.RawResponse))
+		return
+	}
+	if res1.Object == nil {
+		resp.Diagnostics.AddError("unexpected response from API. No response body", debugResponse(res1.RawResponse))
+		return
+	}
+	data.RefreshFromOperationsGetServiceResponseBody(res1.Object)
+	refreshPlan(ctx, plan, &data, resp.Diagnostics)
 
 	// Save updated data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
@@ -342,10 +448,10 @@ func (r *ServiceResource) Delete(ctx context.Context, req resource.DeleteRequest
 		return
 	}
 
-	runtimeGroupID := data.RuntimeGroupID.ValueString()
+	controlPlaneID := data.ControlPlaneID.ValueString()
 	serviceID := data.ID.ValueString()
 	request := operations.DeleteServiceRequest{
-		RuntimeGroupID: runtimeGroupID,
+		ControlPlaneID: controlPlaneID,
 		ServiceID:      serviceID,
 	}
 	res, err := r.client.Services.DeleteService(ctx, request)
@@ -368,5 +474,5 @@ func (r *ServiceResource) Delete(ctx context.Context, req resource.DeleteRequest
 }
 
 func (r *ServiceResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
-	resp.Diagnostics.AddError("Not Implemented", "No available import state operation is available for resource service.")
+	resp.Diagnostics.AddError("Not Implemented", "No available import state operation is available for resource service. Reason: composite imports strings not supported.")
 }

@@ -4,35 +4,53 @@ package provider
 
 import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"konnect/internal/sdk/pkg/models/shared"
+	"github.com/kong/terraform-provider-konnect/internal/sdk/pkg/models/shared"
 )
 
-func (r *RouteResourceModel) ToCreateSDKType() *shared.Route {
-	createdAt := new(int64)
-	if !r.CreatedAt.IsUnknown() && !r.CreatedAt.IsNull() {
-		*createdAt = r.CreatedAt.ValueInt64()
-	} else {
-		createdAt = nil
+func (r *RouteResourceModel) ToSharedRouteRequest() *shared.RouteRequest {
+	var destinations []shared.Destinations = nil
+	for _, destinationsItem := range r.Destinations {
+		ip := new(string)
+		if !destinationsItem.IP.IsUnknown() && !destinationsItem.IP.IsNull() {
+			*ip = destinationsItem.IP.ValueString()
+		} else {
+			ip = nil
+		}
+		port := new(int64)
+		if !destinationsItem.Port.IsUnknown() && !destinationsItem.Port.IsNull() {
+			*port = destinationsItem.Port.ValueInt64()
+		} else {
+			port = nil
+		}
+		destinations = append(destinations, shared.Destinations{
+			IP:   ip,
+			Port: port,
+		})
 	}
-	var headers *shared.RouteHeaders
+	var headers *shared.Headers
 	if r.Headers != nil {
-		headers = &shared.RouteHeaders{}
+		var xAnotherHeader []string = nil
+		for _, xAnotherHeaderItem := range r.Headers.XAnotherHeader {
+			xAnotherHeader = append(xAnotherHeader, xAnotherHeaderItem.ValueString())
+		}
+		var xMyHeader []string = nil
+		for _, xMyHeaderItem := range r.Headers.XMyHeader {
+			xMyHeader = append(xMyHeader, xMyHeaderItem.ValueString())
+		}
+		headers = &shared.Headers{
+			XAnotherHeader: xAnotherHeader,
+			XMyHeader:      xMyHeader,
+		}
 	}
 	var hosts []string = nil
 	for _, hostsItem := range r.Hosts {
 		hosts = append(hosts, hostsItem.ValueString())
 	}
-	httpsRedirectStatusCode := new(int64)
+	httpsRedirectStatusCode := new(shared.HTTPSRedirectStatusCode)
 	if !r.HTTPSRedirectStatusCode.IsUnknown() && !r.HTTPSRedirectStatusCode.IsNull() {
-		*httpsRedirectStatusCode = r.HTTPSRedirectStatusCode.ValueInt64()
+		*httpsRedirectStatusCode = shared.HTTPSRedirectStatusCode(r.HTTPSRedirectStatusCode.ValueInt64())
 	} else {
 		httpsRedirectStatusCode = nil
-	}
-	id := new(string)
-	if !r.ID.IsUnknown() && !r.ID.IsNull() {
-		*id = r.ID.ValueString()
-	} else {
-		id = nil
 	}
 	var methods []string = nil
 	for _, methodsItem := range r.Methods {
@@ -44,9 +62,9 @@ func (r *RouteResourceModel) ToCreateSDKType() *shared.Route {
 	} else {
 		name = nil
 	}
-	pathHandling := new(string)
+	pathHandling := new(shared.PathHandling)
 	if !r.PathHandling.IsUnknown() && !r.PathHandling.IsNull() {
-		*pathHandling = r.PathHandling.ValueString()
+		*pathHandling = shared.PathHandling(r.PathHandling.ValueString())
 	} else {
 		pathHandling = nil
 	}
@@ -82,21 +100,40 @@ func (r *RouteResourceModel) ToCreateSDKType() *shared.Route {
 	} else {
 		responseBuffering = nil
 	}
-	var service *shared.RouteService
+	var service *shared.RouteRequestService
 	if r.Service != nil {
-		id1 := new(string)
+		id := new(string)
 		if !r.Service.ID.IsUnknown() && !r.Service.ID.IsNull() {
-			*id1 = r.Service.ID.ValueString()
+			*id = r.Service.ID.ValueString()
 		} else {
-			id1 = nil
+			id = nil
 		}
-		service = &shared.RouteService{
-			ID: id1,
+		service = &shared.RouteRequestService{
+			ID: id,
 		}
 	}
 	var snis []string = nil
 	for _, snisItem := range r.Snis {
 		snis = append(snis, snisItem.ValueString())
+	}
+	var sources []shared.Sources = nil
+	for _, sourcesItem := range r.Sources {
+		ip1 := new(string)
+		if !sourcesItem.IP.IsUnknown() && !sourcesItem.IP.IsNull() {
+			*ip1 = sourcesItem.IP.ValueString()
+		} else {
+			ip1 = nil
+		}
+		port1 := new(int64)
+		if !sourcesItem.Port.IsUnknown() && !sourcesItem.Port.IsNull() {
+			*port1 = sourcesItem.Port.ValueInt64()
+		} else {
+			port1 = nil
+		}
+		sources = append(sources, shared.Sources{
+			IP:   ip1,
+			Port: port1,
+		})
 	}
 	stripPath := new(bool)
 	if !r.StripPath.IsUnknown() && !r.StripPath.IsNull() {
@@ -108,18 +145,11 @@ func (r *RouteResourceModel) ToCreateSDKType() *shared.Route {
 	for _, tagsItem := range r.Tags {
 		tags = append(tags, tagsItem.ValueString())
 	}
-	updatedAt := new(int64)
-	if !r.UpdatedAt.IsUnknown() && !r.UpdatedAt.IsNull() {
-		*updatedAt = r.UpdatedAt.ValueInt64()
-	} else {
-		updatedAt = nil
-	}
-	out := shared.Route{
-		CreatedAt:               createdAt,
+	out := shared.RouteRequest{
+		Destinations:            destinations,
 		Headers:                 headers,
 		Hosts:                   hosts,
 		HTTPSRedirectStatusCode: httpsRedirectStatusCode,
-		ID:                      id,
 		Methods:                 methods,
 		Name:                    name,
 		PathHandling:            pathHandling,
@@ -131,62 +161,51 @@ func (r *RouteResourceModel) ToCreateSDKType() *shared.Route {
 		ResponseBuffering:       responseBuffering,
 		Service:                 service,
 		Snis:                    snis,
+		Sources:                 sources,
 		StripPath:               stripPath,
 		Tags:                    tags,
-		UpdatedAt:               updatedAt,
 	}
 	return &out
 }
 
-func (r *RouteResourceModel) ToGetSDKType() *shared.Route {
-	out := r.ToCreateSDKType()
-	return out
-}
-
-func (r *RouteResourceModel) ToDeleteSDKType() *shared.Route {
-	out := r.ToCreateSDKType()
-	return out
-}
-
-func (r *RouteResourceModel) RefreshFromGetResponse(resp *shared.Route) {
-	if resp.CreatedAt != nil {
-		r.CreatedAt = types.Int64Value(*resp.CreatedAt)
-	} else {
-		r.CreatedAt = types.Int64Null()
+func (r *RouteResourceModel) RefreshFromSharedRoute(resp *shared.Route) {
+	r.CreatedAt = types.Int64PointerValue(resp.CreatedAt)
+	if len(r.Destinations) > len(resp.Destinations) {
+		r.Destinations = r.Destinations[:len(resp.Destinations)]
 	}
-	if r.Headers == nil {
-		r.Headers = &RouteHeaders{}
+	for destinationsCount, destinationsItem := range resp.Destinations {
+		var destinations1 Destinations
+		destinations1.IP = types.StringPointerValue(destinationsItem.IP)
+		destinations1.Port = types.Int64PointerValue(destinationsItem.Port)
+		if destinationsCount+1 > len(r.Destinations) {
+			r.Destinations = append(r.Destinations, destinations1)
+		} else {
+			r.Destinations[destinationsCount].IP = destinations1.IP
+			r.Destinations[destinationsCount].Port = destinations1.Port
+		}
 	}
 	if resp.Headers == nil {
 		r.Headers = nil
 	} else {
-		r.Headers = &RouteHeaders{}
+		r.Headers = &Headers{}
 	}
 	r.Hosts = nil
 	for _, v := range resp.Hosts {
 		r.Hosts = append(r.Hosts, types.StringValue(v))
 	}
 	if resp.HTTPSRedirectStatusCode != nil {
-		r.HTTPSRedirectStatusCode = types.Int64Value(*resp.HTTPSRedirectStatusCode)
+		r.HTTPSRedirectStatusCode = types.Int64Value(int64(*resp.HTTPSRedirectStatusCode))
 	} else {
 		r.HTTPSRedirectStatusCode = types.Int64Null()
 	}
-	if resp.ID != nil {
-		r.ID = types.StringValue(*resp.ID)
-	} else {
-		r.ID = types.StringNull()
-	}
+	r.ID = types.StringPointerValue(resp.ID)
 	r.Methods = nil
 	for _, v := range resp.Methods {
 		r.Methods = append(r.Methods, types.StringValue(v))
 	}
-	if resp.Name != nil {
-		r.Name = types.StringValue(*resp.Name)
-	} else {
-		r.Name = types.StringNull()
-	}
+	r.Name = types.StringPointerValue(resp.Name)
 	if resp.PathHandling != nil {
-		r.PathHandling = types.StringValue(*resp.PathHandling)
+		r.PathHandling = types.StringValue(string(*resp.PathHandling))
 	} else {
 		r.PathHandling = types.StringNull()
 	}
@@ -194,63 +213,42 @@ func (r *RouteResourceModel) RefreshFromGetResponse(resp *shared.Route) {
 	for _, v := range resp.Paths {
 		r.Paths = append(r.Paths, types.StringValue(v))
 	}
-	if resp.PreserveHost != nil {
-		r.PreserveHost = types.BoolValue(*resp.PreserveHost)
-	} else {
-		r.PreserveHost = types.BoolNull()
-	}
+	r.PreserveHost = types.BoolPointerValue(resp.PreserveHost)
 	r.Protocols = nil
 	for _, v := range resp.Protocols {
 		r.Protocols = append(r.Protocols, types.StringValue(v))
 	}
-	if resp.RegexPriority != nil {
-		r.RegexPriority = types.Int64Value(*resp.RegexPriority)
-	} else {
-		r.RegexPriority = types.Int64Null()
-	}
-	if resp.RequestBuffering != nil {
-		r.RequestBuffering = types.BoolValue(*resp.RequestBuffering)
-	} else {
-		r.RequestBuffering = types.BoolNull()
-	}
-	if resp.ResponseBuffering != nil {
-		r.ResponseBuffering = types.BoolValue(*resp.ResponseBuffering)
-	} else {
-		r.ResponseBuffering = types.BoolNull()
-	}
-	if r.Service == nil {
-		r.Service = &RouteService{}
-	}
+	r.RegexPriority = types.Int64PointerValue(resp.RegexPriority)
+	r.RequestBuffering = types.BoolPointerValue(resp.RequestBuffering)
+	r.ResponseBuffering = types.BoolPointerValue(resp.ResponseBuffering)
 	if resp.Service == nil {
 		r.Service = nil
 	} else {
-		r.Service = &RouteService{}
-		if resp.Service.ID != nil {
-			r.Service.ID = types.StringValue(*resp.Service.ID)
-		} else {
-			r.Service.ID = types.StringNull()
-		}
+		r.Service = &PluginConsumer{}
+		r.Service.ID = types.StringPointerValue(resp.Service.ID)
 	}
 	r.Snis = nil
 	for _, v := range resp.Snis {
 		r.Snis = append(r.Snis, types.StringValue(v))
 	}
-	if resp.StripPath != nil {
-		r.StripPath = types.BoolValue(*resp.StripPath)
-	} else {
-		r.StripPath = types.BoolNull()
+	if len(r.Sources) > len(resp.Sources) {
+		r.Sources = r.Sources[:len(resp.Sources)]
 	}
+	for sourcesCount, sourcesItem := range resp.Sources {
+		var sources1 Destinations
+		sources1.IP = types.StringPointerValue(sourcesItem.IP)
+		sources1.Port = types.Int64PointerValue(sourcesItem.Port)
+		if sourcesCount+1 > len(r.Sources) {
+			r.Sources = append(r.Sources, sources1)
+		} else {
+			r.Sources[sourcesCount].IP = sources1.IP
+			r.Sources[sourcesCount].Port = sources1.Port
+		}
+	}
+	r.StripPath = types.BoolPointerValue(resp.StripPath)
 	r.Tags = nil
 	for _, v := range resp.Tags {
 		r.Tags = append(r.Tags, types.StringValue(v))
 	}
-	if resp.UpdatedAt != nil {
-		r.UpdatedAt = types.Int64Value(*resp.UpdatedAt)
-	} else {
-		r.UpdatedAt = types.Int64Null()
-	}
-}
-
-func (r *RouteResourceModel) RefreshFromCreateResponse(resp *shared.Route) {
-	r.RefreshFromGetResponse(resp)
+	r.UpdatedAt = types.Int64PointerValue(resp.UpdatedAt)
 }

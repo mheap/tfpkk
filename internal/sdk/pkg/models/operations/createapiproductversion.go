@@ -3,7 +3,7 @@
 package operations
 
 import (
-	"konnect/internal/sdk/pkg/models/shared"
+	"github.com/kong/terraform-provider-konnect/internal/sdk/pkg/models/shared"
 	"net/http"
 )
 
@@ -11,6 +11,20 @@ type CreateAPIProductVersionRequest struct {
 	CreateAPIProductVersionDTO shared.CreateAPIProductVersionDTO `request:"mediaType=application/json"`
 	// The API Product ID
 	APIProductID string `pathParam:"style=simple,explode=false,name=apiProductId"`
+}
+
+func (o *CreateAPIProductVersionRequest) GetCreateAPIProductVersionDTO() shared.CreateAPIProductVersionDTO {
+	if o == nil {
+		return shared.CreateAPIProductVersionDTO{}
+	}
+	return o.CreateAPIProductVersionDTO
+}
+
+func (o *CreateAPIProductVersionRequest) GetAPIProductID() string {
+	if o == nil {
+		return ""
+	}
+	return o.APIProductID
 }
 
 type CreateAPIProductVersionResponse struct {
@@ -32,4 +46,67 @@ type CreateAPIProductVersionResponse struct {
 	UnauthorizedError *shared.UnauthorizedError
 	// Unsupported Media Type
 	UnsupportedMediaTypeError *shared.UnsupportedMediaTypeError
+}
+
+func (o *CreateAPIProductVersionResponse) GetAPIProductVersion() *shared.APIProductVersion {
+	if o == nil {
+		return nil
+	}
+	return o.APIProductVersion
+}
+
+func (o *CreateAPIProductVersionResponse) GetBadRequestError() *shared.BadRequestError {
+	if o == nil {
+		return nil
+	}
+	return o.BadRequestError
+}
+
+func (o *CreateAPIProductVersionResponse) GetContentType() string {
+	if o == nil {
+		return ""
+	}
+	return o.ContentType
+}
+
+func (o *CreateAPIProductVersionResponse) GetForbiddenError() *shared.ForbiddenError {
+	if o == nil {
+		return nil
+	}
+	return o.ForbiddenError
+}
+
+func (o *CreateAPIProductVersionResponse) GetNotFoundError() *shared.NotFoundError {
+	if o == nil {
+		return nil
+	}
+	return o.NotFoundError
+}
+
+func (o *CreateAPIProductVersionResponse) GetStatusCode() int {
+	if o == nil {
+		return 0
+	}
+	return o.StatusCode
+}
+
+func (o *CreateAPIProductVersionResponse) GetRawResponse() *http.Response {
+	if o == nil {
+		return nil
+	}
+	return o.RawResponse
+}
+
+func (o *CreateAPIProductVersionResponse) GetUnauthorizedError() *shared.UnauthorizedError {
+	if o == nil {
+		return nil
+	}
+	return o.UnauthorizedError
+}
+
+func (o *CreateAPIProductVersionResponse) GetUnsupportedMediaTypeError() *shared.UnsupportedMediaTypeError {
+	if o == nil {
+		return nil
+	}
+	return o.UnsupportedMediaTypeError
 }

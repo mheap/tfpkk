@@ -3,7 +3,7 @@
 package operations
 
 import (
-	"konnect/internal/sdk/pkg/models/shared"
+	"github.com/kong/terraform-provider-konnect/internal/sdk/pkg/models/shared"
 	"net/http"
 )
 
@@ -12,6 +12,20 @@ type DeleteAPIProductVersionRequest struct {
 	APIProductID string `pathParam:"style=simple,explode=false,name=apiProductId"`
 	// The API product version identifier
 	ID string `pathParam:"style=simple,explode=false,name=id"`
+}
+
+func (o *DeleteAPIProductVersionRequest) GetAPIProductID() string {
+	if o == nil {
+		return ""
+	}
+	return o.APIProductID
+}
+
+func (o *DeleteAPIProductVersionRequest) GetID() string {
+	if o == nil {
+		return ""
+	}
+	return o.ID
 }
 
 type DeleteAPIProductVersionResponse struct {
@@ -27,4 +41,46 @@ type DeleteAPIProductVersionResponse struct {
 	RawResponse *http.Response
 	// Unauthorized
 	UnauthorizedError *shared.UnauthorizedError
+}
+
+func (o *DeleteAPIProductVersionResponse) GetContentType() string {
+	if o == nil {
+		return ""
+	}
+	return o.ContentType
+}
+
+func (o *DeleteAPIProductVersionResponse) GetForbiddenError() *shared.ForbiddenError {
+	if o == nil {
+		return nil
+	}
+	return o.ForbiddenError
+}
+
+func (o *DeleteAPIProductVersionResponse) GetNotFoundError() *shared.NotFoundError {
+	if o == nil {
+		return nil
+	}
+	return o.NotFoundError
+}
+
+func (o *DeleteAPIProductVersionResponse) GetStatusCode() int {
+	if o == nil {
+		return 0
+	}
+	return o.StatusCode
+}
+
+func (o *DeleteAPIProductVersionResponse) GetRawResponse() *http.Response {
+	if o == nil {
+		return nil
+	}
+	return o.RawResponse
+}
+
+func (o *DeleteAPIProductVersionResponse) GetUnauthorizedError() *shared.UnauthorizedError {
+	if o == nil {
+		return nil
+	}
+	return o.UnauthorizedError
 }

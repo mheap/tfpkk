@@ -5,13 +5,12 @@ package provider
 import (
 	"context"
 	"fmt"
-	"konnect/internal/sdk"
-	"konnect/internal/sdk/pkg/models/operations"
-
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
+	"github.com/kong/terraform-provider-konnect/internal/sdk"
+	"github.com/kong/terraform-provider-konnect/internal/sdk/pkg/models/operations"
 )
 
 // Ensure provider defined types fully satisfy framework interfaces.
@@ -29,26 +28,23 @@ type ServiceDataSource struct {
 
 // ServiceDataSourceModel describes the data model.
 type ServiceDataSourceModel struct {
-	CaCertificates    []types.String            `tfsdk:"ca_certificates"`
-	ClientCertificate *ServiceClientCertificate `tfsdk:"client_certificate"`
-	ConnectTimeout    types.Int64               `tfsdk:"connect_timeout"`
-	CreatedAt         types.Int64               `tfsdk:"created_at"`
-	Enabled           types.Bool                `tfsdk:"enabled"`
-	Host              types.String              `tfsdk:"host"`
-	ID                types.String              `tfsdk:"id"`
-	Name              types.String              `tfsdk:"name"`
-	Path              types.String              `tfsdk:"path"`
-	Port              types.Int64               `tfsdk:"port"`
-	Protocol          types.String              `tfsdk:"protocol"`
-	ReadTimeout       types.Int64               `tfsdk:"read_timeout"`
-	Retries           types.Int64               `tfsdk:"retries"`
-	RuntimeGroupID    types.String              `tfsdk:"runtime_group_id"`
-	Tags              []types.String            `tfsdk:"tags"`
-	TLSVerify         types.Bool                `tfsdk:"tls_verify"`
-	TLSVerifyDepth    types.Int64               `tfsdk:"tls_verify_depth"`
-	UpdatedAt         types.Int64               `tfsdk:"updated_at"`
-	URL               types.String              `tfsdk:"url"`
-	WriteTimeout      types.Int64               `tfsdk:"write_timeout"`
+	ConnectTimeout types.Int64  `tfsdk:"connect_timeout"`
+	ControlPlaneID types.String `tfsdk:"control_plane_id"`
+	CreatedAt      types.Int64  `tfsdk:"created_at"`
+	Enabled        types.Bool   `tfsdk:"enabled"`
+	FilterTags     types.String `tfsdk:"filter_tags"`
+	Host           types.String `tfsdk:"host"`
+	ID             types.String `tfsdk:"id"`
+	Name           types.String `tfsdk:"name"`
+	Offset         types.String `tfsdk:"offset"`
+	Path           types.String `tfsdk:"path"`
+	Port           types.Int64  `tfsdk:"port"`
+	Protocol       types.String `tfsdk:"protocol"`
+	ReadTimeout    types.Int64  `tfsdk:"read_timeout"`
+	Retries        types.Int64  `tfsdk:"retries"`
+	Size           types.Int64  `tfsdk:"size"`
+	UpdatedAt      types.Int64  `tfsdk:"updated_at"`
+	WriteTimeout   types.Int64  `tfsdk:"write_timeout"`
 }
 
 // Metadata returns the data source type name.
@@ -62,92 +58,63 @@ func (r *ServiceDataSource) Schema(ctx context.Context, req datasource.SchemaReq
 		MarkdownDescription: "Service DataSource",
 
 		Attributes: map[string]schema.Attribute{
-			"ca_certificates": schema.ListAttribute{
-				Optional:    true,
-				ElementType: types.StringType,
-				Description: `Array of ` + "`" + `CA Certificate` + "`" + ` object UUIDs that are used to build the trust store while verifying upstream server's TLS certificate. If set to ` + "`" + `null` + "`" + ` when Nginx default is respected. If default CA list in Nginx are not specified and TLS verification is enabled, then handshake with upstream server will always fail (because no CA are trusted).`,
-			},
-			"client_certificate": schema.SingleNestedAttribute{
-				Optional: true,
-				Attributes: map[string]schema.Attribute{
-					"id": schema.StringAttribute{
-						Optional: true,
-					},
-				},
-				Description: `Certificate to be used as client certificate while TLS handshaking to the upstream server.`,
-			},
 			"connect_timeout": schema.Int64Attribute{
-				Computed:    true,
-				Description: `The timeout in milliseconds for establishing a connection to the upstream server.`,
+				Computed: true,
+			},
+			"control_plane_id": schema.StringAttribute{
+				Required:    true,
+				Description: `The UUID of your control plane. This variable is available in the Konnect manager`,
 			},
 			"created_at": schema.Int64Attribute{
 				Computed:    true,
-				Description: `Unix epoch when the resource was created.`,
+				Description: `Unix epoch when the resource was last created.`,
 			},
 			"enabled": schema.BoolAttribute{
 				Computed:    true,
-				Description: `Whether the service is active. If set to ` + "`" + `false` + "`" + `, the proxy behavior will be as if any routes attached to it do not exist (404). Default: ` + "`" + `true` + "`" + `.`,
+				Description: `Service enabled boolean`,
+			},
+			"filter_tags": schema.StringAttribute{
+				Optional:    true,
+				Description: `A list of tags to filter the list of resources on. Multiple tags can be concatenated using ',' to mean AND or using '/' to mean OR.`,
 			},
 			"host": schema.StringAttribute{
-				Computed:    true,
-				Description: `The host of the upstream server. Note that the host value is case sensitive.`,
+				Computed: true,
 			},
 			"id": schema.StringAttribute{
-				Optional:    true,
-				Description: `ID **or** name of the service to lookup`,
+				Required:    true,
+				Description: `UUID of the service to lookup`,
 			},
 			"name": schema.StringAttribute{
-				Computed:    true,
-				Description: `The service name.`,
+				Computed: true,
+			},
+			"offset": schema.StringAttribute{
+				Optional:    true,
+				Description: `Offset from which to return the next set of resources. Use the value of the 'offset' field from the response of a list operation as input here to paginate through all the resources`,
 			},
 			"path": schema.StringAttribute{
-				Computed:    true,
-				Description: `The path to be used in requests to the upstream server.`,
+				Computed: true,
 			},
 			"port": schema.Int64Attribute{
-				Computed:    true,
-				Description: `The upstream server port.`,
+				Computed: true,
 			},
 			"protocol": schema.StringAttribute{
-				Computed:    true,
-				Description: `The protocol used to communicate with the upstream.`,
+				Computed: true,
 			},
 			"read_timeout": schema.Int64Attribute{
-				Computed:    true,
-				Description: `The timeout in milliseconds between two successive read operations for transmitting a request to the upstream server.`,
+				Computed: true,
 			},
 			"retries": schema.Int64Attribute{
-				Computed:    true,
-				Description: `The number of retries to execute upon failure to proxy.`,
+				Computed: true,
 			},
-			"runtime_group_id": schema.StringAttribute{
-				Required:    true,
-				Description: `The ID of your runtime group. This variable is available in the Konnect manager`,
-			},
-			"tags": schema.ListAttribute{
+			"size": schema.Int64Attribute{
 				Optional:    true,
-				ElementType: types.StringType,
-				Description: `An optional set of strings associated with the service for grouping and filtering.`,
-			},
-			"tls_verify": schema.BoolAttribute{
-				Optional:    true,
-				Description: `Whether to enable verification of upstream server TLS certificate. If set to ` + "`" + `null` + "`" + `, then the Nginx default is respected.`,
-			},
-			"tls_verify_depth": schema.Int64Attribute{
-				Optional:    true,
-				Description: `Maximum depth of chain while verifying Upstream server's TLS certificate. If set to ` + "`" + `null` + "`" + `, then the Nginx default is respected.`,
+				Description: `Number of resources to be returned. Default: 100`,
 			},
 			"updated_at": schema.Int64Attribute{
-				Computed:    true,
-				Description: `Unix epoch when the resource was last updated.`,
-			},
-			"url": schema.StringAttribute{
-				Optional:    true,
-				Description: `Helper field to set ` + "`" + `protocol` + "`" + `, ` + "`" + `host` + "`" + `, ` + "`" + `port` + "`" + ` and ` + "`" + `path` + "`" + ` using a URL. This field is write-only and is not returned in responses.`,
+				Computed: true,
 			},
 			"write_timeout": schema.Int64Attribute{
-				Computed:    true,
-				Description: `The timeout in milliseconds between two successive write operations for transmitting a request to the upstream server.`,
+				Computed: true,
 			},
 		},
 	}
@@ -191,11 +158,32 @@ func (r *ServiceDataSource) Read(ctx context.Context, req datasource.ReadRequest
 		return
 	}
 
-	runtimeGroupID := data.RuntimeGroupID.ValueString()
+	controlPlaneID := data.ControlPlaneID.ValueString()
+	filterTags := new(string)
+	if !data.FilterTags.IsUnknown() && !data.FilterTags.IsNull() {
+		*filterTags = data.FilterTags.ValueString()
+	} else {
+		filterTags = nil
+	}
+	offset := new(string)
+	if !data.Offset.IsUnknown() && !data.Offset.IsNull() {
+		*offset = data.Offset.ValueString()
+	} else {
+		offset = nil
+	}
 	serviceID := data.ID.ValueString()
+	size := new(int64)
+	if !data.Size.IsUnknown() && !data.Size.IsNull() {
+		*size = data.Size.ValueInt64()
+	} else {
+		size = nil
+	}
 	request := operations.GetServiceRequest{
-		RuntimeGroupID: runtimeGroupID,
+		ControlPlaneID: controlPlaneID,
+		FilterTags:     filterTags,
+		Offset:         offset,
 		ServiceID:      serviceID,
+		Size:           size,
 	}
 	res, err := r.client.Services.GetService(ctx, request)
 	if err != nil {
@@ -213,11 +201,11 @@ func (r *ServiceDataSource) Read(ctx context.Context, req datasource.ReadRequest
 		resp.Diagnostics.AddError(fmt.Sprintf("unexpected response from API. Got an unexpected response code %v", res.StatusCode), debugResponse(res.RawResponse))
 		return
 	}
-	if res.GetService200ApplicationJSONObject == nil {
+	if res.Object == nil {
 		resp.Diagnostics.AddError("unexpected response from API. No response body", debugResponse(res.RawResponse))
 		return
 	}
-	data.RefreshFromGetResponse(res.GetService200ApplicationJSONObject)
+	data.RefreshFromOperationsGetServiceResponseBody(res.Object)
 
 	// Save updated data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)

@@ -5,16 +5,12 @@ package provider
 import (
 	"context"
 	"fmt"
-	"konnect/internal/sdk"
-	"konnect/internal/sdk/pkg/models/operations"
-
-	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
-	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
-	"konnect/internal/validators"
+	"github.com/kong/terraform-provider-konnect/internal/sdk"
+	"github.com/kong/terraform-provider-konnect/internal/sdk/pkg/models/operations"
 )
 
 // Ensure provider defined types fully satisfy framework interfaces.
@@ -32,14 +28,14 @@ type APIProductVersionDataSource struct {
 
 // APIProductVersionDataSourceModel describes the data model.
 type APIProductVersionDataSourceModel struct {
-	APIProductID   types.String          `tfsdk:"api_product_id"`
-	CreatedAt      types.String          `tfsdk:"created_at"`
-	Deprecated     types.Bool            `tfsdk:"deprecated"`
-	GatewayService GatewayServicePayload `tfsdk:"gateway_service"`
-	ID             types.String          `tfsdk:"id"`
-	Name           types.String          `tfsdk:"name"`
-	PublishStatus  types.String          `tfsdk:"publish_status"`
-	UpdatedAt      types.String          `tfsdk:"updated_at"`
+	APIProductID   types.String    `tfsdk:"api_product_id"`
+	CreatedAt      types.String    `tfsdk:"created_at"`
+	Deprecated     types.Bool      `tfsdk:"deprecated"`
+	GatewayService *GatewayService `tfsdk:"gateway_service"`
+	ID             types.String    `tfsdk:"id"`
+	Name           types.String    `tfsdk:"name"`
+	PublishStatus  types.String    `tfsdk:"publish_status"`
+	UpdatedAt      types.String    `tfsdk:"updated_at"`
 }
 
 // Metadata returns the data source type name.
@@ -58,10 +54,7 @@ func (r *APIProductVersionDataSource) Schema(ctx context.Context, req datasource
 				Description: `The API product identifier`,
 			},
 			"created_at": schema.StringAttribute{
-				Computed: true,
-				Validators: []validator.String{
-					validators.IsRFC3339(),
-				},
+				Computed:    true,
 				Description: `An ISO-8601 timestamp representation of entity creation date.`,
 			},
 			"deprecated": schema.BoolAttribute{
@@ -79,10 +72,14 @@ func (r *APIProductVersionDataSource) Schema(ctx context.Context, req datasource
 						Computed:    true,
 						Description: `The identifier of a gateway service associated with the version of the API product.`,
 					},
+					"runtime_group_id": schema.StringAttribute{
+						Computed:    true,
+						Description: `This field is deprecated, please use ` + "`" + `control_plane_id` + "`" + ` instead. The identifier of the control plane that the gateway service resides in`,
+					},
 				},
 			},
 			"id": schema.StringAttribute{
-				Optional:    true,
+				Required:    true,
 				Description: `The API product version identifier`,
 			},
 			"name": schema.StringAttribute{
@@ -90,21 +87,11 @@ func (r *APIProductVersionDataSource) Schema(ctx context.Context, req datasource
 				Description: `The version of the API product`,
 			},
 			"publish_status": schema.StringAttribute{
-				Computed: true,
-				Validators: []validator.String{
-					stringvalidator.OneOf(
-						"unpublished",
-						"published",
-					),
-				},
-				MarkdownDescription: `must be one of ["unpublished", "published"]` + "\n" +
-					`The publish status of the API product version`,
+				Computed:    true,
+				Description: `The publish status of the API product version. must be one of ["unpublished", "published"]`,
 			},
 			"updated_at": schema.StringAttribute{
-				Computed: true,
-				Validators: []validator.String{
-					validators.IsRFC3339(),
-				},
+				Computed:    true,
 				Description: `An ISO-8601 timestamp representation of entity update date.`,
 			},
 		},
@@ -175,7 +162,7 @@ func (r *APIProductVersionDataSource) Read(ctx context.Context, req datasource.R
 		resp.Diagnostics.AddError("unexpected response from API. No response body", debugResponse(res.RawResponse))
 		return
 	}
-	data.RefreshFromGetResponse(res.APIProductVersion)
+	data.RefreshFromSharedAPIProductVersion(res.APIProductVersion)
 
 	// Save updated data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)

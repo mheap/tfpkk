@@ -9,3 +9,31 @@ type InvalidParameterChoiceItem struct {
 	// invalid parameters rules
 	Rule *InvalidRules `json:"rule,omitempty"`
 }
+
+func (o *InvalidParameterChoiceItem) GetChoices() []interface{} {
+	if o == nil {
+		return nil
+	}
+	return o.Choices
+}
+
+func (o *InvalidParameterChoiceItem) GetField() string {
+	if o == nil {
+		return ""
+	}
+	return o.Field
+}
+
+func (o *InvalidParameterChoiceItem) GetReason() string {
+	if o == nil {
+		return ""
+	}
+	return o.Reason
+}
+
+func (o *InvalidParameterChoiceItem) GetRule() *InvalidRules {
+	if o == nil {
+		return nil
+	}
+	return o.Rule
+}

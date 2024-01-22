@@ -4,33 +4,23 @@ package provider
 
 import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"konnect/internal/sdk/pkg/models/shared"
+	"github.com/kong/terraform-provider-konnect/internal/sdk/pkg/models/shared"
 	"time"
 )
 
-func (r *APIProductVersionDataSourceModel) RefreshFromGetResponse(resp *shared.APIProductVersion) {
-	if resp.CreatedAt != nil {
-		r.CreatedAt = types.StringValue(resp.CreatedAt.Format(time.RFC3339Nano))
+func (r *APIProductVersionDataSourceModel) RefreshFromSharedAPIProductVersion(resp *shared.APIProductVersion) {
+	r.CreatedAt = types.StringValue(resp.CreatedAt.Format(time.RFC3339Nano))
+	r.Deprecated = types.BoolValue(resp.Deprecated)
+	if resp.GatewayService == nil {
+		r.GatewayService = nil
 	} else {
-		r.CreatedAt = types.StringNull()
+		r.GatewayService = &GatewayService{}
+		r.GatewayService.ControlPlaneID = types.StringValue(resp.GatewayService.ControlPlaneID)
+		r.GatewayService.ID = types.StringPointerValue(resp.GatewayService.ID)
+		r.GatewayService.RuntimeGroupID = types.StringPointerValue(resp.GatewayService.RuntimeGroupID)
 	}
-	if resp.Deprecated != nil {
-		r.Deprecated = types.BoolValue(*resp.Deprecated)
-	} else {
-		r.Deprecated = types.BoolNull()
-	}
-	r.GatewayService.ControlPlaneID = types.StringValue(resp.GatewayService.ControlPlaneID)
-	r.GatewayService.ID = types.StringValue(resp.GatewayService.ID)
-	if resp.ID != nil {
-		r.ID = types.StringValue(*resp.ID)
-	} else {
-		r.ID = types.StringNull()
-	}
+	r.ID = types.StringValue(resp.ID)
 	r.Name = types.StringValue(resp.Name)
 	r.PublishStatus = types.StringValue(string(resp.PublishStatus))
-	if resp.UpdatedAt != nil {
-		r.UpdatedAt = types.StringValue(resp.UpdatedAt.Format(time.RFC3339Nano))
-	} else {
-		r.UpdatedAt = types.StringNull()
-	}
+	r.UpdatedAt = types.StringValue(resp.UpdatedAt.Format(time.RFC3339Nano))
 }

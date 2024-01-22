@@ -4,28 +4,53 @@ package shared
 
 // BadRequestError - standard error
 type BadRequestError struct {
-	// A human readable explanation specific to this occurence of the problem.
-	// This field may contain request/entity data to help the user understand
-	// what went wrong. Enclose variable values in square brackets. Should be
-	// provided as "Sentence case" for direct use in the UI.
-	//
-	Detail string `json:"detail"`
-	// Used to return the correlation ID back to the user, in the format
-	// kong:trace:<correlation_id>. This helps us find the relevant logs
-	// when a customer reports an issue.
-	//
-	Instance string `json:"instance"`
+	Detail   interface{} `json:"detail"`
+	Instance interface{} `json:"instance"`
 	// invalid parameters
-	InvalidParameters []InvalidParameters `json:"invalid_parameters"`
-	// The HTTP status code of the error. Useful when passing the response
-	// body to child properties in a frontend UI. Must be returned as an integer.
-	//
-	Status int64 `json:"status"`
-	// A short, human-readable summary of the problem. It should not
-	// change between occurences of a problem, except for localization.
-	// Should be provided as "Sentence case" for direct use in the UI.
-	//
-	Title string `json:"title"`
-	// The error type.
-	Type *string `json:"type,omitempty"`
+	InvalidParameters []InvalidParameterChoiceItem `json:"invalid_parameters"`
+	Status            interface{}                  `json:"status"`
+	Title             interface{}                  `json:"title"`
+	Type              interface{}                  `json:"type,omitempty"`
+}
+
+func (o *BadRequestError) GetDetail() interface{} {
+	if o == nil {
+		return nil
+	}
+	return o.Detail
+}
+
+func (o *BadRequestError) GetInstance() interface{} {
+	if o == nil {
+		return nil
+	}
+	return o.Instance
+}
+
+func (o *BadRequestError) GetInvalidParameters() []InvalidParameterChoiceItem {
+	if o == nil {
+		return []InvalidParameterChoiceItem{}
+	}
+	return o.InvalidParameters
+}
+
+func (o *BadRequestError) GetStatus() interface{} {
+	if o == nil {
+		return nil
+	}
+	return o.Status
+}
+
+func (o *BadRequestError) GetTitle() interface{} {
+	if o == nil {
+		return nil
+	}
+	return o.Title
+}
+
+func (o *BadRequestError) GetType() interface{} {
+	if o == nil {
+		return nil
+	}
+	return o.Type
 }

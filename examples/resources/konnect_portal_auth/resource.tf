@@ -14,5 +14,5 @@ resource "konnect_portal_auth" "my_portalauth" {
     "...",
   ]
   oidc_team_mapping_enabled = true
-  portal_id                 = "170048b6-07f4-48ea-80d1-8e1ac97517b6"
+  portal_id                 = "27f80438-1f8d-4188-9e2d-95211ef91d36"
 }

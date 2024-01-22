@@ -1,25 +1,22 @@
-configVersion: 1.0.0
-management:
-  docChecksum: 7b193330bf41e2c47ba62aa354c4a561
-  docVersion: 0.0.1
-  speakeasyVersion: 1.74.3
-  generationVersion: 2.86.6
+configVersion: 2.0.0
 generation:
-  comments:
-    disableComments: false
-    omitDescriptionIfSummaryPresent: false
-  baseServerURL: ""
   sdkClassName: konnect
-  singleTagPerOp: false
-  tagNamespacingDisabled: false
-features:
-  terraform:
-    core: 2.92.0
-    globalSecurity: 2.81.1
-    globalServerURLs: 2.82.0
-    includes: 2.81.1
-    typeOverrides: 2.81.1
+  usageSnippets:
+    optionalPropertyRendering: withExample
+  fixes:
+    nameResolutionDec2023: false
+  baseServerURL: ""
 terraform:
-  version: 0.2.2
+  version: 0.7.9
   author: kong
+  imports:
+    option: openapi
+    paths:
+      callbacks: callbacks
+      errors: sdkerrors
+      operations: operations
+      shared: shared
+      webhooks: webhooks
+  inputModelSuffix: input
+  outputModelSuffix: output
   packageName: konnect

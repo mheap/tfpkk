@@ -2,10 +2,14 @@
 
 package shared
 
+import (
+	"github.com/kong/terraform-provider-konnect/internal/sdk/pkg/utils"
+)
+
 // CreateAPIProductDTO - The request schema to create an API product.
 type CreateAPIProductDTO struct {
 	// The description of the API product.
-	Description *string `json:"description,omitempty"`
+	Description *string `default:"null" json:"description"`
 	// description: A maximum of 5 user-defined labels are allowed on this resource.
 	// Keys must not start with kong, konnect, insomnia, mesh, kic or _, which are reserved for Kong.
 	// Keys are case-sensitive.
@@ -13,4 +17,36 @@ type CreateAPIProductDTO struct {
 	Labels map[string]string `json:"labels,omitempty"`
 	// The name of the API product.
 	Name string `json:"name"`
+}
+
+func (c CreateAPIProductDTO) MarshalJSON() ([]byte, error) {
+	return utils.MarshalJSON(c, "", false)
+}
+
+func (c *CreateAPIProductDTO) UnmarshalJSON(data []byte) error {
+	if err := utils.UnmarshalJSON(data, &c, "", false, false); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (o *CreateAPIProductDTO) GetDescription() *string {
+	if o == nil {
+		return nil
+	}
+	return o.Description
+}
+
+func (o *CreateAPIProductDTO) GetLabels() map[string]string {
+	if o == nil {
+		return nil
+	}
+	return o.Labels
+}
+
+func (o *CreateAPIProductDTO) GetName() string {
+	if o == nil {
+		return ""
+	}
+	return o.Name
 }

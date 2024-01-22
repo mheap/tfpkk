@@ -4,81 +4,16 @@ package provider
 
 import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"konnect/internal/sdk/pkg/models/shared"
+	"github.com/kong/terraform-provider-konnect/internal/sdk/pkg/models/shared"
+	"math/big"
 	"time"
 )
 
-func (r *APIProductResourceModel) ToCreateSDKType() *shared.CreateAPIProductDTO {
-	description := new(string)
-	if !r.Description.IsUnknown() && !r.Description.IsNull() {
-		*description = r.Description.ValueString()
-	} else {
-		description = nil
-	}
-	labels := make(map[string]string)
-	for labelsKey, labelsValue := range r.Labels {
-		labelsInst := labelsValue.ValueString()
-		labels[labelsKey] = labelsInst
-	}
-	name := r.Name.ValueString()
-	out := shared.CreateAPIProductDTO{
-		Description: description,
-		Labels:      labels,
-		Name:        name,
-	}
-	return &out
-}
-
-func (r *APIProductResourceModel) ToGetSDKType() *shared.CreateAPIProductDTO {
-	out := r.ToCreateSDKType()
-	return out
-}
-
-func (r *APIProductResourceModel) ToUpdateSDKType() *shared.UpdateAPIProductDTO {
-	description := new(string)
-	if !r.Description.IsUnknown() && !r.Description.IsNull() {
-		*description = r.Description.ValueString()
-	} else {
-		description = nil
-	}
-	labels := make(map[string]string)
-	for labelsKey, labelsValue := range r.Labels {
-		labelsInst := labelsValue.ValueString()
-		labels[labelsKey] = labelsInst
-	}
-	name := new(string)
-	if !r.Name.IsUnknown() && !r.Name.IsNull() {
-		*name = r.Name.ValueString()
-	} else {
-		name = nil
-	}
-	var portalIds []string = nil
-	for _, portalIdsItem := range r.PortalIds {
-		portalIds = append(portalIds, portalIdsItem.ValueString())
-	}
-	out := shared.UpdateAPIProductDTO{
-		Description: description,
-		Labels:      labels,
-		Name:        name,
-		PortalIds:   portalIds,
-	}
-	return &out
-}
-
-func (r *APIProductResourceModel) ToDeleteSDKType() *shared.CreateAPIProductDTO {
-	out := r.ToCreateSDKType()
-	return out
-}
-
-func (r *APIProductResourceModel) RefreshFromGetResponse(resp *shared.APIProduct) {
+func (r *APIProductResourceModel) RefreshFromSharedAPIProduct(resp *shared.APIProduct) {
 	r.CreatedAt = types.StringValue(resp.CreatedAt.Format(time.RFC3339Nano))
-	if resp.Description != nil {
-		r.Description = types.StringValue(*resp.Description)
-	} else {
-		r.Description = types.StringNull()
-	}
+	r.Description = types.StringPointerValue(resp.Description)
 	r.ID = types.StringValue(resp.ID)
-	if r.Labels == nil && len(resp.Labels) > 0 {
+	if len(resp.Labels) > 0 {
 		r.Labels = make(map[string]types.String)
 		for key, value := range resp.Labels {
 			r.Labels[key] = types.StringValue(value)
@@ -90,12 +25,5 @@ func (r *APIProductResourceModel) RefreshFromGetResponse(resp *shared.APIProduct
 		r.PortalIds = append(r.PortalIds, types.StringValue(v))
 	}
 	r.UpdatedAt = types.StringValue(resp.UpdatedAt.Format(time.RFC3339Nano))
-}
-
-func (r *APIProductResourceModel) RefreshFromCreateResponse(resp *shared.APIProduct) {
-	r.RefreshFromGetResponse(resp)
-}
-
-func (r *APIProductResourceModel) RefreshFromUpdateResponse(resp *shared.APIProduct) {
-	r.RefreshFromGetResponse(resp)
+	r.VersionCount = types.NumberValue(big.NewFloat(float64(resp.VersionCount)))
 }

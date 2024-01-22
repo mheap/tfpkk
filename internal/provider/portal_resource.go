@@ -5,15 +5,14 @@ package provider
 import (
 	"context"
 	"fmt"
-	"konnect/internal/sdk"
-	"konnect/internal/sdk/pkg/models/operations"
-
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
-	"konnect/internal/validators"
+	"github.com/kong/terraform-provider-konnect/internal/sdk"
+	"github.com/kong/terraform-provider-konnect/internal/sdk/pkg/models/operations"
+	"github.com/kong/terraform-provider-konnect/internal/validators"
 )
 
 // Ensure provider defined types fully satisfy framework interfaces.
@@ -55,52 +54,64 @@ func (r *PortalResource) Schema(ctx context.Context, req resource.SchemaRequest,
 
 		Attributes: map[string]schema.Attribute{
 			"auto_approve_applications": schema.BoolAttribute{
-				Required: true,
+				Computed:    true,
+				Optional:    true,
+				Description: `Whether the requests from applications to register for products will be automatically approved, or if they will be set to pending until approved by an admin.`,
 			},
 			"auto_approve_developers": schema.BoolAttribute{
-				Required: true,
+				Computed:    true,
+				Optional:    true,
+				Description: `Whether the developer account registrations will be automatically approved, or if they will be set to pending until approved by an admin.`,
 			},
 			"created_at": schema.StringAttribute{
-				Computed: true,
+				Computed:    true,
+				Description: `An ISO-8601 timestamp representation of entity creation date.`,
 				Validators: []validator.String{
 					validators.IsRFC3339(),
 				},
-				Description: `An ISO-8601 timestamp representation of entity creation date.`,
 			},
 			"custom_client_domain": schema.StringAttribute{
-				Computed: true,
-				Optional: true,
+				Computed:    true,
+				Optional:    true,
+				Description: `The custom domain to access a self-hosted customized developer portal client. If this is set, the Konnect-hosted portal will no longer be available.  ` + "`" + `custom_domain` + "`" + ` must be also set for this value to be set. See https://github.com/Kong/konnect-portal for information on how to get started deploying and customizing your own Konnect portal.`,
 			},
 			"custom_domain": schema.StringAttribute{
-				Computed: true,
-				Optional: true,
+				Computed:    true,
+				Optional:    true,
+				Description: `The custom domain to access the developer portal. A CNAME for the portal's default domain must be able to be set for the custom domain for it to be valid. After setting a valid CNAME, an SSL/TLS certificate will be automatically manged for the custom domain, and traffic will be able to use the custom domain to route to the portal's web client and API.`,
 			},
 			"default_domain": schema.StringAttribute{
-				Computed: true,
+				Computed:    true,
+				Description: `The domain assigned to the portal by Konnect. This is the default place to access the portal and its API if not using a ` + "`" + `custom_domain` + "``" + `.`,
 			},
 			"id": schema.StringAttribute{
 				Computed:    true,
 				Description: `Contains a unique identifier used for this resource.`,
 			},
 			"is_public": schema.BoolAttribute{
-				Required: true,
+				Computed:    true,
+				Optional:    true,
+				Description: `Whether the portal catalog can be accessed publicly without any developer authentication. Developer accounts and applications cannot be created if the portal is public.`,
 			},
 			"name": schema.StringAttribute{
-				Computed: true,
+				Computed:    true,
+				Description: `The name of the portal, used to distinguish it from other portals.`,
 			},
 			"portal_id": schema.StringAttribute{
 				Required:    true,
 				Description: `ID of the portal.`,
 			},
 			"rbac_enabled": schema.BoolAttribute{
-				Required: true,
+				Computed:    true,
+				Optional:    true,
+				Description: `Whether the portal resources are protected by Role Based Access Control (RBAC). If enabled, developers view or register for products until unless assigned to teams with access to view and consume specific products.`,
 			},
 			"updated_at": schema.StringAttribute{
-				Computed: true,
+				Computed:    true,
+				Description: `An ISO-8601 timestamp representation of entity update date.`,
 				Validators: []validator.String{
 					validators.IsRFC3339(),
 				},
-				Description: `An ISO-8601 timestamp representation of entity update date.`,
 			},
 		},
 	}
@@ -128,14 +139,14 @@ func (r *PortalResource) Configure(ctx context.Context, req resource.ConfigureRe
 
 func (r *PortalResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	var data *PortalResourceModel
-	var item types.Object
+	var plan types.Object
 
-	resp.Diagnostics.Append(req.Plan.Get(ctx, &item)...)
+	resp.Diagnostics.Append(req.Plan.Get(ctx, &plan)...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	resp.Diagnostics.Append(item.As(ctx, &data, basetypes.ObjectAsOptions{
+	resp.Diagnostics.Append(plan.As(ctx, &data, basetypes.ObjectAsOptions{
 		UnhandledNullAsEmpty:    true,
 		UnhandledUnknownAsEmpty: true,
 	})...)
@@ -144,7 +155,7 @@ func (r *PortalResource) Create(ctx context.Context, req resource.CreateRequest,
 		return
 	}
 
-	updatePortalRequest := *data.ToCreateSDKType()
+	updatePortalRequest := *data.ToSharedUpdatePortalRequest()
 	portalID := data.PortalID.ValueString()
 	request := operations.UpdatePortalRequest{
 		UpdatePortalRequest: updatePortalRequest,
@@ -170,7 +181,8 @@ func (r *PortalResource) Create(ctx context.Context, req resource.CreateRequest,
 		resp.Diagnostics.AddError("unexpected response from API. No response body", debugResponse(res.RawResponse))
 		return
 	}
-	data.RefreshFromCreateResponse(res.UpdatePortalResponse)
+	data.RefreshFromSharedUpdatePortalResponse(res.UpdatePortalResponse)
+	refreshPlan(ctx, plan, &data, resp.Diagnostics)
 
 	// Save updated data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
@@ -202,12 +214,19 @@ func (r *PortalResource) Read(ctx context.Context, req resource.ReadRequest, res
 
 func (r *PortalResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
 	var data *PortalResourceModel
+	var plan types.Object
+
+	resp.Diagnostics.Append(req.Plan.Get(ctx, &plan)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
 	merge(ctx, req, resp, &data)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	updatePortalRequest := *data.ToUpdateSDKType()
+	updatePortalRequest := *data.ToSharedUpdatePortalRequest()
 	portalID := data.PortalID.ValueString()
 	request := operations.UpdatePortalRequest{
 		UpdatePortalRequest: updatePortalRequest,
@@ -233,7 +252,8 @@ func (r *PortalResource) Update(ctx context.Context, req resource.UpdateRequest,
 		resp.Diagnostics.AddError("unexpected response from API. No response body", debugResponse(res.RawResponse))
 		return
 	}
-	data.RefreshFromUpdateResponse(res.UpdatePortalResponse)
+	data.RefreshFromSharedUpdatePortalResponse(res.UpdatePortalResponse)
+	refreshPlan(ctx, plan, &data, resp.Diagnostics)
 
 	// Save updated data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)

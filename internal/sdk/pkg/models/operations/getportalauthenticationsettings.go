@@ -3,7 +3,7 @@
 package operations
 
 import (
-	"konnect/internal/sdk/pkg/models/shared"
+	"github.com/kong/terraform-provider-konnect/internal/sdk/pkg/models/shared"
 	"net/http"
 )
 
@@ -12,15 +12,57 @@ type GetPortalAuthenticationSettingsRequest struct {
 	PortalID string `pathParam:"style=simple,explode=false,name=portalId"`
 }
 
+func (o *GetPortalAuthenticationSettingsRequest) GetPortalID() string {
+	if o == nil {
+		return ""
+	}
+	return o.PortalID
+}
+
 type GetPortalAuthenticationSettingsResponse struct {
 	// HTTP response content type for this operation
 	ContentType string
-	// Response for authentication settings endpoint
-	PortalAuthenticationSettings *shared.PortalAuthenticationSettings
+	// Details about a portal's authentication settings.
+	PortalAuthenticationSettingsResponse *shared.PortalAuthenticationSettingsResponse
 	// HTTP response status code for this operation
 	StatusCode int
 	// Raw HTTP response; suitable for custom response parsing
 	RawResponse *http.Response
 	// Unauthorized
 	UnauthorizedError *shared.UnauthorizedError
+}
+
+func (o *GetPortalAuthenticationSettingsResponse) GetContentType() string {
+	if o == nil {
+		return ""
+	}
+	return o.ContentType
+}
+
+func (o *GetPortalAuthenticationSettingsResponse) GetPortalAuthenticationSettingsResponse() *shared.PortalAuthenticationSettingsResponse {
+	if o == nil {
+		return nil
+	}
+	return o.PortalAuthenticationSettingsResponse
+}
+
+func (o *GetPortalAuthenticationSettingsResponse) GetStatusCode() int {
+	if o == nil {
+		return 0
+	}
+	return o.StatusCode
+}
+
+func (o *GetPortalAuthenticationSettingsResponse) GetRawResponse() *http.Response {
+	if o == nil {
+		return nil
+	}
+	return o.RawResponse
+}
+
+func (o *GetPortalAuthenticationSettingsResponse) GetUnauthorizedError() *shared.UnauthorizedError {
+	if o == nil {
+		return nil
+	}
+	return o.UnauthorizedError
 }

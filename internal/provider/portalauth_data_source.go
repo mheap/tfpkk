@@ -5,13 +5,12 @@ package provider
 import (
 	"context"
 	"fmt"
-	"konnect/internal/sdk"
-	"konnect/internal/sdk/pkg/models/operations"
-
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
+	"github.com/kong/terraform-provider-konnect/internal/sdk"
+	"github.com/kong/terraform-provider-konnect/internal/sdk/pkg/models/operations"
 )
 
 // Ensure provider defined types fully satisfy framework interfaces.
@@ -29,17 +28,12 @@ type PortalAuthDataSource struct {
 
 // PortalAuthDataSourceModel describes the data model.
 type PortalAuthDataSourceModel struct {
-	BasicAuthEnabled       types.Bool           `tfsdk:"basic_auth_enabled"`
-	KonnectMappingEnabled  types.Bool           `tfsdk:"konnect_mapping_enabled"`
-	OidcAuthEnabled        types.Bool           `tfsdk:"oidc_auth_enabled"`
-	OidcClaimMappings      *PortalClaimMappings `tfsdk:"oidc_claim_mappings"`
-	OidcClientID           types.String         `tfsdk:"oidc_client_id"`
-	OidcClientSecret       types.String         `tfsdk:"oidc_client_secret"`
-	OidcConfig             *PortalOIDCConfig    `tfsdk:"oidc_config"`
-	OidcIssuer             types.String         `tfsdk:"oidc_issuer"`
-	OidcScopes             []types.String       `tfsdk:"oidc_scopes"`
-	OidcTeamMappingEnabled types.Bool           `tfsdk:"oidc_team_mapping_enabled"`
-	PortalID               types.String         `tfsdk:"portal_id"`
+	BasicAuthEnabled       types.Bool        `tfsdk:"basic_auth_enabled"`
+	KonnectMappingEnabled  types.Bool        `tfsdk:"konnect_mapping_enabled"`
+	OidcAuthEnabled        types.Bool        `tfsdk:"oidc_auth_enabled"`
+	OidcConfig             *PortalOIDCConfig `tfsdk:"oidc_config"`
+	OidcTeamMappingEnabled types.Bool        `tfsdk:"oidc_team_mapping_enabled"`
+	PortalID               types.String      `tfsdk:"portal_id"`
 }
 
 // Metadata returns the data source type name.
@@ -65,26 +59,6 @@ func (r *PortalAuthDataSource) Schema(ctx context.Context, req datasource.Schema
 				Computed:    true,
 				Description: `The organization has OIDC disabled.`,
 			},
-			"oidc_claim_mappings": schema.SingleNestedAttribute{
-				Optional: true,
-				Attributes: map[string]schema.Attribute{
-					"email": schema.StringAttribute{
-						Optional: true,
-					},
-					"groups": schema.StringAttribute{
-						Optional: true,
-					},
-					"name": schema.StringAttribute{
-						Optional: true,
-					},
-				},
-			},
-			"oidc_client_id": schema.StringAttribute{
-				Optional: true,
-			},
-			"oidc_client_secret": schema.StringAttribute{
-				Optional: true,
-			},
 			"oidc_config": schema.SingleNestedAttribute{
 				Computed: true,
 				Attributes: map[string]schema.Attribute{
@@ -92,15 +66,19 @@ func (r *PortalAuthDataSource) Schema(ctx context.Context, req datasource.Schema
 						Computed: true,
 						Attributes: map[string]schema.Attribute{
 							"email": schema.StringAttribute{
-								Computed: true,
+								Computed:    true,
+								Description: `Default: "email"`,
 							},
 							"groups": schema.StringAttribute{
-								Computed: true,
+								Computed:    true,
+								Description: `Default: "groups"`,
 							},
 							"name": schema.StringAttribute{
-								Computed: true,
+								Computed:    true,
+								Description: `Default: "name"`,
 							},
 						},
+						Description: `Mappings from a portal developer atribute to an Identity Provider claim.`,
 					},
 					"client_id": schema.StringAttribute{
 						Computed: true,
@@ -113,13 +91,7 @@ func (r *PortalAuthDataSource) Schema(ctx context.Context, req datasource.Schema
 						ElementType: types.StringType,
 					},
 				},
-			},
-			"oidc_issuer": schema.StringAttribute{
-				Optional: true,
-			},
-			"oidc_scopes": schema.ListAttribute{
-				Optional:    true,
-				ElementType: types.StringType,
+				Description: `Configuration properties for an OpenID Connect Identity Provider.`,
 			},
 			"oidc_team_mapping_enabled": schema.BoolAttribute{
 				Computed:    true,
@@ -191,11 +163,11 @@ func (r *PortalAuthDataSource) Read(ctx context.Context, req datasource.ReadRequ
 		resp.Diagnostics.AddError(fmt.Sprintf("unexpected response from API. Got an unexpected response code %v", res.StatusCode), debugResponse(res.RawResponse))
 		return
 	}
-	if res.PortalAuthenticationSettings == nil {
+	if res.PortalAuthenticationSettingsResponse == nil {
 		resp.Diagnostics.AddError("unexpected response from API. No response body", debugResponse(res.RawResponse))
 		return
 	}
-	data.RefreshFromGetResponse(res.PortalAuthenticationSettings)
+	data.RefreshFromSharedPortalAuthenticationSettingsResponse(res.PortalAuthenticationSettingsResponse)
 
 	// Save updated data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)

@@ -3,15 +3,67 @@
 package operations
 
 import (
-	"konnect/internal/sdk/pkg/models/shared"
+	"github.com/kong/terraform-provider-konnect/internal/sdk/pkg/models/shared"
+	"github.com/kong/terraform-provider-konnect/internal/sdk/pkg/utils"
 	"net/http"
 )
 
 type GetRouteRequest struct {
-	// The unique identifier or the name of the route to retrieve.
-	RouteID string `pathParam:"style=simple,explode=false,name=route_id"`
-	// The ID of your runtime group. This variable is available in the Konnect manager
-	RuntimeGroupID string `pathParam:"style=simple,explode=false,name=runtimeGroupId"`
+	// The ID of your control plane. This variable is available in the Konnect manager
+	ControlPlaneID string `pathParam:"style=simple,explode=false,name=controlPlaneId"`
+	// A list of tags to filter the list of resources on. Multiple tags can be concatenated using ',' to mean AND or using '/' to mean OR.
+	FilterTags *string `queryParam:"style=form,explode=true,name=tags"`
+	// Offset from which to return the next set of resources. Use the value of the 'offset' field from the response of a list operation as input here to paginate through all the resources
+	Offset  *string `queryParam:"style=form,explode=true,name=offset"`
+	RouteID string  `pathParam:"style=simple,explode=false,name=route_id"`
+	// Number of resources to be returned.
+	Size *int64 `default:"100" queryParam:"style=form,explode=true,name=size"`
+}
+
+func (g GetRouteRequest) MarshalJSON() ([]byte, error) {
+	return utils.MarshalJSON(g, "", false)
+}
+
+func (g *GetRouteRequest) UnmarshalJSON(data []byte) error {
+	if err := utils.UnmarshalJSON(data, &g, "", false, false); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (o *GetRouteRequest) GetControlPlaneID() string {
+	if o == nil {
+		return ""
+	}
+	return o.ControlPlaneID
+}
+
+func (o *GetRouteRequest) GetFilterTags() *string {
+	if o == nil {
+		return nil
+	}
+	return o.FilterTags
+}
+
+func (o *GetRouteRequest) GetOffset() *string {
+	if o == nil {
+		return nil
+	}
+	return o.Offset
+}
+
+func (o *GetRouteRequest) GetRouteID() string {
+	if o == nil {
+		return ""
+	}
+	return o.RouteID
+}
+
+func (o *GetRouteRequest) GetSize() *int64 {
+	if o == nil {
+		return nil
+	}
+	return o.Size
 }
 
 type GetRouteResponse struct {
@@ -23,4 +75,32 @@ type GetRouteResponse struct {
 	StatusCode int
 	// Raw HTTP response; suitable for custom response parsing
 	RawResponse *http.Response
+}
+
+func (o *GetRouteResponse) GetContentType() string {
+	if o == nil {
+		return ""
+	}
+	return o.ContentType
+}
+
+func (o *GetRouteResponse) GetRoute() *shared.Route {
+	if o == nil {
+		return nil
+	}
+	return o.Route
+}
+
+func (o *GetRouteResponse) GetStatusCode() int {
+	if o == nil {
+		return 0
+	}
+	return o.StatusCode
+}
+
+func (o *GetRouteResponse) GetRawResponse() *http.Response {
+	if o == nil {
+		return nil
+	}
+	return o.RawResponse
 }

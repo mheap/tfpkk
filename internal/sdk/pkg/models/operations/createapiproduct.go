@@ -3,7 +3,7 @@
 package operations
 
 import (
-	"konnect/internal/sdk/pkg/models/shared"
+	"github.com/kong/terraform-provider-konnect/internal/sdk/pkg/models/shared"
 	"net/http"
 )
 
@@ -24,4 +24,60 @@ type CreateAPIProductResponse struct {
 	UnauthorizedError *shared.UnauthorizedError
 	// Unsupported Media Type
 	UnsupportedMediaTypeError *shared.UnsupportedMediaTypeError
+}
+
+func (o *CreateAPIProductResponse) GetAPIProduct() *shared.APIProduct {
+	if o == nil {
+		return nil
+	}
+	return o.APIProduct
+}
+
+func (o *CreateAPIProductResponse) GetBadRequestError() *shared.BadRequestError {
+	if o == nil {
+		return nil
+	}
+	return o.BadRequestError
+}
+
+func (o *CreateAPIProductResponse) GetContentType() string {
+	if o == nil {
+		return ""
+	}
+	return o.ContentType
+}
+
+func (o *CreateAPIProductResponse) GetForbiddenError() *shared.ForbiddenError {
+	if o == nil {
+		return nil
+	}
+	return o.ForbiddenError
+}
+
+func (o *CreateAPIProductResponse) GetStatusCode() int {
+	if o == nil {
+		return 0
+	}
+	return o.StatusCode
+}
+
+func (o *CreateAPIProductResponse) GetRawResponse() *http.Response {
+	if o == nil {
+		return nil
+	}
+	return o.RawResponse
+}
+
+func (o *CreateAPIProductResponse) GetUnauthorizedError() *shared.UnauthorizedError {
+	if o == nil {
+		return nil
+	}
+	return o.UnauthorizedError
+}
+
+func (o *CreateAPIProductResponse) GetUnsupportedMediaTypeError() *shared.UnsupportedMediaTypeError {
+	if o == nil {
+		return nil
+	}
+	return o.UnsupportedMediaTypeError
 }

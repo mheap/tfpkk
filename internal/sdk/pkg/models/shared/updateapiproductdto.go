@@ -16,3 +16,31 @@ type UpdateAPIProductDTO struct {
 	// The list of portal identifiers which this API product should be published to
 	PortalIds []string `json:"portal_ids,omitempty"`
 }
+
+func (o *UpdateAPIProductDTO) GetDescription() *string {
+	if o == nil {
+		return nil
+	}
+	return o.Description
+}
+
+func (o *UpdateAPIProductDTO) GetLabels() map[string]string {
+	if o == nil {
+		return nil
+	}
+	return o.Labels
+}
+
+func (o *UpdateAPIProductDTO) GetName() *string {
+	if o == nil {
+		return nil
+	}
+	return o.Name
+}
+
+func (o *UpdateAPIProductDTO) GetPortalIds() []string {
+	if o == nil {
+		return nil
+	}
+	return o.PortalIds
+}

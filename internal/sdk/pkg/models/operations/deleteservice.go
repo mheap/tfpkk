@@ -7,10 +7,24 @@ import (
 )
 
 type DeleteServiceRequest struct {
-	// The ID of your runtime group. This variable is available in the Konnect manager
-	RuntimeGroupID string `pathParam:"style=simple,explode=false,name=runtimeGroupId"`
-	// ID **or** name of the service to lookup
+	// The UUID of your control plane. This variable is available in the Konnect manager
+	ControlPlaneID string `pathParam:"style=simple,explode=false,name=controlPlaneId"`
+	// ID or name of the service to delete
 	ServiceID string `pathParam:"style=simple,explode=false,name=service_id"`
+}
+
+func (o *DeleteServiceRequest) GetControlPlaneID() string {
+	if o == nil {
+		return ""
+	}
+	return o.ControlPlaneID
+}
+
+func (o *DeleteServiceRequest) GetServiceID() string {
+	if o == nil {
+		return ""
+	}
+	return o.ServiceID
 }
 
 type DeleteServiceResponse struct {
@@ -20,4 +34,25 @@ type DeleteServiceResponse struct {
 	StatusCode int
 	// Raw HTTP response; suitable for custom response parsing
 	RawResponse *http.Response
+}
+
+func (o *DeleteServiceResponse) GetContentType() string {
+	if o == nil {
+		return ""
+	}
+	return o.ContentType
+}
+
+func (o *DeleteServiceResponse) GetStatusCode() int {
+	if o == nil {
+		return 0
+	}
+	return o.StatusCode
+}
+
+func (o *DeleteServiceResponse) GetRawResponse() *http.Response {
+	if o == nil {
+		return nil
+	}
+	return o.RawResponse
 }

@@ -7,3 +7,24 @@ type Security struct {
 	PersonalAccessToken      *string `security:"scheme,type=http,subtype=bearer,name=Authorization"`
 	SystemAccountAccessToken *string `security:"scheme,type=http,subtype=bearer,name=Authorization"`
 }
+
+func (o *Security) GetKonnectAccessToken() *string {
+	if o == nil {
+		return nil
+	}
+	return o.KonnectAccessToken
+}
+
+func (o *Security) GetPersonalAccessToken() *string {
+	if o == nil {
+		return nil
+	}
+	return o.PersonalAccessToken
+}
+
+func (o *Security) GetSystemAccountAccessToken() *string {
+	if o == nil {
+		return nil
+	}
+	return o.SystemAccountAccessToken
+}

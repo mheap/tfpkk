@@ -2,13 +2,15 @@
 
 package shared
 
+// PortalAuthenticationSettingsUpdateRequest - Properties to update a portal's developer auth settings.
 type PortalAuthenticationSettingsUpdateRequest struct {
 	// The organization has basic auth enabled.
 	BasicAuthEnabled *bool `json:"basic_auth_enabled,omitempty"`
 	// Whether a Konnect Identity Admin assigns teams to a developer.
 	KonnectMappingEnabled *bool `json:"konnect_mapping_enabled,omitempty"`
 	// The organization has OIDC disabled.
-	OidcAuthEnabled   *bool                `json:"oidc_auth_enabled,omitempty"`
+	OidcAuthEnabled *bool `json:"oidc_auth_enabled,omitempty"`
+	// Mappings from a portal developer atribute to an Identity Provider claim.
 	OidcClaimMappings *PortalClaimMappings `json:"oidc_claim_mappings,omitempty"`
 	OidcClientID      *string              `json:"oidc_client_id,omitempty"`
 	OidcClientSecret  *string              `json:"oidc_client_secret,omitempty"`
@@ -16,4 +18,67 @@ type PortalAuthenticationSettingsUpdateRequest struct {
 	OidcScopes        []string             `json:"oidc_scopes,omitempty"`
 	// Whether IdP groups determine the Konnect Portal teams a developer has.
 	OidcTeamMappingEnabled *bool `json:"oidc_team_mapping_enabled,omitempty"`
+}
+
+func (o *PortalAuthenticationSettingsUpdateRequest) GetBasicAuthEnabled() *bool {
+	if o == nil {
+		return nil
+	}
+	return o.BasicAuthEnabled
+}
+
+func (o *PortalAuthenticationSettingsUpdateRequest) GetKonnectMappingEnabled() *bool {
+	if o == nil {
+		return nil
+	}
+	return o.KonnectMappingEnabled
+}
+
+func (o *PortalAuthenticationSettingsUpdateRequest) GetOidcAuthEnabled() *bool {
+	if o == nil {
+		return nil
+	}
+	return o.OidcAuthEnabled
+}
+
+func (o *PortalAuthenticationSettingsUpdateRequest) GetOidcClaimMappings() *PortalClaimMappings {
+	if o == nil {
+		return nil
+	}
+	return o.OidcClaimMappings
+}
+
+func (o *PortalAuthenticationSettingsUpdateRequest) GetOidcClientID() *string {
+	if o == nil {
+		return nil
+	}
+	return o.OidcClientID
+}
+
+func (o *PortalAuthenticationSettingsUpdateRequest) GetOidcClientSecret() *string {
+	if o == nil {
+		return nil
+	}
+	return o.OidcClientSecret
+}
+
+func (o *PortalAuthenticationSettingsUpdateRequest) GetOidcIssuer() *string {
+	if o == nil {
+		return nil
+	}
+	return o.OidcIssuer
+}
+
+func (o *PortalAuthenticationSettingsUpdateRequest) GetOidcScopes() []string {
+	if o == nil {
+		return nil
+	}
+	return o.OidcScopes
+}
+
+func (o *PortalAuthenticationSettingsUpdateRequest) GetOidcTeamMappingEnabled() *bool {
+	if o == nil {
+		return nil
+	}
+	return o.OidcTeamMappingEnabled
 }

@@ -5,16 +5,16 @@ package provider
 import (
 	"context"
 	"fmt"
-	"konnect/internal/sdk"
-	"konnect/internal/sdk/pkg/models/operations"
-
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
-	"konnect/internal/validators"
+	"github.com/kong/terraform-provider-konnect/internal/sdk"
+	"github.com/kong/terraform-provider-konnect/internal/sdk/pkg/models/operations"
+	"github.com/kong/terraform-provider-konnect/internal/validators"
+	speakeasy_stringvalidators "github.com/kong/terraform-provider-konnect/internal/validators/stringvalidators"
 )
 
 // Ensure provider defined types fully satisfy framework interfaces.
@@ -32,14 +32,14 @@ type APIProductVersionResource struct {
 
 // APIProductVersionResourceModel describes the resource data model.
 type APIProductVersionResourceModel struct {
-	APIProductID   types.String          `tfsdk:"api_product_id"`
-	CreatedAt      types.String          `tfsdk:"created_at"`
-	Deprecated     types.Bool            `tfsdk:"deprecated"`
-	GatewayService GatewayServicePayload `tfsdk:"gateway_service"`
-	ID             types.String          `tfsdk:"id"`
-	Name           types.String          `tfsdk:"name"`
-	PublishStatus  types.String          `tfsdk:"publish_status"`
-	UpdatedAt      types.String          `tfsdk:"updated_at"`
+	APIProductID   types.String           `tfsdk:"api_product_id"`
+	CreatedAt      types.String           `tfsdk:"created_at"`
+	Deprecated     types.Bool             `tfsdk:"deprecated"`
+	GatewayService *GatewayServicePayload `tfsdk:"gateway_service"`
+	ID             types.String           `tfsdk:"id"`
+	Name           types.String           `tfsdk:"name"`
+	PublishStatus  types.String           `tfsdk:"publish_status"`
+	UpdatedAt      types.String           `tfsdk:"updated_at"`
 }
 
 func (r *APIProductVersionResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
@@ -56,55 +56,68 @@ func (r *APIProductVersionResource) Schema(ctx context.Context, req resource.Sch
 				Description: `The API Product ID`,
 			},
 			"created_at": schema.StringAttribute{
-				Computed: true,
+				Computed:    true,
+				Description: `An ISO-8601 timestamp representation of entity creation date.`,
 				Validators: []validator.String{
 					validators.IsRFC3339(),
 				},
-				Description: `An ISO-8601 timestamp representation of entity creation date.`,
 			},
 			"deprecated": schema.BoolAttribute{
 				Computed:    true,
 				Optional:    true,
-				Description: `Indicates if this API product version is deprecated`,
+				Description: `Indicates if the version of the API product is deprecated. Default: false`,
 			},
 			"gateway_service": schema.SingleNestedAttribute{
-				Required: true,
+				Computed: true,
+				Optional: true,
 				Attributes: map[string]schema.Attribute{
 					"control_plane_id": schema.StringAttribute{
-						Required:    true,
-						Description: `The identifier of the control plane that the gateway service resides in`,
+						Computed:    true,
+						Optional:    true,
+						Description: `The identifier of the control plane that the gateway service resides in. Not Null`,
+						Validators: []validator.String{
+							speakeasy_stringvalidators.NotNull(),
+						},
 					},
 					"id": schema.StringAttribute{
-						Required:    true,
-						Description: `The identifier of a gateway service associated with the version of the API product.`,
+						Computed:    true,
+						Optional:    true,
+						Description: `The identifier of a gateway service associated with the version of the API product. Not Null`,
+						Validators: []validator.String{
+							speakeasy_stringvalidators.NotNull(),
+						},
+					},
+					"runtime_group_id": schema.StringAttribute{
+						Computed:    true,
+						Description: `This field is deprecated, please use ` + "`" + `control_plane_id` + "`" + ` instead. The identifier of the control plane that the gateway service resides in`,
 					},
 				},
 			},
 			"id": schema.StringAttribute{
 				Computed:    true,
-				Description: `The API product version identifier.`,
+				Description: `The API product version identifier`,
 			},
 			"name": schema.StringAttribute{
 				Required:    true,
-				Description: `The version of the API product`,
+				Description: `The version name of the API product version.`,
 			},
 			"publish_status": schema.StringAttribute{
-				Required: true,
+				Computed:    true,
+				Optional:    true,
+				Description: `The publish status of the API product version. must be one of ["unpublished", "published"]; Default: "unpublished"`,
 				Validators: []validator.String{
 					stringvalidator.OneOf(
 						"unpublished",
 						"published",
 					),
 				},
-				MarkdownDescription: `must be one of ["unpublished", "published"]` + "\n" +
-					`The publish status of the API product version`,
 			},
 			"updated_at": schema.StringAttribute{
-				Computed: true,
+				Computed:    true,
+				Description: `An ISO-8601 timestamp representation of entity update date.`,
 				Validators: []validator.String{
 					validators.IsRFC3339(),
 				},
-				Description: `An ISO-8601 timestamp representation of entity update date.`,
 			},
 		},
 	}
@@ -132,14 +145,14 @@ func (r *APIProductVersionResource) Configure(ctx context.Context, req resource.
 
 func (r *APIProductVersionResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	var data *APIProductVersionResourceModel
-	var item types.Object
+	var plan types.Object
 
-	resp.Diagnostics.Append(req.Plan.Get(ctx, &item)...)
+	resp.Diagnostics.Append(req.Plan.Get(ctx, &plan)...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	resp.Diagnostics.Append(item.As(ctx, &data, basetypes.ObjectAsOptions{
+	resp.Diagnostics.Append(plan.As(ctx, &data, basetypes.ObjectAsOptions{
 		UnhandledNullAsEmpty:    true,
 		UnhandledUnknownAsEmpty: true,
 	})...)
@@ -148,7 +161,7 @@ func (r *APIProductVersionResource) Create(ctx context.Context, req resource.Cre
 		return
 	}
 
-	createAPIProductVersionDTO := *data.ToCreateSDKType()
+	createAPIProductVersionDTO := *data.ToSharedCreateAPIProductVersionDTO()
 	apiProductID := data.APIProductID.ValueString()
 	request := operations.CreateAPIProductVersionRequest{
 		CreateAPIProductVersionDTO: createAPIProductVersionDTO,
@@ -174,7 +187,8 @@ func (r *APIProductVersionResource) Create(ctx context.Context, req resource.Cre
 		resp.Diagnostics.AddError("unexpected response from API. No response body", debugResponse(res.RawResponse))
 		return
 	}
-	data.RefreshFromCreateResponse(res.APIProductVersion)
+	data.RefreshFromSharedAPIProductVersion(res.APIProductVersion)
+	refreshPlan(ctx, plan, &data, resp.Diagnostics)
 
 	// Save updated data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
@@ -224,7 +238,7 @@ func (r *APIProductVersionResource) Read(ctx context.Context, req resource.ReadR
 		resp.Diagnostics.AddError("unexpected response from API. No response body", debugResponse(res.RawResponse))
 		return
 	}
-	data.RefreshFromGetResponse(res.APIProductVersion)
+	data.RefreshFromSharedAPIProductVersion(res.APIProductVersion)
 
 	// Save updated data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
@@ -232,12 +246,19 @@ func (r *APIProductVersionResource) Read(ctx context.Context, req resource.ReadR
 
 func (r *APIProductVersionResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
 	var data *APIProductVersionResourceModel
+	var plan types.Object
+
+	resp.Diagnostics.Append(req.Plan.Get(ctx, &plan)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
 	merge(ctx, req, resp, &data)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	updateAPIProductVersionDTO := *data.ToUpdateSDKType()
+	updateAPIProductVersionDTO := *data.ToSharedUpdateAPIProductVersionDTO()
 	apiProductID := data.APIProductID.ValueString()
 	id := data.ID.ValueString()
 	request := operations.UpdateAPIProductVersionRequest{
@@ -265,7 +286,36 @@ func (r *APIProductVersionResource) Update(ctx context.Context, req resource.Upd
 		resp.Diagnostics.AddError("unexpected response from API. No response body", debugResponse(res.RawResponse))
 		return
 	}
-	data.RefreshFromUpdateResponse(res.APIProductVersion)
+	data.RefreshFromSharedAPIProductVersion(res.APIProductVersion)
+	refreshPlan(ctx, plan, &data, resp.Diagnostics)
+	apiProductId1 := data.APIProductID.ValueString()
+	id1 := data.ID.ValueString()
+	request1 := operations.GetAPIProductVersionRequest{
+		APIProductID: apiProductId1,
+		ID:           id1,
+	}
+	res1, err := r.client.APIProductVersions.GetAPIProductVersion(ctx, request1)
+	if err != nil {
+		resp.Diagnostics.AddError("failure to invoke API", err.Error())
+		if res1 != nil && res1.RawResponse != nil {
+			resp.Diagnostics.AddError("unexpected http request/response", debugResponse(res1.RawResponse))
+		}
+		return
+	}
+	if res1 == nil {
+		resp.Diagnostics.AddError("unexpected response from API", fmt.Sprintf("%v", res1))
+		return
+	}
+	if res1.StatusCode != 200 {
+		resp.Diagnostics.AddError(fmt.Sprintf("unexpected response from API. Got an unexpected response code %v", res1.StatusCode), debugResponse(res1.RawResponse))
+		return
+	}
+	if res1.APIProductVersion == nil {
+		resp.Diagnostics.AddError("unexpected response from API. No response body", debugResponse(res1.RawResponse))
+		return
+	}
+	data.RefreshFromSharedAPIProductVersion(res1.APIProductVersion)
+	refreshPlan(ctx, plan, &data, resp.Diagnostics)
 
 	// Save updated data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
@@ -315,5 +365,5 @@ func (r *APIProductVersionResource) Delete(ctx context.Context, req resource.Del
 }
 
 func (r *APIProductVersionResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
-	resp.Diagnostics.AddError("Not Implemented", "No available import state operation is available for resource api_product_version.")
+	resp.Diagnostics.AddError("Not Implemented", "No available import state operation is available for resource api_product_version. Reason: composite imports strings not supported.")
 }

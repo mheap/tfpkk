@@ -5,15 +5,12 @@ package provider
 import (
 	"context"
 	"fmt"
-	"konnect/internal/sdk"
-	"konnect/internal/sdk/pkg/models/operations"
-
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
-	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
-	"konnect/internal/validators"
+	"github.com/kong/terraform-provider-konnect/internal/sdk"
+	"github.com/kong/terraform-provider-konnect/internal/sdk/pkg/models/operations"
 )
 
 // Ensure provider defined types fully satisfy framework interfaces.
@@ -31,13 +28,14 @@ type APIProductDataSource struct {
 
 // APIProductDataSourceModel describes the data model.
 type APIProductDataSourceModel struct {
-	CreatedAt   types.String            `tfsdk:"created_at"`
-	Description types.String            `tfsdk:"description"`
-	ID          types.String            `tfsdk:"id"`
-	Labels      map[string]types.String `tfsdk:"labels"`
-	Name        types.String            `tfsdk:"name"`
-	PortalIds   []types.String          `tfsdk:"portal_ids"`
-	UpdatedAt   types.String            `tfsdk:"updated_at"`
+	CreatedAt    types.String            `tfsdk:"created_at"`
+	Description  types.String            `tfsdk:"description"`
+	ID           types.String            `tfsdk:"id"`
+	Labels       map[string]types.String `tfsdk:"labels"`
+	Name         types.String            `tfsdk:"name"`
+	PortalIds    []types.String          `tfsdk:"portal_ids"`
+	UpdatedAt    types.String            `tfsdk:"updated_at"`
+	VersionCount types.Number            `tfsdk:"version_count"`
 }
 
 // Metadata returns the data source type name.
@@ -52,10 +50,7 @@ func (r *APIProductDataSource) Schema(ctx context.Context, req datasource.Schema
 
 		Attributes: map[string]schema.Attribute{
 			"created_at": schema.StringAttribute{
-				Computed: true,
-				Validators: []validator.String{
-					validators.IsRFC3339(),
-				},
+				Computed:    true,
 				Description: `An ISO-8601 timestamp representation of entity creation date.`,
 			},
 			"description": schema.StringAttribute{
@@ -84,11 +79,12 @@ func (r *APIProductDataSource) Schema(ctx context.Context, req datasource.Schema
 				Description: `The list of portal identifiers which this API product is published to`,
 			},
 			"updated_at": schema.StringAttribute{
-				Computed: true,
-				Validators: []validator.String{
-					validators.IsRFC3339(),
-				},
+				Computed:    true,
 				Description: `An ISO-8601 timestamp representation of entity update date.`,
+			},
+			"version_count": schema.NumberAttribute{
+				Computed:    true,
+				Description: `The number of product versions attached to this API product`,
 			},
 		},
 	}
@@ -156,7 +152,7 @@ func (r *APIProductDataSource) Read(ctx context.Context, req datasource.ReadRequ
 		resp.Diagnostics.AddError("unexpected response from API. No response body", debugResponse(res.RawResponse))
 		return
 	}
-	data.RefreshFromGetResponse(res.APIProduct)
+	data.RefreshFromSharedAPIProduct(res.APIProduct)
 
 	// Save updated data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)

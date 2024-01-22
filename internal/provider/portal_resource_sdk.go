@@ -4,11 +4,11 @@ package provider
 
 import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"konnect/internal/sdk/pkg/models/shared"
+	"github.com/kong/terraform-provider-konnect/internal/sdk/pkg/models/shared"
 	"time"
 )
 
-func (r *PortalResourceModel) ToCreateSDKType() *shared.UpdatePortalRequest {
+func (r *PortalResourceModel) ToSharedUpdatePortalRequest() *shared.UpdatePortalRequest {
 	autoApproveApplications := new(bool)
 	if !r.AutoApproveApplications.IsUnknown() && !r.AutoApproveApplications.IsNull() {
 		*autoApproveApplications = r.AutoApproveApplications.ValueBool()
@@ -56,33 +56,16 @@ func (r *PortalResourceModel) ToCreateSDKType() *shared.UpdatePortalRequest {
 	return &out
 }
 
-func (r *PortalResourceModel) ToUpdateSDKType() *shared.UpdatePortalRequest {
-	out := r.ToCreateSDKType()
-	return out
-}
-
-func (r *PortalResourceModel) RefreshFromCreateResponse(resp *shared.UpdatePortalResponse) {
+func (r *PortalResourceModel) RefreshFromSharedUpdatePortalResponse(resp *shared.UpdatePortalResponse) {
 	r.AutoApproveApplications = types.BoolValue(resp.AutoApproveApplications)
 	r.AutoApproveDevelopers = types.BoolValue(resp.AutoApproveDevelopers)
 	r.CreatedAt = types.StringValue(resp.CreatedAt.Format(time.RFC3339Nano))
-	if resp.CustomClientDomain != nil {
-		r.CustomClientDomain = types.StringValue(*resp.CustomClientDomain)
-	} else {
-		r.CustomClientDomain = types.StringNull()
-	}
-	if resp.CustomDomain != nil {
-		r.CustomDomain = types.StringValue(*resp.CustomDomain)
-	} else {
-		r.CustomDomain = types.StringNull()
-	}
+	r.CustomClientDomain = types.StringPointerValue(resp.CustomClientDomain)
+	r.CustomDomain = types.StringPointerValue(resp.CustomDomain)
 	r.DefaultDomain = types.StringValue(resp.DefaultDomain)
 	r.ID = types.StringValue(resp.ID)
 	r.IsPublic = types.BoolValue(resp.IsPublic)
 	r.Name = types.StringValue(resp.Name)
 	r.RbacEnabled = types.BoolValue(resp.RbacEnabled)
 	r.UpdatedAt = types.StringValue(resp.UpdatedAt.Format(time.RFC3339Nano))
-}
-
-func (r *PortalResourceModel) RefreshFromUpdateResponse(resp *shared.UpdatePortalResponse) {
-	r.RefreshFromCreateResponse(resp)
 }

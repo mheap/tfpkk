@@ -5,19 +5,18 @@ package provider
 import (
 	"context"
 	"fmt"
-	"konnect/internal/sdk"
-	"konnect/internal/sdk/pkg/models/operations"
-
+	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/boolplanmodifier"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64planmodifier"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listplanmodifier"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
+	speakeasy_int64planmodifier "github.com/kong/terraform-provider-konnect/internal/planmodifiers/int64planmodifier"
+	speakeasy_stringplanmodifier "github.com/kong/terraform-provider-konnect/internal/planmodifiers/stringplanmodifier"
+	"github.com/kong/terraform-provider-konnect/internal/sdk"
+	"github.com/kong/terraform-provider-konnect/internal/sdk/pkg/models/operations"
 )
 
 // Ensure provider defined types fully satisfy framework interfaces.
@@ -35,26 +34,28 @@ type RouteResource struct {
 
 // RouteResourceModel describes the resource data model.
 type RouteResourceModel struct {
-	CreatedAt               types.Int64    `tfsdk:"created_at"`
-	Headers                 *RouteHeaders  `tfsdk:"headers"`
-	Hosts                   []types.String `tfsdk:"hosts"`
-	HTTPSRedirectStatusCode types.Int64    `tfsdk:"https_redirect_status_code"`
-	ID                      types.String   `tfsdk:"id"`
-	Methods                 []types.String `tfsdk:"methods"`
-	Name                    types.String   `tfsdk:"name"`
-	PathHandling            types.String   `tfsdk:"path_handling"`
-	Paths                   []types.String `tfsdk:"paths"`
-	PreserveHost            types.Bool     `tfsdk:"preserve_host"`
-	Protocols               []types.String `tfsdk:"protocols"`
-	RegexPriority           types.Int64    `tfsdk:"regex_priority"`
-	RequestBuffering        types.Bool     `tfsdk:"request_buffering"`
-	ResponseBuffering       types.Bool     `tfsdk:"response_buffering"`
-	RuntimeGroupID          types.String   `tfsdk:"runtime_group_id"`
-	Service                 *RouteService  `tfsdk:"service"`
-	Snis                    []types.String `tfsdk:"snis"`
-	StripPath               types.Bool     `tfsdk:"strip_path"`
-	Tags                    []types.String `tfsdk:"tags"`
-	UpdatedAt               types.Int64    `tfsdk:"updated_at"`
+	ControlPlaneID          types.String    `tfsdk:"control_plane_id"`
+	CreatedAt               types.Int64     `tfsdk:"created_at"`
+	Destinations            []Destinations  `tfsdk:"destinations"`
+	Headers                 *Headers        `tfsdk:"headers"`
+	Hosts                   []types.String  `tfsdk:"hosts"`
+	HTTPSRedirectStatusCode types.Int64     `tfsdk:"https_redirect_status_code"`
+	ID                      types.String    `tfsdk:"id"`
+	Methods                 []types.String  `tfsdk:"methods"`
+	Name                    types.String    `tfsdk:"name"`
+	PathHandling            types.String    `tfsdk:"path_handling"`
+	Paths                   []types.String  `tfsdk:"paths"`
+	PreserveHost            types.Bool      `tfsdk:"preserve_host"`
+	Protocols               []types.String  `tfsdk:"protocols"`
+	RegexPriority           types.Int64     `tfsdk:"regex_priority"`
+	RequestBuffering        types.Bool      `tfsdk:"request_buffering"`
+	ResponseBuffering       types.Bool      `tfsdk:"response_buffering"`
+	Service                 *PluginConsumer `tfsdk:"service"`
+	Snis                    []types.String  `tfsdk:"snis"`
+	Sources                 []Destinations  `tfsdk:"sources"`
+	StripPath               types.Bool      `tfsdk:"strip_path"`
+	Tags                    []types.String  `tfsdk:"tags"`
+	UpdatedAt               types.Int64     `tfsdk:"updated_at"`
 }
 
 func (r *RouteResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
@@ -66,178 +67,193 @@ func (r *RouteResource) Schema(ctx context.Context, req resource.SchemaRequest, 
 		MarkdownDescription: "Route Resource",
 
 		Attributes: map[string]schema.Attribute{
+			"control_plane_id": schema.StringAttribute{
+				Required:    true,
+				Description: `The UUID of your control plane. This variable is available in the Konnect manager`,
+			},
 			"created_at": schema.Int64Attribute{
 				Computed: true,
 				PlanModifiers: []planmodifier.Int64{
-					int64planmodifier.RequiresReplace(),
+					speakeasy_int64planmodifier.SuppressDiff(speakeasy_int64planmodifier.ExplicitSuppress),
 				},
-				Optional:    true,
 				Description: `Unix epoch when the resource was created.`,
+			},
+			"destinations": schema.ListNestedAttribute{
+				Computed: true,
+				Optional: true,
+				NestedObject: schema.NestedAttributeObject{
+					Attributes: map[string]schema.Attribute{
+						"ip": schema.StringAttribute{
+							Computed: true,
+							Optional: true,
+						},
+						"port": schema.Int64Attribute{
+							Computed: true,
+							Optional: true,
+						},
+					},
+				},
+				MarkdownDescription: `A list of IP destinations of incoming connections that match this route when using stream routing. Each entry is an object with fields “ip” (optionally in CIDR range notation) and/or “port”.` + "\n" +
+					``,
 			},
 			"headers": schema.SingleNestedAttribute{
 				Computed: true,
-				PlanModifiers: []planmodifier.Object{
-					objectplanmodifier.RequiresReplace(),
+				Optional: true,
+				Attributes: map[string]schema.Attribute{
+					"x_another_header": schema.ListAttribute{
+						Computed:    true,
+						Optional:    true,
+						ElementType: types.StringType,
+					},
+					"x_my_header": schema.ListAttribute{
+						Computed:    true,
+						Optional:    true,
+						ElementType: types.StringType,
+					},
 				},
-				Optional:    true,
-				Attributes:  map[string]schema.Attribute{},
-				Description: `One or more lists of values indexed by header name that will cause this route to match if present in the request. The ` + "`" + `Host` + "`" + ` header cannot be used with this attribute: hosts should be specified using the ` + "`" + `hosts` + "`" + ` attribute. When ` + "`" + `headers` + "`" + ` contains only one value and that value starts with the special prefix ` + "`" + `~*` + "`" + `, the value is interpreted as a regular expression.`,
+				Description: `One or more lists of values indexed by header name that will cause this route to match if present in the request. The Host header cannot be used with this attribute: hosts should be specified using the ` + "`" + `hosts` + "`" + ` attribute. When headers contains only one value and that value starts with the special prefix` + "`" + ` ~*` + "`" + `, the value is interpreted as a regular expression.`,
 			},
 			"hosts": schema.ListAttribute{
-				Computed: true,
-				PlanModifiers: []planmodifier.List{
-					listplanmodifier.RequiresReplace(),
-				},
+				Computed:    true,
 				Optional:    true,
 				ElementType: types.StringType,
-				Description: `A list of domain names that match this route. Note that the hosts value is case sensitive.`,
+				Description: `A list of domain names that match this route. Note that the hosts value is case sensitive. With form-encoded, the notation is ` + "`" + `hosts[]=example.com&hosts[]=foo.test` + "`" + `. With JSON, use an Array.`,
 			},
 			"https_redirect_status_code": schema.Int64Attribute{
-				Computed: true,
-				PlanModifiers: []planmodifier.Int64{
-					int64planmodifier.RequiresReplace(),
+				Optional: true,
+				MarkdownDescription: `The status code Kong responds with when all properties of a route match except the protocol i.e. if the protocol of the request is ` + "`" + `HTTP` + "`" + ` instead of ` + "`" + `HTTPS` + "`" + `` + "\n" +
+					`Location header is injected by Kong if the field is set to ` + "`" + `301` + "`" + `, ` + "`" + `302` + "`" + `, ` + "`" + `307` + "`" + ` or ` + "`" + `308` + "`" + `. Note: This config applies only if the route is configured to only accept the https protocol. Accepted values are: ` + "`" + `426` + "`" + `, ` + "`" + `301` + "`" + `, ` + "`" + `302` + "`" + `, ` + "`" + `307` + "`" + `, ` + "`" + `308` + "`" + `. Default: ` + "`" + `426` + "`" + `.` + "\n" +
+					`must be one of ["426", "301", "302", "307", "308"]; Default: 426`,
+				Validators: []validator.Int64{
+					int64validator.OneOf(
+						[]int64{
+							426,
+							301,
+							302,
+							307,
+							308,
+						}...,
+					),
 				},
-				Optional:    true,
-				Description: `The status code Kong responds with when all properties of a route match except the protocol i.e. if the protocol of the request is ` + "`" + `HTTP` + "`" + ` instead of ` + "`" + `HTTPS` + "`" + `. ` + "`" + `Location` + "`" + ` header is injected by Kong if the field is set to 301, 302, 307 or 308. Note: This config applies only if the route is configured to only accept the ` + "`" + `https` + "`" + ` protocol.`,
 			},
 			"id": schema.StringAttribute{
 				Computed: true,
 				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.RequiresReplace(),
+					speakeasy_stringplanmodifier.SuppressDiff(speakeasy_stringplanmodifier.ExplicitSuppress),
 				},
-				Optional: true,
 			},
 			"methods": schema.ListAttribute{
-				Computed: true,
-				PlanModifiers: []planmodifier.List{
-					listplanmodifier.RequiresReplace(),
-				},
+				Computed:    true,
 				Optional:    true,
 				ElementType: types.StringType,
-				Description: `A list of HTTP methods that match this route.`,
+				MarkdownDescription: `A list of HTTP methods that match this route.` + "\n" +
+					``,
 			},
 			"name": schema.StringAttribute{
 				Computed: true,
-				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.RequiresReplace(),
-				},
-				Optional:    true,
-				Description: `The name of the route. Route names must be unique, and they are case sensitive. For example, there can be two different routes named test and Test.`,
+				Optional: true,
+				MarkdownDescription: `The name of the route. Route names must be unique, and they are case sensitive. For example, there can be two different routes named “test” and “Test”.` + "\n" +
+					``,
 			},
 			"path_handling": schema.StringAttribute{
-				Computed: true,
-				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.RequiresReplace(),
-				},
 				Optional:    true,
-				Description: `Controls how the service path, route path and requested path are combined when sending a request to the upstream. See above for a detailed description of each behavior.`,
+				Description: `Controls how the service path, route path and requested path are combined when sending a request to the upstream. Accepted values are: ` + "`" + `v0` + "`" + `, ` + "`" + `v1` + "`" + `. Default: ` + "`" + `v0` + "`" + `. must be one of ["v1", "v0"]`,
+				Validators: []validator.String{
+					stringvalidator.OneOf(
+						"v1",
+						"v0",
+					),
+				},
 			},
 			"paths": schema.ListAttribute{
-				Computed: true,
-				PlanModifiers: []planmodifier.List{
-					listplanmodifier.RequiresReplace(),
-				},
+				Computed:    true,
 				Optional:    true,
 				ElementType: types.StringType,
-				Description: `A list of paths that match this route.`,
+				Description: `A list of paths that match this route. With form-encoded, the notation is ` + "`" + `paths[]=/foo&paths[]=/bar` + "`" + `. With JSON, use an array. The path can be a regular expression, or a plain text pattern. `,
 			},
 			"preserve_host": schema.BoolAttribute{
-				Computed: true,
-				PlanModifiers: []planmodifier.Bool{
-					boolplanmodifier.RequiresReplace(),
-				},
+				Computed:    true,
 				Optional:    true,
-				Description: `When matching a route via one of the ` + "`" + `hosts` + "`" + ` domain names, use the request ` + "`" + `Host` + "`" + ` header in the upstream request headers. If set to ` + "`" + `false` + "`" + `, the upstream ` + "`" + `Host` + "`" + ` header will be that of the service's ` + "`" + `host` + "`" + `.`,
+				Description: `When matching a route via one of the ` + "`" + `hosts` + "`" + ` domain names, use the request ` + "`" + `host` + "`" + ` header in the upstream request headers. If set to ` + "`" + `false` + "`" + `, the upstream Host header will be that of the service’s host. Default: true`,
 			},
 			"protocols": schema.ListAttribute{
-				Computed: true,
-				PlanModifiers: []planmodifier.List{
-					listplanmodifier.RequiresReplace(),
-				},
+				Computed:    true,
 				Optional:    true,
 				ElementType: types.StringType,
-				Description: `An array of the protocols this route should allow. See the [route Object](#route-object) section for a list of accepted protocols. When set to only ` + "`" + `https` + "`" + `, HTTP requests are answered with an upgrade error. When set to only ` + "`" + `http` + "`" + `, HTTPS requests are answered with an error.`,
+				Description: `An array of the protocols this route should allow`,
 			},
 			"regex_priority": schema.Int64Attribute{
-				Computed: true,
-				PlanModifiers: []planmodifier.Int64{
-					int64planmodifier.RequiresReplace(),
-				},
+				Computed:    true,
 				Optional:    true,
-				Description: `A number used to choose which route resolves a given request when several routes match it using regexes simultaneously. When two routes match the path and have the same ` + "`" + `regex_priority` + "`" + `, the older one (lowest ` + "`" + `created_at` + "`" + `) is used. Note that the priority for non-regex routes is different (longer non-regex routes are matched before shorter ones).`,
+				Description: `A number used to choose which route resolves a given request when several routes match it using regexes simultaneously. When two routes match the path and have the same regex_priority, the older one (lowest ` + "`" + `created_at` + "`" + `) is used. Note that the priority for non-regex routes is different (longer non-regex routes are matched before shorter ones). Default: ` + "`" + `0` + "`" + `. Default: 0`,
 			},
 			"request_buffering": schema.BoolAttribute{
 				Computed: true,
-				PlanModifiers: []planmodifier.Bool{
-					boolplanmodifier.RequiresReplace(),
-				},
-				Optional:    true,
-				Description: `Whether to enable request body buffering or not. With HTTP 1.1, it may make sense to turn this off on services that receive data with chunked transfer encoding.`,
+				Optional: true,
+				MarkdownDescription: `Whether to enable request body buffering or not. With HTTP 1.1, it may make sense to turn this off on services that receive data with chunked transfer encoding. Default: true.` + "\n" +
+					`` + "\n" +
+					`Default: true`,
 			},
 			"response_buffering": schema.BoolAttribute{
 				Computed: true,
-				PlanModifiers: []planmodifier.Bool{
-					boolplanmodifier.RequiresReplace(),
-				},
-				Optional:    true,
-				Description: `Whether to enable response body buffering or not. With HTTP 1.1, it may make sense to turn this off on services that send data with chunked transfer encoding.`,
-			},
-			"runtime_group_id": schema.StringAttribute{
-				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.RequiresReplace(),
-				},
-				Required:    true,
-				Description: `The ID of your runtime group. This variable is available in the Konnect manager`,
+				Optional: true,
+				MarkdownDescription: `Whether to enable response body buffering or not. With HTTP 1.1, it may make sense to turn this off on services that send data with chunked transfer encoding. Default: ` + "`" + `true` + "`" + `.` + "\n" +
+					`` + "\n" +
+					`Default: true`,
 			},
 			"service": schema.SingleNestedAttribute{
 				Computed: true,
-				PlanModifiers: []planmodifier.Object{
-					objectplanmodifier.RequiresReplace(),
-				},
 				Optional: true,
 				Attributes: map[string]schema.Attribute{
 					"id": schema.StringAttribute{
 						Computed: true,
-						PlanModifiers: []planmodifier.String{
-							stringplanmodifier.RequiresReplace(),
-						},
 						Optional: true,
 					},
 				},
-				Description: `The service this route is associated to. This is where the route proxies traffic to.`,
+				Description: `The service this route is associated to. This is where the route proxies traffic to. With form-encoded, the notation is service.id=<service id> or service.name=<service name>. With JSON, use “` + "`" + `service:{id:<service id>}` + "`" + ` or ` + "`" + `service:{name:<service name>}` + "`" + `.`,
 			},
 			"snis": schema.ListAttribute{
-				Computed: true,
-				PlanModifiers: []planmodifier.List{
-					listplanmodifier.RequiresReplace(),
-				},
+				Computed:    true,
 				Optional:    true,
 				ElementType: types.StringType,
-				Description: `A list of SNIs that match this route when using stream routing.`,
+				MarkdownDescription: `A list of SNIs that match this route when using stream routing.` + "\n" +
+					``,
+			},
+			"sources": schema.ListNestedAttribute{
+				Computed: true,
+				Optional: true,
+				NestedObject: schema.NestedAttributeObject{
+					Attributes: map[string]schema.Attribute{
+						"ip": schema.StringAttribute{
+							Computed: true,
+							Optional: true,
+						},
+						"port": schema.Int64Attribute{
+							Computed: true,
+							Optional: true,
+						},
+					},
+				},
+				MarkdownDescription: `A list of IP sources of incoming connections that match this route when using stream routing. Each entry is an object with fields “ip” (optionally in CIDR range notation) and/or “port”.` + "\n" +
+					``,
 			},
 			"strip_path": schema.BoolAttribute{
-				Computed: true,
-				PlanModifiers: []planmodifier.Bool{
-					boolplanmodifier.RequiresReplace(),
-				},
+				Computed:    true,
 				Optional:    true,
-				Description: `When matching a route via one of the ` + "`" + `paths` + "`" + `, strip the matching prefix from the upstream request URL.`,
+				Description: `When matching a route via one of the paths, strip the matching prefix from the upstream request URL. Default: ` + "`" + `true` + "`" + `. Default: true`,
 			},
 			"tags": schema.ListAttribute{
-				Computed: true,
-				PlanModifiers: []planmodifier.List{
-					listplanmodifier.RequiresReplace(),
-				},
+				Computed:    true,
 				Optional:    true,
 				ElementType: types.StringType,
-				Description: `An optional set of strings associated with the route for grouping and filtering.`,
+				MarkdownDescription: `An optional set of strings associated with the route for grouping and filtering.` + "\n" +
+					``,
 			},
 			"updated_at": schema.Int64Attribute{
 				Computed: true,
 				PlanModifiers: []planmodifier.Int64{
-					int64planmodifier.RequiresReplace(),
+					speakeasy_int64planmodifier.SuppressDiff(speakeasy_int64planmodifier.ExplicitSuppress),
 				},
-				Optional:    true,
 				Description: `Unix epoch when the resource was last updated.`,
 			},
 		},
@@ -266,14 +282,14 @@ func (r *RouteResource) Configure(ctx context.Context, req resource.ConfigureReq
 
 func (r *RouteResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	var data *RouteResourceModel
-	var item types.Object
+	var plan types.Object
 
-	resp.Diagnostics.Append(req.Plan.Get(ctx, &item)...)
+	resp.Diagnostics.Append(req.Plan.Get(ctx, &plan)...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	resp.Diagnostics.Append(item.As(ctx, &data, basetypes.ObjectAsOptions{
+	resp.Diagnostics.Append(plan.As(ctx, &data, basetypes.ObjectAsOptions{
 		UnhandledNullAsEmpty:    true,
 		UnhandledUnknownAsEmpty: true,
 	})...)
@@ -282,11 +298,11 @@ func (r *RouteResource) Create(ctx context.Context, req resource.CreateRequest, 
 		return
 	}
 
-	route := data.ToCreateSDKType()
-	runtimeGroupID := data.RuntimeGroupID.ValueString()
+	controlPlaneID := data.ControlPlaneID.ValueString()
+	routeRequest := data.ToSharedRouteRequest()
 	request := operations.CreateRouteRequest{
-		Route:          route,
-		RuntimeGroupID: runtimeGroupID,
+		ControlPlaneID: controlPlaneID,
+		RouteRequest:   routeRequest,
 	}
 	res, err := r.client.Routes.CreateRoute(ctx, request)
 	if err != nil {
@@ -308,7 +324,42 @@ func (r *RouteResource) Create(ctx context.Context, req resource.CreateRequest, 
 		resp.Diagnostics.AddError("unexpected response from API. No response body", debugResponse(res.RawResponse))
 		return
 	}
-	data.RefreshFromCreateResponse(res.Route)
+	data.RefreshFromSharedRoute(res.Route)
+	refreshPlan(ctx, plan, &data, resp.Diagnostics)
+	controlPlaneId1 := data.ControlPlaneID.ValueString()
+	var filterTags *string
+	var offset *string
+	routeID := data.ID.ValueString()
+	var size *int64
+	request1 := operations.GetRouteRequest{
+		ControlPlaneID: controlPlaneId1,
+		FilterTags:     filterTags,
+		Offset:         offset,
+		RouteID:        routeID,
+		Size:           size,
+	}
+	res1, err := r.client.Routes.GetRoute(ctx, request1)
+	if err != nil {
+		resp.Diagnostics.AddError("failure to invoke API", err.Error())
+		if res1 != nil && res1.RawResponse != nil {
+			resp.Diagnostics.AddError("unexpected http request/response", debugResponse(res1.RawResponse))
+		}
+		return
+	}
+	if res1 == nil {
+		resp.Diagnostics.AddError("unexpected response from API", fmt.Sprintf("%v", res1))
+		return
+	}
+	if res1.StatusCode != 200 {
+		resp.Diagnostics.AddError(fmt.Sprintf("unexpected response from API. Got an unexpected response code %v", res1.StatusCode), debugResponse(res1.RawResponse))
+		return
+	}
+	if res1.Route == nil {
+		resp.Diagnostics.AddError("unexpected response from API. No response body", debugResponse(res1.RawResponse))
+		return
+	}
+	data.RefreshFromSharedRoute(res1.Route)
+	refreshPlan(ctx, plan, &data, resp.Diagnostics)
 
 	// Save updated data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
@@ -332,11 +383,17 @@ func (r *RouteResource) Read(ctx context.Context, req resource.ReadRequest, resp
 		return
 	}
 
+	controlPlaneID := data.ControlPlaneID.ValueString()
+	var filterTags *string
+	var offset *string
 	routeID := data.ID.ValueString()
-	runtimeGroupID := data.RuntimeGroupID.ValueString()
+	var size *int64
 	request := operations.GetRouteRequest{
+		ControlPlaneID: controlPlaneID,
+		FilterTags:     filterTags,
+		Offset:         offset,
 		RouteID:        routeID,
-		RuntimeGroupID: runtimeGroupID,
+		Size:           size,
 	}
 	res, err := r.client.Routes.GetRoute(ctx, request)
 	if err != nil {
@@ -358,7 +415,7 @@ func (r *RouteResource) Read(ctx context.Context, req resource.ReadRequest, resp
 		resp.Diagnostics.AddError("unexpected response from API. No response body", debugResponse(res.RawResponse))
 		return
 	}
-	data.RefreshFromGetResponse(res.Route)
+	data.RefreshFromSharedRoute(res.Route)
 
 	// Save updated data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
@@ -366,12 +423,82 @@ func (r *RouteResource) Read(ctx context.Context, req resource.ReadRequest, resp
 
 func (r *RouteResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
 	var data *RouteResourceModel
+	var plan types.Object
+
+	resp.Diagnostics.Append(req.Plan.Get(ctx, &plan)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
 	merge(ctx, req, resp, &data)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	// Not Implemented; all attributes marked as RequiresReplace
+	controlPlaneID := data.ControlPlaneID.ValueString()
+	routeRequest := data.ToSharedRouteRequest()
+	routeID := data.ID.ValueString()
+	request := operations.UpsertRouteRequest{
+		ControlPlaneID: controlPlaneID,
+		RouteRequest:   routeRequest,
+		RouteID:        routeID,
+	}
+	res, err := r.client.Routes.UpsertRoute(ctx, request)
+	if err != nil {
+		resp.Diagnostics.AddError("failure to invoke API", err.Error())
+		if res != nil && res.RawResponse != nil {
+			resp.Diagnostics.AddError("unexpected http request/response", debugResponse(res.RawResponse))
+		}
+		return
+	}
+	if res == nil {
+		resp.Diagnostics.AddError("unexpected response from API", fmt.Sprintf("%v", res))
+		return
+	}
+	if res.StatusCode != 200 {
+		resp.Diagnostics.AddError(fmt.Sprintf("unexpected response from API. Got an unexpected response code %v", res.StatusCode), debugResponse(res.RawResponse))
+		return
+	}
+	if res.Route == nil {
+		resp.Diagnostics.AddError("unexpected response from API. No response body", debugResponse(res.RawResponse))
+		return
+	}
+	data.RefreshFromSharedRoute(res.Route)
+	refreshPlan(ctx, plan, &data, resp.Diagnostics)
+	controlPlaneId1 := data.ControlPlaneID.ValueString()
+	var filterTags *string
+	var offset *string
+	routeId1 := data.ID.ValueString()
+	var size *int64
+	request1 := operations.GetRouteRequest{
+		ControlPlaneID: controlPlaneId1,
+		FilterTags:     filterTags,
+		Offset:         offset,
+		RouteID:        routeId1,
+		Size:           size,
+	}
+	res1, err := r.client.Routes.GetRoute(ctx, request1)
+	if err != nil {
+		resp.Diagnostics.AddError("failure to invoke API", err.Error())
+		if res1 != nil && res1.RawResponse != nil {
+			resp.Diagnostics.AddError("unexpected http request/response", debugResponse(res1.RawResponse))
+		}
+		return
+	}
+	if res1 == nil {
+		resp.Diagnostics.AddError("unexpected response from API", fmt.Sprintf("%v", res1))
+		return
+	}
+	if res1.StatusCode != 200 {
+		resp.Diagnostics.AddError(fmt.Sprintf("unexpected response from API. Got an unexpected response code %v", res1.StatusCode), debugResponse(res1.RawResponse))
+		return
+	}
+	if res1.Route == nil {
+		resp.Diagnostics.AddError("unexpected response from API. No response body", debugResponse(res1.RawResponse))
+		return
+	}
+	data.RefreshFromSharedRoute(res1.Route)
+	refreshPlan(ctx, plan, &data, resp.Diagnostics)
 
 	// Save updated data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
@@ -395,11 +522,11 @@ func (r *RouteResource) Delete(ctx context.Context, req resource.DeleteRequest, 
 		return
 	}
 
+	controlPlaneID := data.ControlPlaneID.ValueString()
 	routeID := data.ID.ValueString()
-	runtimeGroupID := data.RuntimeGroupID.ValueString()
 	request := operations.DeleteRouteRequest{
+		ControlPlaneID: controlPlaneID,
 		RouteID:        routeID,
-		RuntimeGroupID: runtimeGroupID,
 	}
 	res, err := r.client.Routes.DeleteRoute(ctx, request)
 	if err != nil {
@@ -421,5 +548,5 @@ func (r *RouteResource) Delete(ctx context.Context, req resource.DeleteRequest, 
 }
 
 func (r *RouteResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
-	resp.Diagnostics.AddError("Not Implemented", "No available import state operation is available for resource route.")
+	resp.Diagnostics.AddError("Not Implemented", "No available import state operation is available for resource route. Reason: composite imports strings not supported.")
 }

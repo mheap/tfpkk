@@ -4,14 +4,13 @@ package provider
 
 import (
 	"context"
-	"konnect/internal/sdk"
-	"konnect/internal/sdk/pkg/models/shared"
-
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/provider"
 	"github.com/hashicorp/terraform-plugin-framework/provider/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/kong/terraform-provider-konnect/internal/sdk"
+	"github.com/kong/terraform-provider-konnect/internal/sdk/pkg/models/shared"
 )
 
 var _ provider.Provider = &KonnectProvider{}
@@ -114,10 +113,12 @@ func (p *KonnectProvider) Resources(ctx context.Context) []func() resource.Resou
 	return []func() resource.Resource{
 		NewAPIProductResource,
 		NewAPIProductVersionResource,
+		NewConsumerResource,
+		NewGatewayControlPlaneResource,
+		NewPluginResource,
 		NewPortalResource,
 		NewPortalAuthResource,
 		NewRouteResource,
-		NewRuntimeGroupResource,
 		NewServiceResource,
 	}
 }
@@ -126,9 +127,11 @@ func (p *KonnectProvider) DataSources(ctx context.Context) []func() datasource.D
 	return []func() datasource.DataSource{
 		NewAPIProductDataSource,
 		NewAPIProductVersionDataSource,
+		NewConsumerDataSource,
+		NewGatewayControlPlaneDataSource,
+		NewPluginDataSource,
 		NewPortalAuthDataSource,
 		NewRouteDataSource,
-		NewRuntimeGroupDataSource,
 		NewServiceDataSource,
 	}
 }

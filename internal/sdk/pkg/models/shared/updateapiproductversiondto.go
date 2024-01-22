@@ -52,3 +52,38 @@ type UpdateAPIProductVersionDTO struct {
 	// The publish status of the API product version.
 	PublishStatus *UpdateAPIProductVersionDTOPublishStatus `json:"publish_status,omitempty"`
 }
+
+func (o *UpdateAPIProductVersionDTO) GetDeprecated() *bool {
+	if o == nil {
+		return nil
+	}
+	return o.Deprecated
+}
+
+func (o *UpdateAPIProductVersionDTO) GetGatewayService() *GatewayServicePayload {
+	if o == nil {
+		return nil
+	}
+	return o.GatewayService
+}
+
+func (o *UpdateAPIProductVersionDTO) GetName() *string {
+	if o == nil {
+		return nil
+	}
+	return o.Name
+}
+
+func (o *UpdateAPIProductVersionDTO) GetNotify() *bool {
+	if o == nil {
+		return nil
+	}
+	return o.Notify
+}
+
+func (o *UpdateAPIProductVersionDTO) GetPublishStatus() *UpdateAPIProductVersionDTOPublishStatus {
+	if o == nil {
+		return nil
+	}
+	return o.PublishStatus
+}

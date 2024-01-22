@@ -7,4 +7,5 @@ import "github.com/hashicorp/terraform-plugin-framework/types"
 type GatewayServicePayload struct {
 	ControlPlaneID types.String `tfsdk:"control_plane_id"`
 	ID             types.String `tfsdk:"id"`
+	RuntimeGroupID types.String `tfsdk:"runtime_group_id"`
 }

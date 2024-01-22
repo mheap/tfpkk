@@ -3,9 +3,10 @@
 package sdk
 
 import (
+	"context"
 	"fmt"
-	"konnect/internal/sdk/pkg/models/shared"
-	"konnect/internal/sdk/pkg/utils"
+	"github.com/kong/terraform-provider-konnect/internal/sdk/pkg/models/shared"
+	"github.com/kong/terraform-provider-konnect/internal/sdk/pkg/utils"
 	"net/http"
 	"time"
 )
@@ -44,7 +45,7 @@ func Float64(f float64) *float64 { return &f }
 type sdkConfiguration struct {
 	DefaultClient     HTTPClient
 	SecurityClient    HTTPClient
-	Security          *shared.Security
+	Security          func(context.Context) (interface{}, error)
 	ServerURL         string
 	ServerIndex       int
 	Language          string
@@ -52,6 +53,7 @@ type sdkConfiguration struct {
 	SDKVersion        string
 	GenVersion        string
 	UserAgent         string
+	RetryConfig       *utils.RetryConfig
 }
 
 func (c *sdkConfiguration) GetServerDetails() (string, map[string]string) {
@@ -62,19 +64,25 @@ func (c *sdkConfiguration) GetServerDetails() (string, map[string]string) {
 	return ServerList[c.ServerIndex], nil
 }
 
-// Konnect - Konnect API: The Konnect platform API
+// Konnect API: The Konnect platform API
+//
 // https://docs.konghq.com - Documentation for Kong Gateway and its APIs
 type Konnect struct {
-	APIProductVersions *apiProductVersions
-	APIProducts        *apiProducts
-	PortalAuthSettings *portalAuthSettings
-	// Portals - APIs related to the Konnect Developer Portal Management API.
-	Portals *portals
-	// Routes - Gateway routes
-	Routes        *routes
-	RuntimeGroups *runtimeGroups
-	// Services - Gateway services
-	Services *services
+	APIProducts        *APIProducts
+	APIProductVersions *APIProductVersions
+	ControlPlanes      *ControlPlanes
+	// Consumers
+	Consumers *Consumers
+	// Plugins
+	Plugins *Plugins
+	// Gateway routes
+	Routes *Routes
+	// Gateway services
+	Services *Services
+	// APIs related to Configuration of Konnect Developer Portals.
+	Portals *Portals
+	// APIs related to Konnect Developer Portal Authentication Settings.
+	PortalAuthSettings *PortalAuthSettings
 
 	sdkConfiguration sdkConfiguration
 }
@@ -117,10 +125,31 @@ func WithClient(client HTTPClient) SDKOption {
 	}
 }
 
+func withSecurity(security interface{}) func(context.Context) (interface{}, error) {
+	return func(context.Context) (interface{}, error) {
+		return &security, nil
+	}
+}
+
 // WithSecurity configures the SDK to use the provided security details
 func WithSecurity(security shared.Security) SDKOption {
 	return func(sdk *Konnect) {
-		sdk.sdkConfiguration.Security = &security
+		sdk.sdkConfiguration.Security = withSecurity(security)
+	}
+}
+
+// WithSecuritySource configures the SDK to invoke the Security Source function on each method call to determine authentication
+func WithSecuritySource(security func(context.Context) (shared.Security, error)) SDKOption {
+	return func(sdk *Konnect) {
+		sdk.sdkConfiguration.Security = func(ctx context.Context) (interface{}, error) {
+			return security(ctx)
+		}
+	}
+}
+
+func WithRetryConfig(retryConfig utils.RetryConfig) SDKOption {
+	return func(sdk *Konnect) {
+		sdk.sdkConfiguration.RetryConfig = &retryConfig
 	}
 }
 
@@ -128,11 +157,11 @@ func WithSecurity(security shared.Security) SDKOption {
 func New(opts ...SDKOption) *Konnect {
 	sdk := &Konnect{
 		sdkConfiguration: sdkConfiguration{
-			Language:          "terraform",
-			OpenAPIDocVersion: "0.1.0",
-			SDKVersion:        "0.2.2",
-			GenVersion:        "2.144.1",
-			UserAgent:         "speakeasy-sdk/terraform 0.2.2 2.144.1 0.1.0 konnect",
+			Language:          "go",
+			OpenAPIDocVersion: "2.0.0",
+			SDKVersion:        "0.7.9",
+			GenVersion:        "2.237.2",
+			UserAgent:         "speakeasy-sdk/go 0.7.9 2.237.2 2.0.0 konnect",
 		},
 	}
 	for _, opt := range opts {
@@ -151,19 +180,23 @@ func New(opts ...SDKOption) *Konnect {
 		}
 	}
 
-	sdk.APIProductVersions = newAPIProductVersions(sdk.sdkConfiguration)
-
 	sdk.APIProducts = newAPIProducts(sdk.sdkConfiguration)
 
-	sdk.PortalAuthSettings = newPortalAuthSettings(sdk.sdkConfiguration)
+	sdk.APIProductVersions = newAPIProductVersions(sdk.sdkConfiguration)
 
-	sdk.Portals = newPortals(sdk.sdkConfiguration)
+	sdk.ControlPlanes = newControlPlanes(sdk.sdkConfiguration)
+
+	sdk.Consumers = newConsumers(sdk.sdkConfiguration)
+
+	sdk.Plugins = newPlugins(sdk.sdkConfiguration)
 
 	sdk.Routes = newRoutes(sdk.sdkConfiguration)
 
-	sdk.RuntimeGroups = newRuntimeGroups(sdk.sdkConfiguration)
-
 	sdk.Services = newServices(sdk.sdkConfiguration)
+
+	sdk.Portals = newPortals(sdk.sdkConfiguration)
+
+	sdk.PortalAuthSettings = newPortalAuthSettings(sdk.sdkConfiguration)
 
 	return sdk
 }

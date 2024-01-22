@@ -3,7 +3,7 @@
 package operations
 
 import (
-	"konnect/internal/sdk/pkg/models/shared"
+	"github.com/kong/terraform-provider-konnect/internal/sdk/pkg/models/shared"
 	"net/http"
 )
 
@@ -12,6 +12,20 @@ type GetAPIProductVersionRequest struct {
 	APIProductID string `pathParam:"style=simple,explode=false,name=apiProductId"`
 	// The API product version identifier
 	ID string `pathParam:"style=simple,explode=false,name=id"`
+}
+
+func (o *GetAPIProductVersionRequest) GetAPIProductID() string {
+	if o == nil {
+		return ""
+	}
+	return o.APIProductID
+}
+
+func (o *GetAPIProductVersionRequest) GetID() string {
+	if o == nil {
+		return ""
+	}
+	return o.ID
 }
 
 type GetAPIProductVersionResponse struct {
@@ -29,4 +43,53 @@ type GetAPIProductVersionResponse struct {
 	RawResponse *http.Response
 	// Unauthorized
 	UnauthorizedError *shared.UnauthorizedError
+}
+
+func (o *GetAPIProductVersionResponse) GetAPIProductVersion() *shared.APIProductVersion {
+	if o == nil {
+		return nil
+	}
+	return o.APIProductVersion
+}
+
+func (o *GetAPIProductVersionResponse) GetContentType() string {
+	if o == nil {
+		return ""
+	}
+	return o.ContentType
+}
+
+func (o *GetAPIProductVersionResponse) GetForbiddenError() *shared.ForbiddenError {
+	if o == nil {
+		return nil
+	}
+	return o.ForbiddenError
+}
+
+func (o *GetAPIProductVersionResponse) GetNotFoundError() *shared.NotFoundError {
+	if o == nil {
+		return nil
+	}
+	return o.NotFoundError
+}
+
+func (o *GetAPIProductVersionResponse) GetStatusCode() int {
+	if o == nil {
+		return 0
+	}
+	return o.StatusCode
+}
+
+func (o *GetAPIProductVersionResponse) GetRawResponse() *http.Response {
+	if o == nil {
+		return nil
+	}
+	return o.RawResponse
+}
+
+func (o *GetAPIProductVersionResponse) GetUnauthorizedError() *shared.UnauthorizedError {
+	if o == nil {
+		return nil
+	}
+	return o.UnauthorizedError
 }

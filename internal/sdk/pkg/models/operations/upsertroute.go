@@ -3,20 +3,41 @@
 package operations
 
 import (
-	"konnect/internal/sdk/pkg/models/shared"
+	"github.com/kong/terraform-provider-konnect/internal/sdk/pkg/models/shared"
 	"net/http"
 )
 
 type UpsertRouteRequest struct {
-	Route *shared.Route `request:"mediaType=application/json"`
-	// The unique identifier or the name of the route to retrieve.
-	RouteID string `pathParam:"style=simple,explode=false,name=route_id"`
-	// The ID of your runtime group. This variable is available in the Konnect manager
-	RuntimeGroupID string `pathParam:"style=simple,explode=false,name=runtimeGroupId"`
+	// The ID of your control plane. This variable is available in the Konnect manager
+	ControlPlaneID string `pathParam:"style=simple,explode=false,name=controlPlaneId"`
+	// Route request body
+	RouteRequest *shared.RouteRequest `request:"mediaType=application/json"`
+	RouteID      string               `pathParam:"style=simple,explode=false,name=route_id"`
 }
 
-// UpsertRoute400ApplicationJSON - Invalid route
-type UpsertRoute400ApplicationJSON struct {
+func (o *UpsertRouteRequest) GetControlPlaneID() string {
+	if o == nil {
+		return ""
+	}
+	return o.ControlPlaneID
+}
+
+func (o *UpsertRouteRequest) GetRouteRequest() *shared.RouteRequest {
+	if o == nil {
+		return nil
+	}
+	return o.RouteRequest
+}
+
+func (o *UpsertRouteRequest) GetRouteID() string {
+	if o == nil {
+		return ""
+	}
+	return o.RouteID
+}
+
+// UpsertRouteResponseBody - Invalid route
+type UpsertRouteResponseBody struct {
 }
 
 type UpsertRouteResponse struct {
@@ -29,5 +50,40 @@ type UpsertRouteResponse struct {
 	// Raw HTTP response; suitable for custom response parsing
 	RawResponse *http.Response
 	// Invalid route
-	UpsertRoute400ApplicationJSONObject *UpsertRoute400ApplicationJSON
+	Object *UpsertRouteResponseBody
+}
+
+func (o *UpsertRouteResponse) GetContentType() string {
+	if o == nil {
+		return ""
+	}
+	return o.ContentType
+}
+
+func (o *UpsertRouteResponse) GetRoute() *shared.Route {
+	if o == nil {
+		return nil
+	}
+	return o.Route
+}
+
+func (o *UpsertRouteResponse) GetStatusCode() int {
+	if o == nil {
+		return 0
+	}
+	return o.StatusCode
+}
+
+func (o *UpsertRouteResponse) GetRawResponse() *http.Response {
+	if o == nil {
+		return nil
+	}
+	return o.RawResponse
+}
+
+func (o *UpsertRouteResponse) GetObject() *UpsertRouteResponseBody {
+	if o == nil {
+		return nil
+	}
+	return o.Object
 }

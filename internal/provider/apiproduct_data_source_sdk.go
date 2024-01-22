@@ -4,19 +4,16 @@ package provider
 
 import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"konnect/internal/sdk/pkg/models/shared"
+	"github.com/kong/terraform-provider-konnect/internal/sdk/pkg/models/shared"
+	"math/big"
 	"time"
 )
 
-func (r *APIProductDataSourceModel) RefreshFromGetResponse(resp *shared.APIProduct) {
+func (r *APIProductDataSourceModel) RefreshFromSharedAPIProduct(resp *shared.APIProduct) {
 	r.CreatedAt = types.StringValue(resp.CreatedAt.Format(time.RFC3339Nano))
-	if resp.Description != nil {
-		r.Description = types.StringValue(*resp.Description)
-	} else {
-		r.Description = types.StringNull()
-	}
+	r.Description = types.StringPointerValue(resp.Description)
 	r.ID = types.StringValue(resp.ID)
-	if r.Labels == nil && len(resp.Labels) > 0 {
+	if len(resp.Labels) > 0 {
 		r.Labels = make(map[string]types.String)
 		for key, value := range resp.Labels {
 			r.Labels[key] = types.StringValue(value)
@@ -28,4 +25,5 @@ func (r *APIProductDataSourceModel) RefreshFromGetResponse(resp *shared.APIProdu
 		r.PortalIds = append(r.PortalIds, types.StringValue(v))
 	}
 	r.UpdatedAt = types.StringValue(resp.UpdatedAt.Format(time.RFC3339Nano))
+	r.VersionCount = types.NumberValue(big.NewFloat(float64(resp.VersionCount)))
 }

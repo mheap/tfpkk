@@ -8,3 +8,17 @@ type GatewayServicePayload struct {
 	// The identifier of a gateway service associated with the version of the API product.
 	ID string `json:"id"`
 }
+
+func (o *GatewayServicePayload) GetControlPlaneID() string {
+	if o == nil {
+		return ""
+	}
+	return o.ControlPlaneID
+}
+
+func (o *GatewayServicePayload) GetID() string {
+	if o == nil {
+		return ""
+	}
+	return o.ID
+}

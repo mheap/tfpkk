@@ -3,15 +3,29 @@
 package operations
 
 import (
-	"konnect/internal/sdk/pkg/models/shared"
+	"github.com/kong/terraform-provider-konnect/internal/sdk/pkg/models/shared"
 	"net/http"
 )
 
 type UpdatePortalRequest struct {
-	// Update a portal
+	// Update a portal's settings.
 	UpdatePortalRequest shared.UpdatePortalRequest `request:"mediaType=application/json"`
 	// ID of the portal.
 	PortalID string `pathParam:"style=simple,explode=false,name=portalId"`
+}
+
+func (o *UpdatePortalRequest) GetUpdatePortalRequest() shared.UpdatePortalRequest {
+	if o == nil {
+		return shared.UpdatePortalRequest{}
+	}
+	return o.UpdatePortalRequest
+}
+
+func (o *UpdatePortalRequest) GetPortalID() string {
+	if o == nil {
+		return ""
+	}
+	return o.PortalID
 }
 
 type UpdatePortalResponse struct {
@@ -28,6 +42,63 @@ type UpdatePortalResponse struct {
 	// Raw HTTP response; suitable for custom response parsing
 	RawResponse *http.Response
 	// Unauthorized
-	UnauthorizedError    *shared.UnauthorizedError
+	UnauthorizedError *shared.UnauthorizedError
+	// Details about the portal being updated.
 	UpdatePortalResponse *shared.UpdatePortalResponse
+}
+
+func (o *UpdatePortalResponse) GetBadRequestError() *shared.BadRequestError {
+	if o == nil {
+		return nil
+	}
+	return o.BadRequestError
+}
+
+func (o *UpdatePortalResponse) GetContentType() string {
+	if o == nil {
+		return ""
+	}
+	return o.ContentType
+}
+
+func (o *UpdatePortalResponse) GetForbiddenError() *shared.ForbiddenError {
+	if o == nil {
+		return nil
+	}
+	return o.ForbiddenError
+}
+
+func (o *UpdatePortalResponse) GetNotFoundError() *shared.NotFoundError {
+	if o == nil {
+		return nil
+	}
+	return o.NotFoundError
+}
+
+func (o *UpdatePortalResponse) GetStatusCode() int {
+	if o == nil {
+		return 0
+	}
+	return o.StatusCode
+}
+
+func (o *UpdatePortalResponse) GetRawResponse() *http.Response {
+	if o == nil {
+		return nil
+	}
+	return o.RawResponse
+}
+
+func (o *UpdatePortalResponse) GetUnauthorizedError() *shared.UnauthorizedError {
+	if o == nil {
+		return nil
+	}
+	return o.UnauthorizedError
+}
+
+func (o *UpdatePortalResponse) GetUpdatePortalResponse() *shared.UpdatePortalResponse {
+	if o == nil {
+		return nil
+	}
+	return o.UpdatePortalResponse
 }

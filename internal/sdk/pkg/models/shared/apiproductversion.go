@@ -5,22 +5,55 @@ package shared
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/kong/terraform-provider-konnect/internal/sdk/pkg/utils"
 	"time"
 )
 
-// APIProductVersionPublishStatus - The publish status of the API product version
-type APIProductVersionPublishStatus string
+type GatewayService struct {
+	// The identifier of the control plane that the gateway service resides in
+	ControlPlaneID string `json:"control_plane_id"`
+	// The identifier of a gateway service associated with the version of the API product.
+	ID *string `json:"id"`
+	// This field is deprecated, please use `control_plane_id` instead. The identifier of the control plane that the gateway service resides in
+	//
+	// Deprecated field: This will be removed in a future release, please migrate away from it as soon as possible.
+	RuntimeGroupID *string `json:"runtime_group_id,omitempty"`
+}
+
+func (o *GatewayService) GetControlPlaneID() string {
+	if o == nil {
+		return ""
+	}
+	return o.ControlPlaneID
+}
+
+func (o *GatewayService) GetID() *string {
+	if o == nil {
+		return nil
+	}
+	return o.ID
+}
+
+func (o *GatewayService) GetRuntimeGroupID() *string {
+	if o == nil {
+		return nil
+	}
+	return o.RuntimeGroupID
+}
+
+// PublishStatus - The publish status of the API product version
+type PublishStatus string
 
 const (
-	APIProductVersionPublishStatusUnpublished APIProductVersionPublishStatus = "unpublished"
-	APIProductVersionPublishStatusPublished   APIProductVersionPublishStatus = "published"
+	PublishStatusUnpublished PublishStatus = "unpublished"
+	PublishStatusPublished   PublishStatus = "published"
 )
 
-func (e APIProductVersionPublishStatus) ToPointer() *APIProductVersionPublishStatus {
+func (e PublishStatus) ToPointer() *PublishStatus {
 	return &e
 }
 
-func (e *APIProductVersionPublishStatus) UnmarshalJSON(data []byte) error {
+func (e *PublishStatus) UnmarshalJSON(data []byte) error {
 	var v string
 	if err := json.Unmarshal(data, &v); err != nil {
 		return err
@@ -29,25 +62,85 @@ func (e *APIProductVersionPublishStatus) UnmarshalJSON(data []byte) error {
 	case "unpublished":
 		fallthrough
 	case "published":
-		*e = APIProductVersionPublishStatus(v)
+		*e = PublishStatus(v)
 		return nil
 	default:
-		return fmt.Errorf("invalid value for APIProductVersionPublishStatus: %v", v)
+		return fmt.Errorf("invalid value for PublishStatus: %v", v)
 	}
 }
 
 type APIProductVersion struct {
 	// An ISO-8601 timestamp representation of entity creation date.
-	CreatedAt *time.Time `json:"created_at,omitempty"`
+	CreatedAt time.Time `json:"created_at"`
 	// Indicates if this API product version is deprecated
-	Deprecated     *bool                 `json:"deprecated,omitempty"`
-	GatewayService GatewayServicePayload `json:"gateway_service"`
+	Deprecated     bool            `json:"deprecated"`
+	GatewayService *GatewayService `json:"gateway_service"`
 	// The API product version identifier.
-	ID *string `json:"id,omitempty"`
+	ID string `json:"id"`
 	// The version of the API product
 	Name string `json:"name"`
 	// The publish status of the API product version
-	PublishStatus APIProductVersionPublishStatus `json:"publish_status"`
+	PublishStatus PublishStatus `json:"publish_status"`
 	// An ISO-8601 timestamp representation of entity update date.
-	UpdatedAt *time.Time `json:"updated_at,omitempty"`
+	UpdatedAt time.Time `json:"updated_at"`
+}
+
+func (a APIProductVersion) MarshalJSON() ([]byte, error) {
+	return utils.MarshalJSON(a, "", false)
+}
+
+func (a *APIProductVersion) UnmarshalJSON(data []byte) error {
+	if err := utils.UnmarshalJSON(data, &a, "", false, false); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (o *APIProductVersion) GetCreatedAt() time.Time {
+	if o == nil {
+		return time.Time{}
+	}
+	return o.CreatedAt
+}
+
+func (o *APIProductVersion) GetDeprecated() bool {
+	if o == nil {
+		return false
+	}
+	return o.Deprecated
+}
+
+func (o *APIProductVersion) GetGatewayService() *GatewayService {
+	if o == nil {
+		return nil
+	}
+	return o.GatewayService
+}
+
+func (o *APIProductVersion) GetID() string {
+	if o == nil {
+		return ""
+	}
+	return o.ID
+}
+
+func (o *APIProductVersion) GetName() string {
+	if o == nil {
+		return ""
+	}
+	return o.Name
+}
+
+func (o *APIProductVersion) GetPublishStatus() PublishStatus {
+	if o == nil {
+		return PublishStatus("")
+	}
+	return o.PublishStatus
+}
+
+func (o *APIProductVersion) GetUpdatedAt() time.Time {
+	if o == nil {
+		return time.Time{}
+	}
+	return o.UpdatedAt
 }

@@ -3,13 +3,20 @@
 package operations
 
 import (
-	"konnect/internal/sdk/pkg/models/shared"
+	"github.com/kong/terraform-provider-konnect/internal/sdk/pkg/models/shared"
 	"net/http"
 )
 
 type DeleteAPIProductRequest struct {
 	// API product identifier
 	ID string `pathParam:"style=simple,explode=false,name=id"`
+}
+
+func (o *DeleteAPIProductRequest) GetID() string {
+	if o == nil {
+		return ""
+	}
+	return o.ID
 }
 
 type DeleteAPIProductResponse struct {
@@ -25,4 +32,46 @@ type DeleteAPIProductResponse struct {
 	RawResponse *http.Response
 	// Unauthorized
 	UnauthorizedError *shared.UnauthorizedError
+}
+
+func (o *DeleteAPIProductResponse) GetContentType() string {
+	if o == nil {
+		return ""
+	}
+	return o.ContentType
+}
+
+func (o *DeleteAPIProductResponse) GetForbiddenError() *shared.ForbiddenError {
+	if o == nil {
+		return nil
+	}
+	return o.ForbiddenError
+}
+
+func (o *DeleteAPIProductResponse) GetNotFoundError() *shared.NotFoundError {
+	if o == nil {
+		return nil
+	}
+	return o.NotFoundError
+}
+
+func (o *DeleteAPIProductResponse) GetStatusCode() int {
+	if o == nil {
+		return 0
+	}
+	return o.StatusCode
+}
+
+func (o *DeleteAPIProductResponse) GetRawResponse() *http.Response {
+	if o == nil {
+		return nil
+	}
+	return o.RawResponse
+}
+
+func (o *DeleteAPIProductResponse) GetUnauthorizedError() *shared.UnauthorizedError {
+	if o == nil {
+		return nil
+	}
+	return o.UnauthorizedError
 }

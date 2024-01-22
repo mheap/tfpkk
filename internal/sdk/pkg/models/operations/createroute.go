@@ -3,18 +3,33 @@
 package operations
 
 import (
-	"konnect/internal/sdk/pkg/models/shared"
+	"github.com/kong/terraform-provider-konnect/internal/sdk/pkg/models/shared"
 	"net/http"
 )
 
 type CreateRouteRequest struct {
-	Route *shared.Route `request:"mediaType=application/json"`
-	// The ID of your runtime group. This variable is available in the Konnect manager
-	RuntimeGroupID string `pathParam:"style=simple,explode=false,name=runtimeGroupId"`
+	// The UUID of your control plane. This variable is available in the Konnect manager
+	ControlPlaneID string `pathParam:"style=simple,explode=false,name=controlPlaneId"`
+	// Route request body
+	RouteRequest *shared.RouteRequest `request:"mediaType=application/json"`
 }
 
-// CreateRoute400ApplicationJSON - Invalid route
-type CreateRoute400ApplicationJSON struct {
+func (o *CreateRouteRequest) GetControlPlaneID() string {
+	if o == nil {
+		return ""
+	}
+	return o.ControlPlaneID
+}
+
+func (o *CreateRouteRequest) GetRouteRequest() *shared.RouteRequest {
+	if o == nil {
+		return nil
+	}
+	return o.RouteRequest
+}
+
+// CreateRouteResponseBody - Invalid route
+type CreateRouteResponseBody struct {
 }
 
 type CreateRouteResponse struct {
@@ -27,5 +42,40 @@ type CreateRouteResponse struct {
 	// Raw HTTP response; suitable for custom response parsing
 	RawResponse *http.Response
 	// Invalid route
-	CreateRoute400ApplicationJSONObject *CreateRoute400ApplicationJSON
+	Object *CreateRouteResponseBody
+}
+
+func (o *CreateRouteResponse) GetContentType() string {
+	if o == nil {
+		return ""
+	}
+	return o.ContentType
+}
+
+func (o *CreateRouteResponse) GetRoute() *shared.Route {
+	if o == nil {
+		return nil
+	}
+	return o.Route
+}
+
+func (o *CreateRouteResponse) GetStatusCode() int {
+	if o == nil {
+		return 0
+	}
+	return o.StatusCode
+}
+
+func (o *CreateRouteResponse) GetRawResponse() *http.Response {
+	if o == nil {
+		return nil
+	}
+	return o.RawResponse
+}
+
+func (o *CreateRouteResponse) GetObject() *CreateRouteResponseBody {
+	if o == nil {
+		return nil
+	}
+	return o.Object
 }

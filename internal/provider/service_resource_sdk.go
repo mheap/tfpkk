@@ -4,16 +4,16 @@ package provider
 
 import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"konnect/internal/sdk/pkg/models/operations"
-	"konnect/internal/sdk/pkg/models/shared"
+	"github.com/kong/terraform-provider-konnect/internal/sdk/pkg/models/operations"
+	"github.com/kong/terraform-provider-konnect/internal/sdk/pkg/models/shared"
 )
 
-func (r *ServiceResourceModel) ToCreateSDKType() *shared.Service {
+func (r *ServiceResourceModel) ToSharedServiceRequest() *shared.ServiceRequest {
 	var caCertificates []string = nil
 	for _, caCertificatesItem := range r.CaCertificates {
 		caCertificates = append(caCertificates, caCertificatesItem.ValueString())
 	}
-	var clientCertificate *shared.ServiceClientCertificate
+	var clientCertificate *shared.ClientCertificate
 	if r.ClientCertificate != nil {
 		id := new(string)
 		if !r.ClientCertificate.ID.IsUnknown() && !r.ClientCertificate.ID.IsNull() {
@@ -21,7 +21,7 @@ func (r *ServiceResourceModel) ToCreateSDKType() *shared.Service {
 		} else {
 			id = nil
 		}
-		clientCertificate = &shared.ServiceClientCertificate{
+		clientCertificate = &shared.ClientCertificate{
 			ID: id,
 		}
 	}
@@ -31,30 +31,13 @@ func (r *ServiceResourceModel) ToCreateSDKType() *shared.Service {
 	} else {
 		connectTimeout = nil
 	}
-	createdAt := new(int64)
-	if !r.CreatedAt.IsUnknown() && !r.CreatedAt.IsNull() {
-		*createdAt = r.CreatedAt.ValueInt64()
-	} else {
-		createdAt = nil
-	}
 	enabled := new(bool)
 	if !r.Enabled.IsUnknown() && !r.Enabled.IsNull() {
 		*enabled = r.Enabled.ValueBool()
 	} else {
 		enabled = nil
 	}
-	host := new(string)
-	if !r.Host.IsUnknown() && !r.Host.IsNull() {
-		*host = r.Host.ValueString()
-	} else {
-		host = nil
-	}
-	id1 := new(string)
-	if !r.ID.IsUnknown() && !r.ID.IsNull() {
-		*id1 = r.ID.ValueString()
-	} else {
-		id1 = nil
-	}
+	host := r.Host.ValueString()
 	name := new(string)
 	if !r.Name.IsUnknown() && !r.Name.IsNull() {
 		*name = r.Name.ValueString()
@@ -73,9 +56,9 @@ func (r *ServiceResourceModel) ToCreateSDKType() *shared.Service {
 	} else {
 		port = nil
 	}
-	protocol := new(string)
+	protocol := new(shared.Protocol)
 	if !r.Protocol.IsUnknown() && !r.Protocol.IsNull() {
-		*protocol = r.Protocol.ValueString()
+		*protocol = shared.Protocol(r.Protocol.ValueString())
 	} else {
 		protocol = nil
 	}
@@ -101,23 +84,11 @@ func (r *ServiceResourceModel) ToCreateSDKType() *shared.Service {
 	} else {
 		tlsVerify = nil
 	}
-	tlsVerifyDepth := new(int64)
+	tlsVerifyDepth := new(string)
 	if !r.TLSVerifyDepth.IsUnknown() && !r.TLSVerifyDepth.IsNull() {
-		*tlsVerifyDepth = r.TLSVerifyDepth.ValueInt64()
+		*tlsVerifyDepth = r.TLSVerifyDepth.ValueString()
 	} else {
 		tlsVerifyDepth = nil
-	}
-	updatedAt := new(int64)
-	if !r.UpdatedAt.IsUnknown() && !r.UpdatedAt.IsNull() {
-		*updatedAt = r.UpdatedAt.ValueInt64()
-	} else {
-		updatedAt = nil
-	}
-	url := new(string)
-	if !r.URL.IsUnknown() && !r.URL.IsNull() {
-		*url = r.URL.ValueString()
-	} else {
-		url = nil
 	}
 	writeTimeout := new(int64)
 	if !r.WriteTimeout.IsUnknown() && !r.WriteTimeout.IsNull() {
@@ -125,14 +96,12 @@ func (r *ServiceResourceModel) ToCreateSDKType() *shared.Service {
 	} else {
 		writeTimeout = nil
 	}
-	out := shared.Service{
+	out := shared.ServiceRequest{
 		CaCertificates:    caCertificates,
 		ClientCertificate: clientCertificate,
 		ConnectTimeout:    connectTimeout,
-		CreatedAt:         createdAt,
 		Enabled:           enabled,
 		Host:              host,
-		ID:                id1,
 		Name:              name,
 		Path:              path,
 		Port:              port,
@@ -142,228 +111,67 @@ func (r *ServiceResourceModel) ToCreateSDKType() *shared.Service {
 		Tags:              tags,
 		TLSVerify:         tlsVerify,
 		TLSVerifyDepth:    tlsVerifyDepth,
-		UpdatedAt:         updatedAt,
-		URL:               url,
 		WriteTimeout:      writeTimeout,
 	}
 	return &out
 }
 
-func (r *ServiceResourceModel) ToGetSDKType() *shared.Service {
-	out := r.ToCreateSDKType()
-	return out
-}
-
-func (r *ServiceResourceModel) ToUpdateSDKType() *shared.Service {
-	out := r.ToCreateSDKType()
-	return out
-}
-
-func (r *ServiceResourceModel) ToDeleteSDKType() *shared.Service {
-	out := r.ToCreateSDKType()
-	return out
-}
-
-func (r *ServiceResourceModel) RefreshFromGetResponse(resp *operations.GetService200ApplicationJSON) {
-	if resp.ConnectTimeout != nil {
-		r.ConnectTimeout = types.Int64Value(*resp.ConnectTimeout)
-	} else {
-		r.ConnectTimeout = types.Int64Null()
-	}
-	if resp.CreatedAt != nil {
-		r.CreatedAt = types.Int64Value(*resp.CreatedAt)
-	} else {
-		r.CreatedAt = types.Int64Null()
-	}
-	if resp.Enabled != nil {
-		r.Enabled = types.BoolValue(*resp.Enabled)
-	} else {
-		r.Enabled = types.BoolNull()
-	}
-	if resp.Host != nil {
-		r.Host = types.StringValue(*resp.Host)
-	} else {
-		r.Host = types.StringNull()
-	}
-	if resp.ID != nil {
-		r.ID = types.StringValue(*resp.ID)
-	} else {
-		r.ID = types.StringNull()
-	}
-	if resp.Name != nil {
-		r.Name = types.StringValue(*resp.Name)
-	} else {
-		r.Name = types.StringNull()
-	}
-	if resp.Path != nil {
-		r.Path = types.StringValue(*resp.Path)
-	} else {
-		r.Path = types.StringNull()
-	}
-	if resp.Port != nil {
-		r.Port = types.Int64Value(*resp.Port)
-	} else {
-		r.Port = types.Int64Null()
-	}
+func (r *ServiceResourceModel) RefreshFromOperationsCreateServiceResponseBody(resp *operations.CreateServiceResponseBody) {
+	r.ConnectTimeout = types.Int64PointerValue(resp.ConnectTimeout)
+	r.CreatedAt = types.Int64PointerValue(resp.CreatedAt)
+	r.Enabled = types.BoolPointerValue(resp.Enabled)
+	r.Host = types.StringPointerValue(resp.Host)
+	r.ID = types.StringPointerValue(resp.ID)
+	r.Name = types.StringPointerValue(resp.Name)
+	r.Path = types.StringPointerValue(resp.Path)
+	r.Port = types.Int64PointerValue(resp.Port)
 	if resp.Protocol != nil {
-		r.Protocol = types.StringValue(*resp.Protocol)
+		r.Protocol = types.StringValue(string(*resp.Protocol))
 	} else {
 		r.Protocol = types.StringNull()
 	}
-	if resp.ReadTimeout != nil {
-		r.ReadTimeout = types.Int64Value(*resp.ReadTimeout)
-	} else {
-		r.ReadTimeout = types.Int64Null()
-	}
-	if resp.Retries != nil {
-		r.Retries = types.Int64Value(*resp.Retries)
-	} else {
-		r.Retries = types.Int64Null()
-	}
-	if resp.UpdatedAt != nil {
-		r.UpdatedAt = types.Int64Value(*resp.UpdatedAt)
-	} else {
-		r.UpdatedAt = types.Int64Null()
-	}
-	if resp.WriteTimeout != nil {
-		r.WriteTimeout = types.Int64Value(*resp.WriteTimeout)
-	} else {
-		r.WriteTimeout = types.Int64Null()
-	}
+	r.ReadTimeout = types.Int64PointerValue(resp.ReadTimeout)
+	r.Retries = types.Int64PointerValue(resp.Retries)
+	r.UpdatedAt = types.Int64PointerValue(resp.UpdatedAt)
+	r.WriteTimeout = types.Int64PointerValue(resp.WriteTimeout)
 }
 
-func (r *ServiceResourceModel) RefreshFromCreateResponse(resp *operations.CreateService201ApplicationJSON) {
-	if resp.ConnectTimeout != nil {
-		r.ConnectTimeout = types.Int64Value(*resp.ConnectTimeout)
-	} else {
-		r.ConnectTimeout = types.Int64Null()
-	}
-	if resp.CreatedAt != nil {
-		r.CreatedAt = types.Int64Value(*resp.CreatedAt)
-	} else {
-		r.CreatedAt = types.Int64Null()
-	}
-	if resp.Enabled != nil {
-		r.Enabled = types.BoolValue(*resp.Enabled)
-	} else {
-		r.Enabled = types.BoolNull()
-	}
-	if resp.Host != nil {
-		r.Host = types.StringValue(*resp.Host)
-	} else {
-		r.Host = types.StringNull()
-	}
-	if resp.ID != nil {
-		r.ID = types.StringValue(*resp.ID)
-	} else {
-		r.ID = types.StringNull()
-	}
-	if resp.Name != nil {
-		r.Name = types.StringValue(*resp.Name)
-	} else {
-		r.Name = types.StringNull()
-	}
-	if resp.Path != nil {
-		r.Path = types.StringValue(*resp.Path)
-	} else {
-		r.Path = types.StringNull()
-	}
-	if resp.Port != nil {
-		r.Port = types.Int64Value(*resp.Port)
-	} else {
-		r.Port = types.Int64Null()
-	}
+func (r *ServiceResourceModel) RefreshFromOperationsGetServiceResponseBody(resp *operations.GetServiceResponseBody) {
+	r.ConnectTimeout = types.Int64PointerValue(resp.ConnectTimeout)
+	r.CreatedAt = types.Int64PointerValue(resp.CreatedAt)
+	r.Enabled = types.BoolPointerValue(resp.Enabled)
+	r.Host = types.StringPointerValue(resp.Host)
+	r.ID = types.StringPointerValue(resp.ID)
+	r.Name = types.StringPointerValue(resp.Name)
+	r.Path = types.StringPointerValue(resp.Path)
+	r.Port = types.Int64PointerValue(resp.Port)
 	if resp.Protocol != nil {
-		r.Protocol = types.StringValue(*resp.Protocol)
+		r.Protocol = types.StringValue(string(*resp.Protocol))
 	} else {
 		r.Protocol = types.StringNull()
 	}
-	if resp.ReadTimeout != nil {
-		r.ReadTimeout = types.Int64Value(*resp.ReadTimeout)
-	} else {
-		r.ReadTimeout = types.Int64Null()
-	}
-	if resp.Retries != nil {
-		r.Retries = types.Int64Value(*resp.Retries)
-	} else {
-		r.Retries = types.Int64Null()
-	}
-	if resp.UpdatedAt != nil {
-		r.UpdatedAt = types.Int64Value(*resp.UpdatedAt)
-	} else {
-		r.UpdatedAt = types.Int64Null()
-	}
-	if resp.WriteTimeout != nil {
-		r.WriteTimeout = types.Int64Value(*resp.WriteTimeout)
-	} else {
-		r.WriteTimeout = types.Int64Null()
-	}
+	r.ReadTimeout = types.Int64PointerValue(resp.ReadTimeout)
+	r.Retries = types.Int64PointerValue(resp.Retries)
+	r.UpdatedAt = types.Int64PointerValue(resp.UpdatedAt)
+	r.WriteTimeout = types.Int64PointerValue(resp.WriteTimeout)
 }
 
-func (r *ServiceResourceModel) RefreshFromUpdateResponse(resp *operations.UpsertService200ApplicationJSON) {
-	if resp.ConnectTimeout != nil {
-		r.ConnectTimeout = types.Int64Value(*resp.ConnectTimeout)
-	} else {
-		r.ConnectTimeout = types.Int64Null()
-	}
-	if resp.CreatedAt != nil {
-		r.CreatedAt = types.Int64Value(*resp.CreatedAt)
-	} else {
-		r.CreatedAt = types.Int64Null()
-	}
-	if resp.Enabled != nil {
-		r.Enabled = types.BoolValue(*resp.Enabled)
-	} else {
-		r.Enabled = types.BoolNull()
-	}
-	if resp.Host != nil {
-		r.Host = types.StringValue(*resp.Host)
-	} else {
-		r.Host = types.StringNull()
-	}
-	if resp.ID != nil {
-		r.ID = types.StringValue(*resp.ID)
-	} else {
-		r.ID = types.StringNull()
-	}
-	if resp.Name != nil {
-		r.Name = types.StringValue(*resp.Name)
-	} else {
-		r.Name = types.StringNull()
-	}
-	if resp.Path != nil {
-		r.Path = types.StringValue(*resp.Path)
-	} else {
-		r.Path = types.StringNull()
-	}
-	if resp.Port != nil {
-		r.Port = types.Int64Value(*resp.Port)
-	} else {
-		r.Port = types.Int64Null()
-	}
+func (r *ServiceResourceModel) RefreshFromOperationsUpsertServiceResponseBody(resp *operations.UpsertServiceResponseBody) {
+	r.ConnectTimeout = types.Int64PointerValue(resp.ConnectTimeout)
+	r.CreatedAt = types.Int64PointerValue(resp.CreatedAt)
+	r.Enabled = types.BoolPointerValue(resp.Enabled)
+	r.Host = types.StringPointerValue(resp.Host)
+	r.ID = types.StringPointerValue(resp.ID)
+	r.Name = types.StringPointerValue(resp.Name)
+	r.Path = types.StringPointerValue(resp.Path)
+	r.Port = types.Int64PointerValue(resp.Port)
 	if resp.Protocol != nil {
-		r.Protocol = types.StringValue(*resp.Protocol)
+		r.Protocol = types.StringValue(string(*resp.Protocol))
 	} else {
 		r.Protocol = types.StringNull()
 	}
-	if resp.ReadTimeout != nil {
-		r.ReadTimeout = types.Int64Value(*resp.ReadTimeout)
-	} else {
-		r.ReadTimeout = types.Int64Null()
-	}
-	if resp.Retries != nil {
-		r.Retries = types.Int64Value(*resp.Retries)
-	} else {
-		r.Retries = types.Int64Null()
-	}
-	if resp.UpdatedAt != nil {
-		r.UpdatedAt = types.Int64Value(*resp.UpdatedAt)
-	} else {
-		r.UpdatedAt = types.Int64Null()
-	}
-	if resp.WriteTimeout != nil {
-		r.WriteTimeout = types.Int64Value(*resp.WriteTimeout)
-	} else {
-		r.WriteTimeout = types.Int64Null()
-	}
+	r.ReadTimeout = types.Int64PointerValue(resp.ReadTimeout)
+	r.Retries = types.Int64PointerValue(resp.Retries)
+	r.UpdatedAt = types.Int64PointerValue(resp.UpdatedAt)
+	r.WriteTimeout = types.Int64PointerValue(resp.WriteTimeout)
 }

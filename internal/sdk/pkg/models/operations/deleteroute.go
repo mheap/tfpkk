@@ -7,10 +7,23 @@ import (
 )
 
 type DeleteRouteRequest struct {
-	// The unique identifier or the name of the route to retrieve.
-	RouteID string `pathParam:"style=simple,explode=false,name=route_id"`
-	// The ID of your runtime group. This variable is available in the Konnect manager
-	RuntimeGroupID string `pathParam:"style=simple,explode=false,name=runtimeGroupId"`
+	// The ID of your control plane. This variable is available in the Konnect manager
+	ControlPlaneID string `pathParam:"style=simple,explode=false,name=controlPlaneId"`
+	RouteID        string `pathParam:"style=simple,explode=false,name=route_id"`
+}
+
+func (o *DeleteRouteRequest) GetControlPlaneID() string {
+	if o == nil {
+		return ""
+	}
+	return o.ControlPlaneID
+}
+
+func (o *DeleteRouteRequest) GetRouteID() string {
+	if o == nil {
+		return ""
+	}
+	return o.RouteID
 }
 
 type DeleteRouteResponse struct {
@@ -20,4 +33,25 @@ type DeleteRouteResponse struct {
 	StatusCode int
 	// Raw HTTP response; suitable for custom response parsing
 	RawResponse *http.Response
+}
+
+func (o *DeleteRouteResponse) GetContentType() string {
+	if o == nil {
+		return ""
+	}
+	return o.ContentType
+}
+
+func (o *DeleteRouteResponse) GetStatusCode() int {
+	if o == nil {
+		return 0
+	}
+	return o.StatusCode
+}
+
+func (o *DeleteRouteResponse) GetRawResponse() *http.Response {
+	if o == nil {
+		return nil
+	}
+	return o.RawResponse
 }

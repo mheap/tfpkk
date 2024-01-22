@@ -3,24 +3,45 @@
 package operations
 
 import (
-	"konnect/internal/sdk/pkg/models/shared"
+	"github.com/kong/terraform-provider-konnect/internal/sdk/pkg/models/shared"
 	"net/http"
 )
 
 type UpsertServiceRequest struct {
-	Service *shared.Service `request:"mediaType=application/json"`
-	// The ID of your runtime group. This variable is available in the Konnect manager
-	RuntimeGroupID string `pathParam:"style=simple,explode=false,name=runtimeGroupId"`
-	// ID **or** name of the service to lookup
+	// The UUID of your control plane. This variable is available in the Konnect manager
+	ControlPlaneID string                 `pathParam:"style=simple,explode=false,name=controlPlaneId"`
+	ServiceRequest *shared.ServiceRequest `request:"mediaType=application/json"`
+	// UUID of the service to lookup
 	ServiceID string `pathParam:"style=simple,explode=false,name=service_id"`
 }
 
-// UpsertService400ApplicationJSON - Invalid service
-type UpsertService400ApplicationJSON struct {
+func (o *UpsertServiceRequest) GetControlPlaneID() string {
+	if o == nil {
+		return ""
+	}
+	return o.ControlPlaneID
 }
 
-// UpsertService200ApplicationJSON - The service response object is returned when creating a new service or retreiving an existing service.
-type UpsertService200ApplicationJSON struct {
+func (o *UpsertServiceRequest) GetServiceRequest() *shared.ServiceRequest {
+	if o == nil {
+		return nil
+	}
+	return o.ServiceRequest
+}
+
+func (o *UpsertServiceRequest) GetServiceID() string {
+	if o == nil {
+		return ""
+	}
+	return o.ServiceID
+}
+
+// UpsertServiceServicesResponseBody - Invalid service
+type UpsertServiceServicesResponseBody struct {
+}
+
+// UpsertServiceResponseBody - The service response object is returned when creating a new service or retreiving an existing service.
+type UpsertServiceResponseBody struct {
 	ConnectTimeout *int64 `json:"connect_timeout,omitempty"`
 	// Unix epoch when the resource was last created.
 	CreatedAt *int64 `json:"created_at,omitempty"`
@@ -38,15 +59,141 @@ type UpsertService200ApplicationJSON struct {
 	WriteTimeout *int64  `json:"write_timeout,omitempty"`
 }
 
+func (o *UpsertServiceResponseBody) GetConnectTimeout() *int64 {
+	if o == nil {
+		return nil
+	}
+	return o.ConnectTimeout
+}
+
+func (o *UpsertServiceResponseBody) GetCreatedAt() *int64 {
+	if o == nil {
+		return nil
+	}
+	return o.CreatedAt
+}
+
+func (o *UpsertServiceResponseBody) GetEnabled() *bool {
+	if o == nil {
+		return nil
+	}
+	return o.Enabled
+}
+
+func (o *UpsertServiceResponseBody) GetHost() *string {
+	if o == nil {
+		return nil
+	}
+	return o.Host
+}
+
+func (o *UpsertServiceResponseBody) GetID() *string {
+	if o == nil {
+		return nil
+	}
+	return o.ID
+}
+
+func (o *UpsertServiceResponseBody) GetName() *string {
+	if o == nil {
+		return nil
+	}
+	return o.Name
+}
+
+func (o *UpsertServiceResponseBody) GetPath() *string {
+	if o == nil {
+		return nil
+	}
+	return o.Path
+}
+
+func (o *UpsertServiceResponseBody) GetPort() *int64 {
+	if o == nil {
+		return nil
+	}
+	return o.Port
+}
+
+func (o *UpsertServiceResponseBody) GetProtocol() *string {
+	if o == nil {
+		return nil
+	}
+	return o.Protocol
+}
+
+func (o *UpsertServiceResponseBody) GetReadTimeout() *int64 {
+	if o == nil {
+		return nil
+	}
+	return o.ReadTimeout
+}
+
+func (o *UpsertServiceResponseBody) GetRetries() *int64 {
+	if o == nil {
+		return nil
+	}
+	return o.Retries
+}
+
+func (o *UpsertServiceResponseBody) GetUpdatedAt() *int64 {
+	if o == nil {
+		return nil
+	}
+	return o.UpdatedAt
+}
+
+func (o *UpsertServiceResponseBody) GetWriteTimeout() *int64 {
+	if o == nil {
+		return nil
+	}
+	return o.WriteTimeout
+}
+
 type UpsertServiceResponse struct {
+	// The service response object is returned when creating a new service or retreiving an existing service.
+	TwoHundredApplicationJSONObject *UpsertServiceResponseBody
+	// Invalid service
+	FourHundredApplicationJSONObject *UpsertServiceServicesResponseBody
 	// HTTP response content type for this operation
 	ContentType string
 	// HTTP response status code for this operation
 	StatusCode int
 	// Raw HTTP response; suitable for custom response parsing
 	RawResponse *http.Response
-	// The service response object is returned when creating a new service or retreiving an existing service.
-	UpsertService200ApplicationJSONObject *UpsertService200ApplicationJSON
-	// Invalid service
-	UpsertService400ApplicationJSONObject *UpsertService400ApplicationJSON
+}
+
+func (o *UpsertServiceResponse) GetTwoHundredApplicationJSONObject() *UpsertServiceResponseBody {
+	if o == nil {
+		return nil
+	}
+	return o.TwoHundredApplicationJSONObject
+}
+
+func (o *UpsertServiceResponse) GetFourHundredApplicationJSONObject() *UpsertServiceServicesResponseBody {
+	if o == nil {
+		return nil
+	}
+	return o.FourHundredApplicationJSONObject
+}
+
+func (o *UpsertServiceResponse) GetContentType() string {
+	if o == nil {
+		return ""
+	}
+	return o.ContentType
+}
+
+func (o *UpsertServiceResponse) GetStatusCode() int {
+	if o == nil {
+		return 0
+	}
+	return o.StatusCode
+}
+
+func (o *UpsertServiceResponse) GetRawResponse() *http.Response {
+	if o == nil {
+		return nil
+	}
+	return o.RawResponse
 }

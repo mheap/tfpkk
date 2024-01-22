@@ -2,6 +2,29 @@
 
 package shared
 
+import (
+	"github.com/kong/terraform-provider-konnect/internal/sdk/pkg/utils"
+)
+
+type RouteDestinations struct {
+	IP   *string `json:"ip,omitempty"`
+	Port *int64  `json:"port,omitempty"`
+}
+
+func (o *RouteDestinations) GetIP() *string {
+	if o == nil {
+		return nil
+	}
+	return o.IP
+}
+
+func (o *RouteDestinations) GetPort() *int64 {
+	if o == nil {
+		return nil
+	}
+	return o.Port
+}
+
 // RouteHeaders - One or more lists of values indexed by header name that will cause this route to match if present in the request. The `Host` header cannot be used with this attribute: hosts should be specified using the `hosts` attribute. When `headers` contains only one value and that value starts with the special prefix `~*`, the value is interpreted as a regular expression.
 type RouteHeaders struct {
 }
@@ -11,43 +34,231 @@ type RouteService struct {
 	ID *string `json:"id,omitempty"`
 }
 
-// Route - Route entities define rules to match client requests. Every request matching a given route will be proxied to its associated service.
+func (o *RouteService) GetID() *string {
+	if o == nil {
+		return nil
+	}
+	return o.ID
+}
+
+type RouteSources struct {
+	IP   *string `json:"ip,omitempty"`
+	Port *int64  `json:"port,omitempty"`
+}
+
+func (o *RouteSources) GetIP() *string {
+	if o == nil {
+		return nil
+	}
+	return o.IP
+}
+
+func (o *RouteSources) GetPort() *int64 {
+	if o == nil {
+		return nil
+	}
+	return o.Port
+}
+
+// Route entities define rules to match client requests. Every request matching a given route will be proxied to its associated service.
 type Route struct {
 	// Unix epoch when the resource was created.
 	CreatedAt *int64 `json:"created_at,omitempty"`
+	// A list of IP destinations of incoming connections that match this route when using stream routing. Each entry is an object with fields ip (optionally in CIDR range notation) and/or port.
+	Destinations []RouteDestinations `json:"destinations,omitempty"`
 	// One or more lists of values indexed by header name that will cause this route to match if present in the request. The `Host` header cannot be used with this attribute: hosts should be specified using the `hosts` attribute. When `headers` contains only one value and that value starts with the special prefix `~*`, the value is interpreted as a regular expression.
 	Headers *RouteHeaders `json:"headers,omitempty"`
 	// A list of domain names that match this route. Note that the hosts value is case sensitive.
 	Hosts []string `json:"hosts,omitempty"`
 	// The status code Kong responds with when all properties of a route match except the protocol i.e. if the protocol of the request is `HTTP` instead of `HTTPS`. `Location` header is injected by Kong if the field is set to 301, 302, 307 or 308. Note: This config applies only if the route is configured to only accept the `https` protocol.
-	HTTPSRedirectStatusCode *int64  `json:"https_redirect_status_code,omitempty"`
+	HTTPSRedirectStatusCode *int64  `default:"426" json:"https_redirect_status_code"`
 	ID                      *string `json:"id,omitempty"`
 	// A list of HTTP methods that match this route.
 	Methods []string `json:"methods,omitempty"`
 	// The name of the route. Route names must be unique, and they are case sensitive. For example, there can be two different routes named test and Test.
 	Name *string `json:"name,omitempty"`
 	// Controls how the service path, route path and requested path are combined when sending a request to the upstream. See above for a detailed description of each behavior.
-	PathHandling *string `json:"path_handling,omitempty"`
+	PathHandling *string `default:"v0" json:"path_handling"`
 	// A list of paths that match this route.
 	Paths []string `json:"paths,omitempty"`
 	// When matching a route via one of the `hosts` domain names, use the request `Host` header in the upstream request headers. If set to `false`, the upstream `Host` header will be that of the service's `host`.
-	PreserveHost *bool `json:"preserve_host,omitempty"`
+	PreserveHost *bool `default:"false" json:"preserve_host"`
 	// An array of the protocols this route should allow. See the [route Object](#route-object) section for a list of accepted protocols. When set to only `https`, HTTP requests are answered with an upgrade error. When set to only `http`, HTTPS requests are answered with an error.
 	Protocols []string `json:"protocols,omitempty"`
 	// A number used to choose which route resolves a given request when several routes match it using regexes simultaneously. When two routes match the path and have the same `regex_priority`, the older one (lowest `created_at`) is used. Note that the priority for non-regex routes is different (longer non-regex routes are matched before shorter ones).
-	RegexPriority *int64 `json:"regex_priority,omitempty"`
+	RegexPriority *int64 `default:"0" json:"regex_priority"`
 	// Whether to enable request body buffering or not. With HTTP 1.1, it may make sense to turn this off on services that receive data with chunked transfer encoding.
-	RequestBuffering *bool `json:"request_buffering,omitempty"`
+	RequestBuffering *bool `default:"true" json:"request_buffering"`
 	// Whether to enable response body buffering or not. With HTTP 1.1, it may make sense to turn this off on services that send data with chunked transfer encoding.
-	ResponseBuffering *bool `json:"response_buffering,omitempty"`
+	ResponseBuffering *bool `default:"true" json:"response_buffering"`
 	// The service this route is associated to. This is where the route proxies traffic to.
 	Service *RouteService `json:"service,omitempty"`
 	// A list of SNIs that match this route when using stream routing.
 	Snis []string `json:"snis,omitempty"`
+	// A list of IP sources of incoming connections that match this route when using stream routing. Each entry is an object with fields ip (optionally in CIDR range notation) and/or port.
+	Sources []RouteSources `json:"sources,omitempty"`
 	// When matching a route via one of the `paths`, strip the matching prefix from the upstream request URL.
-	StripPath *bool `json:"strip_path,omitempty"`
+	StripPath *bool `default:"true" json:"strip_path"`
 	// An optional set of strings associated with the route for grouping and filtering.
 	Tags []string `json:"tags,omitempty"`
 	// Unix epoch when the resource was last updated.
 	UpdatedAt *int64 `json:"updated_at,omitempty"`
+}
+
+func (r Route) MarshalJSON() ([]byte, error) {
+	return utils.MarshalJSON(r, "", false)
+}
+
+func (r *Route) UnmarshalJSON(data []byte) error {
+	if err := utils.UnmarshalJSON(data, &r, "", false, false); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (o *Route) GetCreatedAt() *int64 {
+	if o == nil {
+		return nil
+	}
+	return o.CreatedAt
+}
+
+func (o *Route) GetDestinations() []RouteDestinations {
+	if o == nil {
+		return nil
+	}
+	return o.Destinations
+}
+
+func (o *Route) GetHeaders() *RouteHeaders {
+	if o == nil {
+		return nil
+	}
+	return o.Headers
+}
+
+func (o *Route) GetHosts() []string {
+	if o == nil {
+		return nil
+	}
+	return o.Hosts
+}
+
+func (o *Route) GetHTTPSRedirectStatusCode() *int64 {
+	if o == nil {
+		return nil
+	}
+	return o.HTTPSRedirectStatusCode
+}
+
+func (o *Route) GetID() *string {
+	if o == nil {
+		return nil
+	}
+	return o.ID
+}
+
+func (o *Route) GetMethods() []string {
+	if o == nil {
+		return nil
+	}
+	return o.Methods
+}
+
+func (o *Route) GetName() *string {
+	if o == nil {
+		return nil
+	}
+	return o.Name
+}
+
+func (o *Route) GetPathHandling() *string {
+	if o == nil {
+		return nil
+	}
+	return o.PathHandling
+}
+
+func (o *Route) GetPaths() []string {
+	if o == nil {
+		return nil
+	}
+	return o.Paths
+}
+
+func (o *Route) GetPreserveHost() *bool {
+	if o == nil {
+		return nil
+	}
+	return o.PreserveHost
+}
+
+func (o *Route) GetProtocols() []string {
+	if o == nil {
+		return nil
+	}
+	return o.Protocols
+}
+
+func (o *Route) GetRegexPriority() *int64 {
+	if o == nil {
+		return nil
+	}
+	return o.RegexPriority
+}
+
+func (o *Route) GetRequestBuffering() *bool {
+	if o == nil {
+		return nil
+	}
+	return o.RequestBuffering
+}
+
+func (o *Route) GetResponseBuffering() *bool {
+	if o == nil {
+		return nil
+	}
+	return o.ResponseBuffering
+}
+
+func (o *Route) GetService() *RouteService {
+	if o == nil {
+		return nil
+	}
+	return o.Service
+}
+
+func (o *Route) GetSnis() []string {
+	if o == nil {
+		return nil
+	}
+	return o.Snis
+}
+
+func (o *Route) GetSources() []RouteSources {
+	if o == nil {
+		return nil
+	}
+	return o.Sources
+}
+
+func (o *Route) GetStripPath() *bool {
+	if o == nil {
+		return nil
+	}
+	return o.StripPath
+}
+
+func (o *Route) GetTags() []string {
+	if o == nil {
+		return nil
+	}
+	return o.Tags
+}
+
+func (o *Route) GetUpdatedAt() *int64 {
+	if o == nil {
+		return nil
+	}
+	return o.UpdatedAt
 }

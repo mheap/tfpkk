@@ -5,14 +5,13 @@ package provider
 import (
 	"context"
 	"fmt"
-	"konnect/internal/sdk"
-	"konnect/internal/sdk/pkg/models/operations"
-
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
+	"github.com/kong/terraform-provider-konnect/internal/sdk"
+	"github.com/kong/terraform-provider-konnect/internal/sdk/pkg/models/operations"
 )
 
 // Ensure provider defined types fully satisfy framework interfaces.
@@ -32,11 +31,11 @@ type PortalAuthResource struct {
 type PortalAuthResourceModel struct {
 	BasicAuthEnabled       types.Bool           `tfsdk:"basic_auth_enabled"`
 	KonnectMappingEnabled  types.Bool           `tfsdk:"konnect_mapping_enabled"`
+	OidcConfig             *PortalOIDCConfig    `tfsdk:"oidc_config"`
 	OidcAuthEnabled        types.Bool           `tfsdk:"oidc_auth_enabled"`
 	OidcClaimMappings      *PortalClaimMappings `tfsdk:"oidc_claim_mappings"`
 	OidcClientID           types.String         `tfsdk:"oidc_client_id"`
 	OidcClientSecret       types.String         `tfsdk:"oidc_client_secret"`
-	OidcConfig             *PortalOIDCConfig    `tfsdk:"oidc_config"`
 	OidcIssuer             types.String         `tfsdk:"oidc_issuer"`
 	OidcScopes             []types.String       `tfsdk:"oidc_scopes"`
 	OidcTeamMappingEnabled types.Bool           `tfsdk:"oidc_team_mapping_enabled"`
@@ -53,36 +52,14 @@ func (r *PortalAuthResource) Schema(ctx context.Context, req resource.SchemaRequ
 
 		Attributes: map[string]schema.Attribute{
 			"basic_auth_enabled": schema.BoolAttribute{
-				Required:    true,
+				Computed:    true,
+				Optional:    true,
 				Description: `The organization has basic auth enabled.`,
 			},
 			"konnect_mapping_enabled": schema.BoolAttribute{
-				Required:    true,
-				Description: `A Konnect Identity Admin assigns teams to a developer.`,
-			},
-			"oidc_auth_enabled": schema.BoolAttribute{
-				Required:    true,
-				Description: `The organization has OIDC disabled.`,
-			},
-			"oidc_claim_mappings": schema.SingleNestedAttribute{
-				Optional: true,
-				Attributes: map[string]schema.Attribute{
-					"email": schema.StringAttribute{
-						Optional: true,
-					},
-					"groups": schema.StringAttribute{
-						Optional: true,
-					},
-					"name": schema.StringAttribute{
-						Optional: true,
-					},
-				},
-			},
-			"oidc_client_id": schema.StringAttribute{
-				Optional: true,
-			},
-			"oidc_client_secret": schema.StringAttribute{
-				Optional: true,
+				Computed:    true,
+				Optional:    true,
+				Description: `Whether a Konnect Identity Admin assigns teams to a developer.`,
 			},
 			"oidc_config": schema.SingleNestedAttribute{
 				Computed: true,
@@ -91,15 +68,19 @@ func (r *PortalAuthResource) Schema(ctx context.Context, req resource.SchemaRequ
 						Computed: true,
 						Attributes: map[string]schema.Attribute{
 							"email": schema.StringAttribute{
-								Computed: true,
+								Computed:    true,
+								Description: `Default: "email"`,
 							},
 							"groups": schema.StringAttribute{
-								Computed: true,
+								Computed:    true,
+								Description: `Default: "groups"`,
 							},
 							"name": schema.StringAttribute{
-								Computed: true,
+								Computed:    true,
+								Description: `Default: "name"`,
 							},
 						},
+						Description: `Mappings from a portal developer atribute to an Identity Provider claim.`,
 					},
 					"client_id": schema.StringAttribute{
 						Computed: true,
@@ -112,6 +93,36 @@ func (r *PortalAuthResource) Schema(ctx context.Context, req resource.SchemaRequ
 						ElementType: types.StringType,
 					},
 				},
+				Description: `Configuration properties for an OpenID Connect Identity Provider.`,
+			},
+			"oidc_auth_enabled": schema.BoolAttribute{
+				Computed:    true,
+				Optional:    true,
+				Description: `The organization has OIDC disabled.`,
+			},
+			"oidc_claim_mappings": schema.SingleNestedAttribute{
+				Optional: true,
+				Attributes: map[string]schema.Attribute{
+					"email": schema.StringAttribute{
+						Optional:    true,
+						Description: `Default: "email"`,
+					},
+					"groups": schema.StringAttribute{
+						Optional:    true,
+						Description: `Default: "groups"`,
+					},
+					"name": schema.StringAttribute{
+						Optional:    true,
+						Description: `Default: "name"`,
+					},
+				},
+				Description: `Mappings from a portal developer atribute to an Identity Provider claim.`,
+			},
+			"oidc_client_id": schema.StringAttribute{
+				Optional: true,
+			},
+			"oidc_client_secret": schema.StringAttribute{
+				Optional: true,
 			},
 			"oidc_issuer": schema.StringAttribute{
 				Optional: true,
@@ -121,8 +132,9 @@ func (r *PortalAuthResource) Schema(ctx context.Context, req resource.SchemaRequ
 				ElementType: types.StringType,
 			},
 			"oidc_team_mapping_enabled": schema.BoolAttribute{
-				Required:    true,
-				Description: `IdP groups determine the Portal Teams a developer has.`,
+				Computed:    true,
+				Optional:    true,
+				Description: `Whether IdP groups determine the Konnect Portal teams a developer has.`,
 			},
 			"portal_id": schema.StringAttribute{
 				Required:    true,
@@ -154,14 +166,14 @@ func (r *PortalAuthResource) Configure(ctx context.Context, req resource.Configu
 
 func (r *PortalAuthResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	var data *PortalAuthResourceModel
-	var item types.Object
+	var plan types.Object
 
-	resp.Diagnostics.Append(req.Plan.Get(ctx, &item)...)
+	resp.Diagnostics.Append(req.Plan.Get(ctx, &plan)...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	resp.Diagnostics.Append(item.As(ctx, &data, basetypes.ObjectAsOptions{
+	resp.Diagnostics.Append(plan.As(ctx, &data, basetypes.ObjectAsOptions{
 		UnhandledNullAsEmpty:    true,
 		UnhandledUnknownAsEmpty: true,
 	})...)
@@ -170,7 +182,7 @@ func (r *PortalAuthResource) Create(ctx context.Context, req resource.CreateRequ
 		return
 	}
 
-	portalAuthenticationSettingsUpdateRequest := data.ToCreateSDKType()
+	portalAuthenticationSettingsUpdateRequest := data.ToSharedPortalAuthenticationSettingsUpdateRequest()
 	portalID := data.PortalID.ValueString()
 	request := operations.UpdatePortalAuthenticationSettingsRequest{
 		PortalAuthenticationSettingsUpdateRequest: portalAuthenticationSettingsUpdateRequest,
@@ -192,11 +204,38 @@ func (r *PortalAuthResource) Create(ctx context.Context, req resource.CreateRequ
 		resp.Diagnostics.AddError(fmt.Sprintf("unexpected response from API. Got an unexpected response code %v", res.StatusCode), debugResponse(res.RawResponse))
 		return
 	}
-	if res.PortalAuthenticationSettings == nil {
+	if res.PortalAuthenticationSettingsResponse == nil {
 		resp.Diagnostics.AddError("unexpected response from API. No response body", debugResponse(res.RawResponse))
 		return
 	}
-	data.RefreshFromCreateResponse(res.PortalAuthenticationSettings)
+	data.RefreshFromSharedPortalAuthenticationSettingsResponse(res.PortalAuthenticationSettingsResponse)
+	refreshPlan(ctx, plan, &data, resp.Diagnostics)
+	portalId1 := data.PortalID.ValueString()
+	request1 := operations.GetPortalAuthenticationSettingsRequest{
+		PortalID: portalId1,
+	}
+	res1, err := r.client.PortalAuthSettings.GetPortalAuthenticationSettings(ctx, request1)
+	if err != nil {
+		resp.Diagnostics.AddError("failure to invoke API", err.Error())
+		if res1 != nil && res1.RawResponse != nil {
+			resp.Diagnostics.AddError("unexpected http request/response", debugResponse(res1.RawResponse))
+		}
+		return
+	}
+	if res1 == nil {
+		resp.Diagnostics.AddError("unexpected response from API", fmt.Sprintf("%v", res1))
+		return
+	}
+	if res1.StatusCode != 200 {
+		resp.Diagnostics.AddError(fmt.Sprintf("unexpected response from API. Got an unexpected response code %v", res1.StatusCode), debugResponse(res1.RawResponse))
+		return
+	}
+	if res1.PortalAuthenticationSettingsResponse == nil {
+		resp.Diagnostics.AddError("unexpected response from API. No response body", debugResponse(res1.RawResponse))
+		return
+	}
+	data.RefreshFromSharedPortalAuthenticationSettingsResponse(res1.PortalAuthenticationSettingsResponse)
+	refreshPlan(ctx, plan, &data, resp.Diagnostics)
 
 	// Save updated data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
@@ -240,11 +279,11 @@ func (r *PortalAuthResource) Read(ctx context.Context, req resource.ReadRequest,
 		resp.Diagnostics.AddError(fmt.Sprintf("unexpected response from API. Got an unexpected response code %v", res.StatusCode), debugResponse(res.RawResponse))
 		return
 	}
-	if res.PortalAuthenticationSettings == nil {
+	if res.PortalAuthenticationSettingsResponse == nil {
 		resp.Diagnostics.AddError("unexpected response from API. No response body", debugResponse(res.RawResponse))
 		return
 	}
-	data.RefreshFromGetResponse(res.PortalAuthenticationSettings)
+	data.RefreshFromSharedPortalAuthenticationSettingsResponse(res.PortalAuthenticationSettingsResponse)
 
 	// Save updated data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
@@ -252,12 +291,19 @@ func (r *PortalAuthResource) Read(ctx context.Context, req resource.ReadRequest,
 
 func (r *PortalAuthResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
 	var data *PortalAuthResourceModel
+	var plan types.Object
+
+	resp.Diagnostics.Append(req.Plan.Get(ctx, &plan)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
 	merge(ctx, req, resp, &data)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	portalAuthenticationSettingsUpdateRequest := data.ToUpdateSDKType()
+	portalAuthenticationSettingsUpdateRequest := data.ToSharedPortalAuthenticationSettingsUpdateRequest()
 	portalID := data.PortalID.ValueString()
 	request := operations.UpdatePortalAuthenticationSettingsRequest{
 		PortalAuthenticationSettingsUpdateRequest: portalAuthenticationSettingsUpdateRequest,
@@ -279,11 +325,38 @@ func (r *PortalAuthResource) Update(ctx context.Context, req resource.UpdateRequ
 		resp.Diagnostics.AddError(fmt.Sprintf("unexpected response from API. Got an unexpected response code %v", res.StatusCode), debugResponse(res.RawResponse))
 		return
 	}
-	if res.PortalAuthenticationSettings == nil {
+	if res.PortalAuthenticationSettingsResponse == nil {
 		resp.Diagnostics.AddError("unexpected response from API. No response body", debugResponse(res.RawResponse))
 		return
 	}
-	data.RefreshFromUpdateResponse(res.PortalAuthenticationSettings)
+	data.RefreshFromSharedPortalAuthenticationSettingsResponse(res.PortalAuthenticationSettingsResponse)
+	refreshPlan(ctx, plan, &data, resp.Diagnostics)
+	portalId1 := data.PortalID.ValueString()
+	request1 := operations.GetPortalAuthenticationSettingsRequest{
+		PortalID: portalId1,
+	}
+	res1, err := r.client.PortalAuthSettings.GetPortalAuthenticationSettings(ctx, request1)
+	if err != nil {
+		resp.Diagnostics.AddError("failure to invoke API", err.Error())
+		if res1 != nil && res1.RawResponse != nil {
+			resp.Diagnostics.AddError("unexpected http request/response", debugResponse(res1.RawResponse))
+		}
+		return
+	}
+	if res1 == nil {
+		resp.Diagnostics.AddError("unexpected response from API", fmt.Sprintf("%v", res1))
+		return
+	}
+	if res1.StatusCode != 200 {
+		resp.Diagnostics.AddError(fmt.Sprintf("unexpected response from API. Got an unexpected response code %v", res1.StatusCode), debugResponse(res1.RawResponse))
+		return
+	}
+	if res1.PortalAuthenticationSettingsResponse == nil {
+		resp.Diagnostics.AddError("unexpected response from API. No response body", debugResponse(res1.RawResponse))
+		return
+	}
+	data.RefreshFromSharedPortalAuthenticationSettingsResponse(res1.PortalAuthenticationSettingsResponse)
+	refreshPlan(ctx, plan, &data, resp.Diagnostics)
 
 	// Save updated data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
@@ -311,5 +384,5 @@ func (r *PortalAuthResource) Delete(ctx context.Context, req resource.DeleteRequ
 }
 
 func (r *PortalAuthResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
-	resource.ImportStatePassthroughID(ctx, path.Root("portal_id"), req, resp)
+	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("portal_id"), req.ID)...)
 }

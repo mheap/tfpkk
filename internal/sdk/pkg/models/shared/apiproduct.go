@@ -3,6 +3,7 @@
 package shared
 
 import (
+	"github.com/kong/terraform-provider-konnect/internal/sdk/pkg/utils"
 	"time"
 )
 
@@ -24,4 +25,73 @@ type APIProduct struct {
 	PortalIds []string `json:"portal_ids"`
 	// An ISO-8601 timestamp representation of entity update date.
 	UpdatedAt time.Time `json:"updated_at"`
+	// The number of product versions attached to this API product
+	VersionCount float64 `json:"version_count"`
+}
+
+func (a APIProduct) MarshalJSON() ([]byte, error) {
+	return utils.MarshalJSON(a, "", false)
+}
+
+func (a *APIProduct) UnmarshalJSON(data []byte) error {
+	if err := utils.UnmarshalJSON(data, &a, "", false, false); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (o *APIProduct) GetCreatedAt() time.Time {
+	if o == nil {
+		return time.Time{}
+	}
+	return o.CreatedAt
+}
+
+func (o *APIProduct) GetDescription() *string {
+	if o == nil {
+		return nil
+	}
+	return o.Description
+}
+
+func (o *APIProduct) GetID() string {
+	if o == nil {
+		return ""
+	}
+	return o.ID
+}
+
+func (o *APIProduct) GetLabels() map[string]string {
+	if o == nil {
+		return map[string]string{}
+	}
+	return o.Labels
+}
+
+func (o *APIProduct) GetName() string {
+	if o == nil {
+		return ""
+	}
+	return o.Name
+}
+
+func (o *APIProduct) GetPortalIds() []string {
+	if o == nil {
+		return []string{}
+	}
+	return o.PortalIds
+}
+
+func (o *APIProduct) GetUpdatedAt() time.Time {
+	if o == nil {
+		return time.Time{}
+	}
+	return o.UpdatedAt
+}
+
+func (o *APIProduct) GetVersionCount() float64 {
+	if o == nil {
+		return 0.0
+	}
+	return o.VersionCount
 }
