@@ -1,4 +1,4 @@
 data "konnect_consumer" "my_consumer" {
-  control_plane_id = "9e316aa8-acf7-4cfc-8b3d-1fb1f5dcae84"
-  id               = "308e3d7d-8500-48bd-b868-ea37a58194ef"
+  control_plane_id = "fcb828c7-e950-4080-9b3e-9d8df5c53711"
+  id               = "f3ae3959-b761-4892-9fef-5e43d0eabc1b"
 }

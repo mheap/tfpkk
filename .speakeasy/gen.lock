@@ -1,12 +1,12 @@
 lockVersion: 2.0.0
 id: f7a08c6a-272d-43a4-951c-9da08faf703d
 management:
-  docChecksum: 2902e330978c84c6547923a460e9dcda
+  docChecksum: b407fb7d190ced343a1150d099dafac8
   docVersion: 2.1.0
   speakeasyVersion: internal
   generationVersion: 2.250.15
-  releaseVersion: 0.19.4
-  configChecksum: cb4e2b918d05df58efeed9d0d9037610
+  releaseVersion: 0.19.5
+  configChecksum: 05d4fa2fafd14021fa7a786e60b11e5a
 features:
   terraform:
     additionalProperties: 0.1.2
@@ -170,25 +170,40 @@ generatedFiles:
   - internal/sdk/pkg/models/operations/createkeyauth.go
   - internal/sdk/pkg/models/operations/getcontrolplanescontrolplaneidcoreentitiesconsumersconsumeridkeyauth.go
   - internal/sdk/pkg/models/operations/postcontrolplanescontrolplaneidcoreentitiesconsumersconsumeridkeyauth.go
+  - internal/sdk/pkg/models/operations/createaclplugin.go
   - internal/sdk/pkg/models/operations/createaiproxyplugin.go
+  - internal/sdk/pkg/models/operations/createapplicationregistrationplugin.go
   - internal/sdk/pkg/models/operations/createbasicauthplugin.go
+  - internal/sdk/pkg/models/operations/createcorsplugin.go
+  - internal/sdk/pkg/models/operations/createexittransformerplugin.go
   - internal/sdk/pkg/models/operations/createkeyauthplugin.go
   - internal/sdk/pkg/models/operations/createplugin.go
+  - internal/sdk/pkg/models/operations/createprometheusplugin.go
   - internal/sdk/pkg/models/operations/createratelimitingplugin.go
   - internal/sdk/pkg/models/operations/createrequesttransformerplugin.go
+  - internal/sdk/pkg/models/operations/deleteaclplugin.go
   - internal/sdk/pkg/models/operations/deleteaiproxyplugin.go
+  - internal/sdk/pkg/models/operations/deleteapplicationregistrationplugin.go
   - internal/sdk/pkg/models/operations/deletebasicauthplugin.go
+  - internal/sdk/pkg/models/operations/deletecorsplugin.go
+  - internal/sdk/pkg/models/operations/deleteexittransformerplugin.go
   - internal/sdk/pkg/models/operations/deletekeyauthplugin.go
   - internal/sdk/pkg/models/operations/deleteplugin.go
+  - internal/sdk/pkg/models/operations/deleteprometheusplugin.go
   - internal/sdk/pkg/models/operations/deleteratelimitingplugin.go
   - internal/sdk/pkg/models/operations/deleterequesttransformerplugin.go
   - internal/sdk/pkg/models/operations/deletecontrolplanescontrolplaneidcoreentitiesconsumersconsumeridpluginspluginid.go
   - internal/sdk/pkg/models/operations/deletecontrolplanescontrolplaneidcoreentitiesroutesrouteidpluginspluginid.go
   - internal/sdk/pkg/models/operations/deletecontrolplanescontrolplaneidcoreentitiesservicesserviceidpluginspluginid.go
+  - internal/sdk/pkg/models/operations/getaclplugin.go
   - internal/sdk/pkg/models/operations/getaiproxyplugin.go
+  - internal/sdk/pkg/models/operations/getapplicationregistrationplugin.go
   - internal/sdk/pkg/models/operations/getbasicauthplugin.go
+  - internal/sdk/pkg/models/operations/getcorsplugin.go
+  - internal/sdk/pkg/models/operations/getexittransformerplugin.go
   - internal/sdk/pkg/models/operations/getkeyauthplugin.go
   - internal/sdk/pkg/models/operations/getplugin.go
+  - internal/sdk/pkg/models/operations/getprometheusplugin.go
   - internal/sdk/pkg/models/operations/getratelimitingplugin.go
   - internal/sdk/pkg/models/operations/getrequesttransformerplugin.go
   - internal/sdk/pkg/models/operations/getcontrolplanescontrolplaneidcoreentitiesconsumersconsumeridplugins.go
@@ -203,9 +218,14 @@ generatedFiles:
   - internal/sdk/pkg/models/operations/putcontrolplanescontrolplaneidcoreentitiesconsumersconsumeridpluginspluginid.go
   - internal/sdk/pkg/models/operations/putcontrolplanescontrolplaneidcoreentitiesroutesrouteidpluginspluginid.go
   - internal/sdk/pkg/models/operations/putcontrolplanescontrolplaneidcoreentitiesservicesserviceidpluginspluginid.go
+  - internal/sdk/pkg/models/operations/updateaclplugin.go
   - internal/sdk/pkg/models/operations/updateaiproxyplugin.go
+  - internal/sdk/pkg/models/operations/updateapplicationregistrationplugin.go
   - internal/sdk/pkg/models/operations/updatebasicauthplugin.go
+  - internal/sdk/pkg/models/operations/updatecorsplugin.go
+  - internal/sdk/pkg/models/operations/updateexittransformerplugin.go
   - internal/sdk/pkg/models/operations/updatekeyauthplugin.go
+  - internal/sdk/pkg/models/operations/updateprometheusplugin.go
   - internal/sdk/pkg/models/operations/updateratelimitingplugin.go
   - internal/sdk/pkg/models/operations/updaterequesttransformerplugin.go
   - internal/sdk/pkg/models/operations/createkeyset.go
@@ -290,14 +310,24 @@ generatedFiles:
   - internal/sdk/pkg/models/shared/apikey.go
   - internal/sdk/pkg/models/shared/createapikey.go
   - internal/sdk/pkg/models/shared/createapikeywithoutparents.go
+  - internal/sdk/pkg/models/shared/aclplugin.go
+  - internal/sdk/pkg/models/shared/createaclplugin.go
   - internal/sdk/pkg/models/shared/aiproxyplugin.go
   - internal/sdk/pkg/models/shared/createaiproxyplugin.go
+  - internal/sdk/pkg/models/shared/applicationregistrationplugin.go
+  - internal/sdk/pkg/models/shared/createapplicationregistrationplugin.go
   - internal/sdk/pkg/models/shared/basicauthplugin.go
   - internal/sdk/pkg/models/shared/createbasicauthplugin.go
+  - internal/sdk/pkg/models/shared/corsplugin.go
+  - internal/sdk/pkg/models/shared/createcorsplugin.go
+  - internal/sdk/pkg/models/shared/exittransformerplugin.go
+  - internal/sdk/pkg/models/shared/createexittransformerplugin.go
   - internal/sdk/pkg/models/shared/keyauthplugin.go
   - internal/sdk/pkg/models/shared/createkeyauthplugin.go
   - internal/sdk/pkg/models/shared/plugin.go
   - internal/sdk/pkg/models/shared/createplugin.go
+  - internal/sdk/pkg/models/shared/prometheusplugin.go
+  - internal/sdk/pkg/models/shared/createprometheusplugin.go
   - internal/sdk/pkg/models/shared/ratelimitingplugin.go
   - internal/sdk/pkg/models/shared/createratelimitingplugin.go
   - internal/sdk/pkg/models/shared/requesttransformerplugin.go
@@ -340,13 +370,18 @@ generatedFiles:
   - internal/provider/type_control_plane_config.go
   - internal/provider/type_proxy_url.go
   - internal/provider/type_pem.go
+  - internal/provider/type_create_acl_plugin_config.go
   - internal/provider/type_create_ai_proxy_plugin_auth.go
   - internal/provider/type_create_ai_proxy_plugin_logging.go
   - internal/provider/type_create_ai_proxy_plugin_options.go
   - internal/provider/type_create_ai_proxy_plugin_model.go
   - internal/provider/type_create_ai_proxy_plugin_config.go
+  - internal/provider/type_create_application_registration_plugin_config.go
   - internal/provider/type_create_basic_auth_plugin_config.go
+  - internal/provider/type_create_cors_plugin_config.go
+  - internal/provider/type_create_exit_transformer_plugin_config.go
   - internal/provider/type_create_key_auth_plugin_config.go
+  - internal/provider/type_create_prometheus_plugin_config.go
   - internal/provider/type_create_rate_limiting_plugin_config.go
   - internal/provider/type_add.go
   - internal/provider/type_replace.go
@@ -416,15 +451,30 @@ generatedFiles:
   - internal/provider/plugin_resource.go
   - internal/provider/plugin_resource_sdk.go
   - examples/resources/konnect_plugin/resource.tf
+  - internal/provider/pluginacl_resource.go
+  - internal/provider/pluginacl_resource_sdk.go
+  - examples/resources/konnect_plugin_acl/resource.tf
   - internal/provider/pluginaiproxy_resource.go
   - internal/provider/pluginaiproxy_resource_sdk.go
   - examples/resources/konnect_plugin_ai_proxy/resource.tf
+  - internal/provider/pluginapplicationregistration_resource.go
+  - internal/provider/pluginapplicationregistration_resource_sdk.go
+  - examples/resources/konnect_plugin_application_registration/resource.tf
   - internal/provider/pluginbasicauth_resource.go
   - internal/provider/pluginbasicauth_resource_sdk.go
   - examples/resources/konnect_plugin_basic_auth/resource.tf
+  - internal/provider/plugincors_resource.go
+  - internal/provider/plugincors_resource_sdk.go
+  - examples/resources/konnect_plugin_cors/resource.tf
+  - internal/provider/pluginexittransformer_resource.go
+  - internal/provider/pluginexittransformer_resource_sdk.go
+  - examples/resources/konnect_plugin_exit_transformer/resource.tf
   - internal/provider/pluginkeyauth_resource.go
   - internal/provider/pluginkeyauth_resource_sdk.go
   - examples/resources/konnect_plugin_key_auth/resource.tf
+  - internal/provider/pluginprometheus_resource.go
+  - internal/provider/pluginprometheus_resource_sdk.go
+  - examples/resources/konnect_plugin_prometheus/resource.tf
   - internal/provider/pluginratelimiting_resource.go
   - internal/provider/pluginratelimiting_resource_sdk.go
   - examples/resources/konnect_plugin_rate_limiting/resource.tf
@@ -500,15 +550,30 @@ generatedFiles:
   - internal/provider/plugin_data_source.go
   - internal/provider/plugin_data_source_sdk.go
   - examples/data-sources/konnect_plugin/data-source.tf
+  - internal/provider/pluginacl_data_source.go
+  - internal/provider/pluginacl_data_source_sdk.go
+  - examples/data-sources/konnect_plugin_acl/data-source.tf
   - internal/provider/pluginaiproxy_data_source.go
   - internal/provider/pluginaiproxy_data_source_sdk.go
   - examples/data-sources/konnect_plugin_ai_proxy/data-source.tf
+  - internal/provider/pluginapplicationregistration_data_source.go
+  - internal/provider/pluginapplicationregistration_data_source_sdk.go
+  - examples/data-sources/konnect_plugin_application_registration/data-source.tf
   - internal/provider/pluginbasicauth_data_source.go
   - internal/provider/pluginbasicauth_data_source_sdk.go
   - examples/data-sources/konnect_plugin_basic_auth/data-source.tf
+  - internal/provider/plugincors_data_source.go
+  - internal/provider/plugincors_data_source_sdk.go
+  - examples/data-sources/konnect_plugin_cors/data-source.tf
+  - internal/provider/pluginexittransformer_data_source.go
+  - internal/provider/pluginexittransformer_data_source_sdk.go
+  - examples/data-sources/konnect_plugin_exit_transformer/data-source.tf
   - internal/provider/pluginkeyauth_data_source.go
   - internal/provider/pluginkeyauth_data_source_sdk.go
   - examples/data-sources/konnect_plugin_key_auth/data-source.tf
+  - internal/provider/pluginprometheus_data_source.go
+  - internal/provider/pluginprometheus_data_source_sdk.go
+  - examples/data-sources/konnect_plugin_prometheus/data-source.tf
   - internal/provider/pluginratelimiting_data_source.go
   - internal/provider/pluginratelimiting_data_source_sdk.go
   - examples/data-sources/konnect_plugin_rate_limiting/data-source.tf

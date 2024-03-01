@@ -55,9 +55,9 @@ resource "konnect_plugin_request_transformer" "my_pluginrequesttransformer" {
       querystring = [
         "...",
       ]
-      uri = "http://vacant-emanate.name"
+      uri = "http://parallel-mobility.name"
     }
   }
-  control_plane_id = "b663982d-5de8-40c6-a3db-61e38c8a40f3"
-  enabled          = true
+  control_plane_id = "7799dc9b-5606-450c-a4b3-676d9dc7a53e"
+  enabled          = false
 }

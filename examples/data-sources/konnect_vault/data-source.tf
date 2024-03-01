@@ -1,4 +1,4 @@
 data "konnect_vault" "my_vault" {
-  control_plane_id = "8d6976e6-7043-44b5-9e02-645107c14c75"
-  id               = "4c854e4f-6578-4c13-8e47-32f6d49e0379"
+  control_plane_id = "2f120031-019a-48c6-8460-982d8389e7e3"
+  id               = "1490d73f-430a-4c6f-a4fb-c31a503f846e"
 }

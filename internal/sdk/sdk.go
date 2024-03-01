@@ -135,24 +135,6 @@ type Konnect struct {
 	//
 	//
 	//
-	//
-	//
-	//
-	//
-	//
-	//
-	//
-	//
-	//
-	//
-	//
-	//
-	//
-	//
-	//
-	//
-	//
-	//
 	//   <br>
 	//   A route can't have both `tls` and `tls_passthrough` protocols at same time.
 	//   <br><br>
@@ -266,9 +248,9 @@ func New(opts ...SDKOption) *Konnect {
 		sdkConfiguration: sdkConfiguration{
 			Language:          "go",
 			OpenAPIDocVersion: "2.1.0",
-			SDKVersion:        "0.19.4",
+			SDKVersion:        "0.19.5",
 			GenVersion:        "2.250.15",
-			UserAgent:         "speakeasy-sdk/go 0.19.4 2.250.15 2.1.0 konnect",
+			UserAgent:         "speakeasy-sdk/go 0.19.5 2.250.15 2.1.0 konnect",
 		},
 	}
 	for _, opt := range opts {

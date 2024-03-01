@@ -1,4 +1,4 @@
 data "konnect_basic_auth" "my_basicauth" {
-  control_plane_id = "655b4c56-2b3c-4ce1-a52a-940124e5005e"
-  id               = "0d8973e7-339b-46db-82d2-fec341b20377"
+  control_plane_id = "902a62cf-629e-4316-aa8a-cf7cfccb3d1f"
+  id               = "b1f5dcae-8430-48e3-97d8-5008bdf868ea"
 }

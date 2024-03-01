@@ -1,4 +1,4 @@
 data "konnect_target" "my_target" {
-  control_plane_id = "dcf4946e-2b11-49cf-b75f-af39ba89ac38"
-  id               = "2881f7d4-f5fa-48d7-a46b-f8df45382974"
+  control_plane_id = "06609bbc-1851-4960-b172-a54aab08840b"
+  id               = "047e4738-a9f8-4065-ad68-602bfc9e0043"
 }

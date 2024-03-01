@@ -1,4 +1,4 @@
 data "konnect_hmac_auth" "my_hmacauth" {
-  control_plane_id = "d7909837-d534-489d-ba1d-c0fcb828c7e9"
-  id               = "500809b3-e9d8-4df5-8537-11f3ae3959b7"
+  control_plane_id = "08a82590-8c6c-4758-ba6a-8a3bdf96c083"
+  id               = "c903b456-6eb6-48d5-8d38-ec6635f115dd"
 }

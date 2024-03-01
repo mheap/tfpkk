@@ -1,4 +1,4 @@
 data "konnect_jwt" "my_jwt" {
-  control_plane_id = "618929fe-f5e4-43d0-aabc-1b223feab2f5"
-  id               = "5a217a14-1c85-44cf-bb63-0b5377024470"
+  control_plane_id = "96e351db-a79b-446c-8856-b371e3abcdfb"
+  id               = "e86e2db2-8db7-4265-94d3-84f545bdf527"
 }

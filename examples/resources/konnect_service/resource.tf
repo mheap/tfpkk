@@ -3,23 +3,23 @@ resource "konnect_service" "my_service" {
     "...",
   ]
   client_certificate = {
-    id = "4b3676d9-dc7a-453e-875a-7c2c465dec6b"
+    id = "ae90248b-41b6-43f9-80d7-66a42b1f9779"
   }
-  connect_timeout  = 5
-  control_plane_id = "cafb4e58-66ce-489d-b047-31b77b31cb14"
+  connect_timeout  = 6
+  control_plane_id = "e7f64e8e-9cbc-48cd-95e3-42c7dd4186c1"
   enabled          = false
   host             = "...my_host..."
-  name             = "Estelle Padberg"
+  name             = "April Leffler"
   path             = "...my_path..."
-  port             = 1
-  protocol         = "https"
-  read_timeout     = 1
-  retries          = 1
+  port             = 6
+  protocol         = "http"
+  read_timeout     = 10
+  retries          = 2
   tags = [
     "...",
   ]
   tls_verify       = false
-  tls_verify_depth = 8
+  tls_verify_depth = 6
   url              = "...my_url..."
-  write_timeout    = 8
+  write_timeout    = 0
 }

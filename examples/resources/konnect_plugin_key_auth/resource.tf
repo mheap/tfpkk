@@ -3,13 +3,13 @@ resource "konnect_plugin_key_auth" "my_pluginkeyauth" {
     anonymous        = "...my_anonymous..."
     hide_credentials = false
     key_in_body      = true
-    key_in_header    = true
-    key_in_query     = false
+    key_in_header    = false
+    key_in_query     = true
     key_names = [
       "...",
     ]
     run_on_preflight = false
   }
-  control_plane_id = "3147a05e-0578-4dd2-90d5-6ee0701be332"
-  enabled          = true
+  control_plane_id = "ebf7e058-032e-4a6f-a6c6-162d8cc023f8"
+  enabled          = false
 }

@@ -3352,6 +3352,506 @@ paths:
       tags:
         - Plugins
       x-speakeasy-entity-operation: PluginRequestTransformer#update
+  /control-planes/{controlPlaneId}/core-entities/plugins#CORS:
+    parameters:
+      - $ref: '#/components/parameters/ControlPlaneId'
+    post:
+      x-speakeasy-entity-operation: PluginCORS#create
+      description: Create a new CORS Plugin
+      summary: Create a new CORS Plugin
+      tags:
+        - Plugins
+      operationId: create-cors-plugin
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateCORSPlugin'
+        description: Create a new CORS plugin
+        required: true
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CORSPlugin'
+          description: Successfully created Plugin
+        '400':
+          content:
+            application/json:
+              schema:
+                type: object
+          description: Invalid Plugin
+        '401':
+          $ref: '#/components/responses/HTTP401Error'
+  /control-planes/{controlPlaneId}/core-entities/plugins/{PluginId}#CORS:
+    delete:
+      description: Delete a Plugin
+      operationId: delete-cors-plugin
+      parameters:
+        - $ref: '#/components/parameters/PluginId'
+      responses:
+        '204':
+          description: Successfully deleted Plugin or the resource didn't exist
+        '401':
+          $ref: '#/components/responses/HTTP401Error'
+      summary: Delete a Plugin
+      tags:
+        - Plugins
+      x-speakeasy-entity-operation: PluginCORS#delete
+    get:
+      description: Get a Plugin using ID.
+      operationId: get-cors-plugin
+      parameters:
+        - $ref: '#/components/parameters/PluginId'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CORSPlugin'
+          description: Successfully fetched Plugin
+        '401':
+          $ref: '#/components/responses/HTTP401Error'
+        '404':
+          description: Resource does not exist
+      summary: Fetch a Plugin
+      tags:
+        - Plugins
+      x-speakeasy-entity-operation: PluginCORS#read
+    parameters:
+      - $ref: '#/components/parameters/ControlPlaneId'
+    put:
+      description: Create or Update Plugin using ID.
+      operationId: update-cors-plugin
+      parameters:
+        - $ref: '#/components/parameters/PluginId'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateCORSPlugin'
+        description: Description of the Plugin
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CORSPlugin'
+          description: Successfully upserted Plugin
+        '400':
+          content:
+            application/json:
+              schema:
+                type: object
+          description: Invalid Plugin
+        '401':
+          $ref: '#/components/responses/HTTP401Error'
+      summary: Upsert a Plugin
+      tags:
+        - Plugins
+      x-speakeasy-entity-operation: PluginCORS#update
+  /control-planes/{controlPlaneId}/core-entities/plugins#ACL:
+    parameters:
+      - $ref: '#/components/parameters/ControlPlaneId'
+    post:
+      x-speakeasy-entity-operation: PluginACL#create
+      description: Create a new ACL Plugin
+      summary: Create a new ACL Plugin
+      tags:
+        - Plugins
+      operationId: create-acl-plugin
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateACLPlugin'
+        description: Create a new ACL plugin
+        required: true
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ACLPlugin'
+          description: Successfully created Plugin
+        '400':
+          content:
+            application/json:
+              schema:
+                type: object
+          description: Invalid Plugin
+        '401':
+          $ref: '#/components/responses/HTTP401Error'
+  /control-planes/{controlPlaneId}/core-entities/plugins/{PluginId}#ACL:
+    delete:
+      description: Delete a Plugin
+      operationId: delete-acl-plugin
+      parameters:
+        - $ref: '#/components/parameters/PluginId'
+      responses:
+        '204':
+          description: Successfully deleted Plugin or the resource didn't exist
+        '401':
+          $ref: '#/components/responses/HTTP401Error'
+      summary: Delete a Plugin
+      tags:
+        - Plugins
+      x-speakeasy-entity-operation: PluginACL#delete
+    get:
+      description: Get a Plugin using ID.
+      operationId: get-acl-plugin
+      parameters:
+        - $ref: '#/components/parameters/PluginId'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ACLPlugin'
+          description: Successfully fetched Plugin
+        '401':
+          $ref: '#/components/responses/HTTP401Error'
+        '404':
+          description: Resource does not exist
+      summary: Fetch a Plugin
+      tags:
+        - Plugins
+      x-speakeasy-entity-operation: PluginACL#read
+    parameters:
+      - $ref: '#/components/parameters/ControlPlaneId'
+    put:
+      description: Create or Update Plugin using ID.
+      operationId: update-acl-plugin
+      parameters:
+        - $ref: '#/components/parameters/PluginId'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateACLPlugin'
+        description: Description of the Plugin
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ACLPlugin'
+          description: Successfully upserted Plugin
+        '400':
+          content:
+            application/json:
+              schema:
+                type: object
+          description: Invalid Plugin
+        '401':
+          $ref: '#/components/responses/HTTP401Error'
+      summary: Upsert a Plugin
+      tags:
+        - Plugins
+      x-speakeasy-entity-operation: PluginACL#update
+  /control-planes/{controlPlaneId}/core-entities/plugins#ExitTransformer:
+    parameters:
+      - $ref: '#/components/parameters/ControlPlaneId'
+    post:
+      x-speakeasy-entity-operation: PluginExitTransformer#create
+      description: Create a new ExitTransformer Plugin
+      summary: Create a new ExitTransformer Plugin
+      tags:
+        - Plugins
+      operationId: create-exittransformer-plugin
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateExitTransformerPlugin'
+        description: Create a new ExitTransformer plugin
+        required: true
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExitTransformerPlugin'
+          description: Successfully created Plugin
+        '400':
+          content:
+            application/json:
+              schema:
+                type: object
+          description: Invalid Plugin
+        '401':
+          $ref: '#/components/responses/HTTP401Error'
+  /control-planes/{controlPlaneId}/core-entities/plugins/{PluginId}#ExitTransformer:
+    delete:
+      description: Delete a Plugin
+      operationId: delete-exittransformer-plugin
+      parameters:
+        - $ref: '#/components/parameters/PluginId'
+      responses:
+        '204':
+          description: Successfully deleted Plugin or the resource didn't exist
+        '401':
+          $ref: '#/components/responses/HTTP401Error'
+      summary: Delete a Plugin
+      tags:
+        - Plugins
+      x-speakeasy-entity-operation: PluginExitTransformer#delete
+    get:
+      description: Get a Plugin using ID.
+      operationId: get-exittransformer-plugin
+      parameters:
+        - $ref: '#/components/parameters/PluginId'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExitTransformerPlugin'
+          description: Successfully fetched Plugin
+        '401':
+          $ref: '#/components/responses/HTTP401Error'
+        '404':
+          description: Resource does not exist
+      summary: Fetch a Plugin
+      tags:
+        - Plugins
+      x-speakeasy-entity-operation: PluginExitTransformer#read
+    parameters:
+      - $ref: '#/components/parameters/ControlPlaneId'
+    put:
+      description: Create or Update Plugin using ID.
+      operationId: update-exittransformer-plugin
+      parameters:
+        - $ref: '#/components/parameters/PluginId'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateExitTransformerPlugin'
+        description: Description of the Plugin
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExitTransformerPlugin'
+          description: Successfully upserted Plugin
+        '400':
+          content:
+            application/json:
+              schema:
+                type: object
+          description: Invalid Plugin
+        '401':
+          $ref: '#/components/responses/HTTP401Error'
+      summary: Upsert a Plugin
+      tags:
+        - Plugins
+      x-speakeasy-entity-operation: PluginExitTransformer#update
+  /control-planes/{controlPlaneId}/core-entities/plugins#Prometheus:
+    parameters:
+      - $ref: '#/components/parameters/ControlPlaneId'
+    post:
+      x-speakeasy-entity-operation: PluginPrometheus#create
+      description: Create a new Prometheus Plugin
+      summary: Create a new Prometheus Plugin
+      tags:
+        - Plugins
+      operationId: create-prometheus-plugin
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreatePrometheusPlugin'
+        description: Create a new Prometheus plugin
+        required: true
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PrometheusPlugin'
+          description: Successfully created Plugin
+        '400':
+          content:
+            application/json:
+              schema:
+                type: object
+          description: Invalid Plugin
+        '401':
+          $ref: '#/components/responses/HTTP401Error'
+  /control-planes/{controlPlaneId}/core-entities/plugins/{PluginId}#Prometheus:
+    delete:
+      description: Delete a Plugin
+      operationId: delete-prometheus-plugin
+      parameters:
+        - $ref: '#/components/parameters/PluginId'
+      responses:
+        '204':
+          description: Successfully deleted Plugin or the resource didn't exist
+        '401':
+          $ref: '#/components/responses/HTTP401Error'
+      summary: Delete a Plugin
+      tags:
+        - Plugins
+      x-speakeasy-entity-operation: PluginPrometheus#delete
+    get:
+      description: Get a Plugin using ID.
+      operationId: get-prometheus-plugin
+      parameters:
+        - $ref: '#/components/parameters/PluginId'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PrometheusPlugin'
+          description: Successfully fetched Plugin
+        '401':
+          $ref: '#/components/responses/HTTP401Error'
+        '404':
+          description: Resource does not exist
+      summary: Fetch a Plugin
+      tags:
+        - Plugins
+      x-speakeasy-entity-operation: PluginPrometheus#read
+    parameters:
+      - $ref: '#/components/parameters/ControlPlaneId'
+    put:
+      description: Create or Update Plugin using ID.
+      operationId: update-prometheus-plugin
+      parameters:
+        - $ref: '#/components/parameters/PluginId'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreatePrometheusPlugin'
+        description: Description of the Plugin
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PrometheusPlugin'
+          description: Successfully upserted Plugin
+        '400':
+          content:
+            application/json:
+              schema:
+                type: object
+          description: Invalid Plugin
+        '401':
+          $ref: '#/components/responses/HTTP401Error'
+      summary: Upsert a Plugin
+      tags:
+        - Plugins
+      x-speakeasy-entity-operation: PluginPrometheus#update
+  /control-planes/{controlPlaneId}/core-entities/plugins#ApplicationRegistration:
+    parameters:
+      - $ref: '#/components/parameters/ControlPlaneId'
+    post:
+      x-speakeasy-entity-operation: PluginApplicationRegistration#create
+      description: Create a new ApplicationRegistration Plugin
+      summary: Create a new ApplicationRegistration Plugin
+      tags:
+        - Plugins
+      operationId: create-applicationregistration-plugin
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateApplicationRegistrationPlugin'
+        description: Create a new ApplicationRegistration plugin
+        required: true
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApplicationRegistrationPlugin'
+          description: Successfully created Plugin
+        '400':
+          content:
+            application/json:
+              schema:
+                type: object
+          description: Invalid Plugin
+        '401':
+          $ref: '#/components/responses/HTTP401Error'
+  /control-planes/{controlPlaneId}/core-entities/plugins/{PluginId}#ApplicationRegistration:
+    delete:
+      description: Delete a Plugin
+      operationId: delete-applicationregistration-plugin
+      parameters:
+        - $ref: '#/components/parameters/PluginId'
+      responses:
+        '204':
+          description: Successfully deleted Plugin or the resource didn't exist
+        '401':
+          $ref: '#/components/responses/HTTP401Error'
+      summary: Delete a Plugin
+      tags:
+        - Plugins
+      x-speakeasy-entity-operation: PluginApplicationRegistration#delete
+    get:
+      description: Get a Plugin using ID.
+      operationId: get-applicationregistration-plugin
+      parameters:
+        - $ref: '#/components/parameters/PluginId'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApplicationRegistrationPlugin'
+          description: Successfully fetched Plugin
+        '401':
+          $ref: '#/components/responses/HTTP401Error'
+        '404':
+          description: Resource does not exist
+      summary: Fetch a Plugin
+      tags:
+        - Plugins
+      x-speakeasy-entity-operation: PluginApplicationRegistration#read
+    parameters:
+      - $ref: '#/components/parameters/ControlPlaneId'
+    put:
+      description: Create or Update Plugin using ID.
+      operationId: update-applicationregistration-plugin
+      parameters:
+        - $ref: '#/components/parameters/PluginId'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateApplicationRegistrationPlugin'
+        description: Description of the Plugin
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApplicationRegistrationPlugin'
+          description: Successfully upserted Plugin
+        '400':
+          content:
+            application/json:
+              schema:
+                type: object
+          description: Invalid Plugin
+        '401':
+          $ref: '#/components/responses/HTTP401Error'
+      summary: Upsert a Plugin
+      tags:
+        - Plugins
+      x-speakeasy-entity-operation: PluginApplicationRegistration#update
 components:
   parameters:
     PageSize:
@@ -6944,6 +7444,244 @@ components:
       allOf:
         - $ref: '#/components/schemas/CreatePlugin'
         - $ref: '#/components/schemas/RequestTransformerPluginConfig'
+    CORSPluginConfig:
+      properties:
+        config:
+          type: object
+          properties:
+            origins:
+              type: array
+              items:
+                type: string
+              description: >-
+                List of allowed domains for the `Access-Control-Allow-Origin` header. If you want to allow all origins, add `*` as a single value to this configuration field. The accepted values can either be flat strings or PCRE regexes.
+            headers:
+              type: array
+              items:
+                type: string
+              description: Value for the `Access-Control-Allow-Headers` header.
+            exposed_headers:
+              type: array
+              items:
+                type: string
+              description: >-
+                Value for the `Access-Control-Expose-Headers` header. If not specified, no custom headers are exposed.
+            methods:
+              default:
+                - GET
+                - HEAD
+                - PUT
+                - PATCH
+                - POST
+                - DELETE
+                - OPTIONS
+                - TRACE
+                - CONNECT
+              type: array
+              items:
+                type: string
+                enum:
+                  - GET
+                  - HEAD
+                  - PUT
+                  - PATCH
+                  - POST
+                  - DELETE
+                  - OPTIONS
+                  - TRACE
+                  - CONNECT
+              description: >-
+                'Value for the `Access-Control-Allow-Methods` header. Available options include `GET`, `HEAD`, `PUT`, `PATCH`, `POST`, `DELETE`, `OPTIONS`, `TRACE`, `CONNECT`. By default, all options are allowed.'
+            max_age:
+              type: number
+              description: >-
+                Indicates how long the results of the preflight request can be cached, in `seconds`.
+            credentials:
+              type: boolean
+              default: false
+              description: >-
+                Flag to determine whether the `Access-Control-Allow-Credentials` header should be sent with `true` as the value.
+            private_network:
+              type: boolean
+              default: false
+              description: >-
+                Flag to determine whether the `Access-Control-Allow-Private-Network` header should be sent with `true` as the value.
+            preflight_continue:
+              type: boolean
+              default: false
+              description: >-
+                A boolean value that instructs the plugin to proxy the `OPTIONS` preflight request to the Upstream service.
+        name:
+          type: string
+          const: cors
+      required: []
+    CORSPlugin:
+      x-speakeasy-entity: PluginCORS
+      allOf:
+        - $ref: '#/components/schemas/Plugin'
+        - $ref: '#/components/schemas/CORSPluginConfig'
+    CreateCORSPlugin:
+      x-speakeasy-entity: PluginCORS
+      allOf:
+        - $ref: '#/components/schemas/CreatePlugin'
+        - $ref: '#/components/schemas/CORSPluginConfig'
+    ACLPluginConfig:
+      properties:
+        config:
+          type: object
+          properties:
+            allow:
+              type: array
+              description: >-
+                Arbitrary group names that are allowed to consume the service or route. One of `config.allow` or `config.deny` must be specified.
+              items:
+                type: string
+            deny:
+              type: array
+              description: >-
+                Arbitrary group names that are not allowed to consume the service or route. One of `config.allow` or `config.deny` must be specified.
+              items:
+                type: string
+            hide_groups_header:
+              default: false
+              type: boolean
+              description: >-
+                If enabled (`true`), prevents the `X-Consumer-Groups` header from being sent in the request to the upstream service.
+            include_consumer_groups:
+              type: boolean
+              default: false
+        name:
+          type: string
+          const: acl
+      required: []
+    ACLPlugin:
+      x-speakeasy-entity: PluginACL
+      allOf:
+        - $ref: '#/components/schemas/Plugin'
+        - $ref: '#/components/schemas/ACLPluginConfig'
+    CreateACLPlugin:
+      x-speakeasy-entity: PluginACL
+      allOf:
+        - $ref: '#/components/schemas/CreatePlugin'
+        - $ref: '#/components/schemas/ACLPluginConfig'
+    ExitTransformerPluginConfig:
+      properties:
+        config:
+          type: object
+          properties:
+            functions:
+              type: array
+              items:
+                type: string
+            handle_unknown:
+              type: boolean
+              default: false
+              description: >-
+                Determines whether to handle unknown status codes by transforming their responses.
+            handle_unexpected:
+              type: boolean
+              default: false
+              description: >-
+                Determines whether to handle unexpected errors by transforming their responses.
+          required: []
+        name:
+          type: string
+          const: exit-transformer
+      required:
+        - config
+    ExitTransformerPlugin:
+      x-speakeasy-entity: PluginExitTransformer
+      allOf:
+        - $ref: '#/components/schemas/Plugin'
+        - $ref: '#/components/schemas/ExitTransformerPluginConfig'
+    CreateExitTransformerPlugin:
+      x-speakeasy-entity: PluginExitTransformer
+      allOf:
+        - $ref: '#/components/schemas/CreatePlugin'
+        - $ref: '#/components/schemas/ExitTransformerPluginConfig'
+    PrometheusPluginConfig:
+      properties:
+        config:
+          type: object
+          properties:
+            per_consumer:
+              default: false
+              type: boolean
+              description: >-
+                A boolean value that determines if per-consumer metrics should be collected. If enabled, the `kong_http_requests_total` and `kong_bandwidth_bytes` metrics fill in the consumer label when available.
+            status_code_metrics:
+              default: false
+              type: boolean
+              description: >-
+                A boolean value that determines if status code metrics should be collected. If enabled, `http_requests_total`, `stream_sessions_total` metrics will be exported.
+            latency_metrics:
+              default: false
+              type: boolean
+              description: >-
+                A boolean value that determines if status code metrics should be collected. If enabled, `kong_latency_ms`, `upstream_latency_ms` and `request_latency_ms` metrics will be exported.
+            bandwidth_metrics:
+              default: false
+              type: boolean
+              description: >-
+                A boolean value that determines if status code metrics should be collected. If enabled, `bandwidth_bytes` and `stream_sessions_total` metrics will be exported.
+            upstream_health_metrics:
+              default: false
+              type: boolean
+              description: >-
+                A boolean value that determines if status code metrics should be collected. If enabled, `upstream_target_health` metric will be exported.
+        name:
+          type: string
+          const: prometheus
+      required: []
+    PrometheusPlugin:
+      x-speakeasy-entity: PluginPrometheus
+      allOf:
+        - $ref: '#/components/schemas/Plugin'
+        - $ref: '#/components/schemas/PrometheusPluginConfig'
+    CreatePrometheusPlugin:
+      x-speakeasy-entity: PluginPrometheus
+      allOf:
+        - $ref: '#/components/schemas/CreatePlugin'
+        - $ref: '#/components/schemas/PrometheusPluginConfig'
+    ApplicationRegistrationPluginConfig:
+      properties:
+        config:
+          type: object
+          properties:
+            display_name:
+              unique: true
+              type: string
+              description: Unique display name used for a Service in the Developer Portal.
+            description:
+              unique: true
+              type: string
+              description: >-
+                Unique description displayed in information about a Service in the Developer Portal.
+            auto_approve:
+              type: boolean
+              default: false
+              description: >-
+                If enabled, all new Service Contracts requests are automatically approved.
+            show_issuer:
+              type: boolean
+              default: false
+              description: Displays the **Issuer URL** in the **Service Details** dialog.
+          required: []
+        name:
+          type: string
+          const: application-registration
+      required:
+        - config
+    ApplicationRegistrationPlugin:
+      x-speakeasy-entity: PluginApplicationRegistration
+      allOf:
+        - $ref: '#/components/schemas/Plugin'
+        - $ref: '#/components/schemas/ApplicationRegistrationPluginConfig'
+    CreateApplicationRegistrationPlugin:
+      x-speakeasy-entity: PluginApplicationRegistration
+      allOf:
+        - $ref: '#/components/schemas/CreatePlugin'
+        - $ref: '#/components/schemas/ApplicationRegistrationPluginConfig'
   securitySchemes:
     personalAccessToken:
       type: http
@@ -7068,24 +7806,6 @@ tags:
       - `ws`: At least one of `hosts`, `headers`, or `paths`
 
       - `wss`: At least one of `hosts`, `headers`, `paths`, or `snis`
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

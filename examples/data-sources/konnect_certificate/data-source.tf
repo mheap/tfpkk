@@ -1,4 +1,4 @@
 data "konnect_certificate" "my_certificate" {
-  control_plane_id = "313e8f74-572b-41d6-8bef-d78ba74f1a59"
-  id               = "8371c52e-0029-4543-8b9a-fc902a62cf62"
+  control_plane_id = "e8b289ab-69ab-4fce-ad0c-512cd54941c4"
+  id               = "5e957753-e5d7-4909-837d-53489dfa1dc0"
 }

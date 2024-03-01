@@ -1,3 +1,3 @@
 data "konnect_mesh_control_plane" "my_meshcontrolplane" {
-  id = "9b46c885-6b37-41e3-abcd-fbe86e2db28d"
+  id = "4ba367b2-95d6-4241-97ea-b620d7c60a72"
 }

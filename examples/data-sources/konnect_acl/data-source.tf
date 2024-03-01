@@ -1,4 +1,4 @@
 data "konnect_acl" "my_acl" {
-  control_plane_id = "d25a21c4-3426-4ec3-beb6-5aa1e9c8861d"
-  id               = "7028316b-dc62-4cfe-9a20-01db5f5d35c2"
+  control_plane_id = "0124e500-5e0d-4897-be73-39b6db82d2fe"
+  id               = "c341b203-77ac-4d02-8250-5390e819aa4c"
 }

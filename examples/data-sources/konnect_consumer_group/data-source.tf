@@ -1,4 +1,4 @@
 data "konnect_consumer_group" "my_consumergroup" {
-  control_plane_id = "843e4401-969a-4650-a3af-137b158020a5"
-  id               = "f2a4320a-0efa-4b81-8d8f-fee8b289ab69"
+  control_plane_id = "223feab2-f55a-4217-a141-c854cffb630b"
+  id               = "53770244-70a4-4cb0-8617-aca3acadb4f4"
 }

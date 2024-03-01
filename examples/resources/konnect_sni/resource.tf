@@ -1,7 +1,7 @@
 resource "konnect_sni" "my_sni" {
   certificate = {
-    id = "6bb4fac9-9f0c-45e4-8192-1e006c27e7b6"
+    id = "c3d5d6c8-0f52-4e90-83d7-9c5ff0adbcce"
   }
-  control_plane_id = "8796c525-1207-43b5-a463-f810eb264f9a"
-  name             = "Sherri Hammes Sr."
+  control_plane_id = "ad25a21c-4342-46ec-b7eb-65aa1e9c8861"
+  name             = "Adrian Barrows"
 }

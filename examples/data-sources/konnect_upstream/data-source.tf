@@ -1,4 +1,4 @@
 data "konnect_upstream" "my_upstream" {
-  control_plane_id = "5f8544c9-e895-49b1-a0a3-cf3b2244ae8d"
-  id               = "96ea325c-ec96-4071-b972-65ac2d20d6ee"
+  control_plane_id = "d6fb9f76-8b1f-4433-abb2-2cb97d0f9b54"
+  id               = "8c9f984b-7f8f-4328-aca2-2f40779a8faf"
 }

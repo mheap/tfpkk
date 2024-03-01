@@ -387,7 +387,7 @@ func (e *RouteType) UnmarshalJSON(data []byte) error {
 	}
 }
 
-type Config struct {
+type AIProxyPluginConfig struct {
 	Auth    *Auth    `json:"auth,omitempty"`
 	Logging *Logging `json:"logging,omitempty"`
 	Model   Model    `json:"model"`
@@ -395,28 +395,28 @@ type Config struct {
 	RouteType *RouteType `json:"route_type,omitempty"`
 }
 
-func (o *Config) GetAuth() *Auth {
+func (o *AIProxyPluginConfig) GetAuth() *Auth {
 	if o == nil {
 		return nil
 	}
 	return o.Auth
 }
 
-func (o *Config) GetLogging() *Logging {
+func (o *AIProxyPluginConfig) GetLogging() *Logging {
 	if o == nil {
 		return nil
 	}
 	return o.Logging
 }
 
-func (o *Config) GetModel() Model {
+func (o *AIProxyPluginConfig) GetModel() Model {
 	if o == nil {
 		return Model{}
 	}
 	return o.Model
 }
 
-func (o *Config) GetRouteType() *RouteType {
+func (o *AIProxyPluginConfig) GetRouteType() *RouteType {
 	if o == nil {
 		return nil
 	}
@@ -435,26 +435,26 @@ func (o *AIProxyPluginConsumer) GetID() *string {
 	return o.ID
 }
 
-type Protocols string
+type AIProxyPluginProtocols string
 
 const (
-	ProtocolsGrpc           Protocols = "grpc"
-	ProtocolsGrpcs          Protocols = "grpcs"
-	ProtocolsHTTP           Protocols = "http"
-	ProtocolsHTTPS          Protocols = "https"
-	ProtocolsTCP            Protocols = "tcp"
-	ProtocolsTLS            Protocols = "tls"
-	ProtocolsTLSPassthrough Protocols = "tls_passthrough"
-	ProtocolsUDP            Protocols = "udp"
-	ProtocolsWs             Protocols = "ws"
-	ProtocolsWss            Protocols = "wss"
+	AIProxyPluginProtocolsGrpc           AIProxyPluginProtocols = "grpc"
+	AIProxyPluginProtocolsGrpcs          AIProxyPluginProtocols = "grpcs"
+	AIProxyPluginProtocolsHTTP           AIProxyPluginProtocols = "http"
+	AIProxyPluginProtocolsHTTPS          AIProxyPluginProtocols = "https"
+	AIProxyPluginProtocolsTCP            AIProxyPluginProtocols = "tcp"
+	AIProxyPluginProtocolsTLS            AIProxyPluginProtocols = "tls"
+	AIProxyPluginProtocolsTLSPassthrough AIProxyPluginProtocols = "tls_passthrough"
+	AIProxyPluginProtocolsUDP            AIProxyPluginProtocols = "udp"
+	AIProxyPluginProtocolsWs             AIProxyPluginProtocols = "ws"
+	AIProxyPluginProtocolsWss            AIProxyPluginProtocols = "wss"
 )
 
-func (e Protocols) ToPointer() *Protocols {
+func (e AIProxyPluginProtocols) ToPointer() *AIProxyPluginProtocols {
 	return &e
 }
 
-func (e *Protocols) UnmarshalJSON(data []byte) error {
+func (e *AIProxyPluginProtocols) UnmarshalJSON(data []byte) error {
 	var v string
 	if err := json.Unmarshal(data, &v); err != nil {
 		return err
@@ -479,10 +479,10 @@ func (e *Protocols) UnmarshalJSON(data []byte) error {
 	case "ws":
 		fallthrough
 	case "wss":
-		*e = Protocols(v)
+		*e = AIProxyPluginProtocols(v)
 		return nil
 	default:
-		return fmt.Errorf("invalid value for Protocols: %v", v)
+		return fmt.Errorf("invalid value for AIProxyPluginProtocols: %v", v)
 	}
 }
 
@@ -512,7 +512,7 @@ func (o *AIProxyPluginService) GetID() *string {
 
 // AIProxyPlugin - A Plugin entity represents a plugin configuration that will be executed during the HTTP request/response lifecycle. It is how you can add functionalities to Services that run behind Kong, like Authentication or Rate Limiting for example. You can find more information about how to install and what values each plugin takes by visiting the [Kong Hub](https://docs.konghq.com/hub/). When adding a Plugin Configuration to a Service, every request made by a client to that Service will run said Plugin. If a Plugin needs to be tuned to different values for some specific Consumers, you can do so by creating a separate plugin instance that specifies both the Service and the Consumer, through the `service` and `consumer` fields.
 type AIProxyPlugin struct {
-	Config Config `json:"config"`
+	Config AIProxyPluginConfig `json:"config"`
 	// If set, the plugin will activate only for requests where the specified has been authenticated. (Note that some plugins can not be restricted to consumers this way.). Leave unset for the plugin to activate regardless of the authenticated Consumer.
 	Consumer *AIProxyPluginConsumer `json:"consumer,omitempty"`
 	// Unix epoch when the resource was created.
@@ -522,7 +522,7 @@ type AIProxyPlugin struct {
 	ID      *string `json:"id,omitempty"`
 	name    string  `const:"ai-proxy" json:"name"`
 	// A list of the request protocols that will trigger this plugin. The default value, as well as the possible values allowed on this field, may change depending on the plugin type. For example, plugins that only work in stream mode will only support `"tcp"` and `"tls"`.
-	Protocols []Protocols `json:"protocols"`
+	Protocols []AIProxyPluginProtocols `json:"protocols"`
 	// If set, the plugin will only activate when receiving requests via the specified route. Leave unset for the plugin to activate regardless of the Route being used.
 	Route *AIProxyPluginRoute `json:"route,omitempty"`
 	// If set, the plugin will only activate when receiving requests via one of the routes belonging to the specified Service. Leave unset for the plugin to activate regardless of the Service being matched.
@@ -542,9 +542,9 @@ func (a *AIProxyPlugin) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-func (o *AIProxyPlugin) GetConfig() Config {
+func (o *AIProxyPlugin) GetConfig() AIProxyPluginConfig {
 	if o == nil {
-		return Config{}
+		return AIProxyPluginConfig{}
 	}
 	return o.Config
 }
@@ -581,9 +581,9 @@ func (o *AIProxyPlugin) GetName() string {
 	return "ai-proxy"
 }
 
-func (o *AIProxyPlugin) GetProtocols() []Protocols {
+func (o *AIProxyPlugin) GetProtocols() []AIProxyPluginProtocols {
 	if o == nil {
-		return []Protocols{}
+		return []AIProxyPluginProtocols{}
 	}
 	return o.Protocols
 }

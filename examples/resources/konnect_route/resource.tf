@@ -1,11 +1,11 @@
 resource "konnect_route" "my_route" {
-  control_plane_id           = "0ce8052a-e316-4190-a7be-94aa09997799"
-  https_redirect_status_code = "308"
-  name                       = "Marshall Price"
-  path_handling              = "v0"
+  control_plane_id           = "64f9a795-812c-4ac8-9640-320bb6b8f1cf"
+  https_redirect_status_code = "307"
+  name                       = "Andrea Swift"
+  path_handling              = "v1"
   preserve_host              = false
-  regex_priority             = 4
-  request_buffering          = false
-  response_buffering         = true
+  regex_priority             = 3
+  request_buffering          = true
+  response_buffering         = false
   strip_path                 = true
 }

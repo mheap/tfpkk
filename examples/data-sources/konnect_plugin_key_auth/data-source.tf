@@ -1,4 +1,4 @@
 data "konnect_plugin_key_auth" "my_pluginkeyauth" {
-  control_plane_id = "2413c50b-02cf-43ce-bb98-b7f0166e2add"
-  id               = "c324a4d4-85b8-49b3-97bd-bddb39a0e7d5"
+  control_plane_id = "af39ba89-ac38-4288-9f7d-4f5fa8d7646b"
+  id               = "f8df4538-2974-45f8-944c-9e8959b1a0a3"
 }

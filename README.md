@@ -10,7 +10,7 @@ terraform {
   required_providers {
     konnect = {
       source  = "kong/konnect"
-      version = "0.19.4"
+      version = "0.19.5"
     }
   }
 }

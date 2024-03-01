@@ -1,4 +1,4 @@
 data "konnect_plugin_ai_proxy" "my_pluginaiproxy" {
-  control_plane_id = "79d8d919-7773-4a6d-a9f8-9ac6a5ff6580"
-  id               = "c9758a37-deb8-4c8e-bd2b-aacaace6f9d2"
+  control_plane_id = "c377f5b9-af05-4888-8477-ce1057fc839a"
+  id               = "932688e9-7572-4483-9170-e1178d28c5f7"
 }
