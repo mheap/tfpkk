@@ -2,7 +2,7 @@
 
 package shared
 
-// The Consumer object represents a consumer - or a user - of a service. You can either rely on Kong as the primary datastore, or you can map the consumer list with your database to keep consistency between Kong and your existing primary datastore.
+// The Consumer object represents a consumer - or a user - of a Service. You can either rely on Kong as the primary datastore, or you can map the consumer list with your database to keep consistency between Kong and your existing primary datastore.
 type Consumer struct {
 	// Unix epoch when the resource was created.
 	CreatedAt *int64 `json:"created_at,omitempty"`
@@ -11,8 +11,6 @@ type Consumer struct {
 	ID       *string `json:"id,omitempty"`
 	// An optional set of strings associated with the Consumer for grouping and filtering.
 	Tags []string `json:"tags,omitempty"`
-	// Unix epoch when the resouce was updated.
-	UpdatedAt *int64 `json:"updated_at,omitempty"`
 	// The unique username of the Consumer. You must send either this field or `custom_id` with the request.
 	Username *string `json:"username,omitempty"`
 }
@@ -43,13 +41,6 @@ func (o *Consumer) GetTags() []string {
 		return nil
 	}
 	return o.Tags
-}
-
-func (o *Consumer) GetUpdatedAt() *int64 {
-	if o == nil {
-		return nil
-	}
-	return o.UpdatedAt
 }
 
 func (o *Consumer) GetUsername() *string {

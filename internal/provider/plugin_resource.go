@@ -7,8 +7,18 @@ import (
 	"fmt"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/boolplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
+	speakeasy_boolplanmodifier "github.com/kong/terraform-provider-konnect/internal/planmodifiers/boolplanmodifier"
+	speakeasy_listplanmodifier "github.com/kong/terraform-provider-konnect/internal/planmodifiers/listplanmodifier"
+	speakeasy_objectplanmodifier "github.com/kong/terraform-provider-konnect/internal/planmodifiers/objectplanmodifier"
+	speakeasy_stringplanmodifier "github.com/kong/terraform-provider-konnect/internal/planmodifiers/stringplanmodifier"
 	"github.com/kong/terraform-provider-konnect/internal/sdk"
 	"github.com/kong/terraform-provider-konnect/internal/sdk/pkg/models/operations"
 )
@@ -28,19 +38,16 @@ type PluginResource struct {
 
 // PluginResourceModel describes the resource data model.
 type PluginResourceModel struct {
-	Config         *Config         `tfsdk:"config"`
-	Consumer       *PluginConsumer `tfsdk:"consumer"`
-	ControlPlaneID types.String    `tfsdk:"control_plane_id"`
-	CreatedAt      types.Int64     `tfsdk:"created_at"`
-	Enabled        types.Bool      `tfsdk:"enabled"`
-	ID             types.String    `tfsdk:"id"`
-	InstanceName   types.String    `tfsdk:"instance_name"`
-	Name           types.String    `tfsdk:"name"`
-	Ordering       *Ordering       `tfsdk:"ordering"`
-	Protocols      []types.String  `tfsdk:"protocols"`
-	Route          *PluginConsumer `tfsdk:"route"`
-	Service        *PluginConsumer `tfsdk:"service"`
-	Tags           []types.String  `tfsdk:"tags"`
+	Consumer       *CreateACLConsumer `tfsdk:"consumer"`
+	ControlPlaneID types.String       `tfsdk:"control_plane_id"`
+	CreatedAt      types.Int64        `tfsdk:"created_at"`
+	Enabled        types.Bool         `tfsdk:"enabled"`
+	ID             types.String       `tfsdk:"id"`
+	Name           types.String       `tfsdk:"name"`
+	Protocols      []types.String     `tfsdk:"protocols"`
+	Route          *CreateACLConsumer `tfsdk:"route"`
+	Service        *CreateACLConsumer `tfsdk:"service"`
+	Tags           []types.String     `tfsdk:"tags"`
 }
 
 func (r *PluginResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
@@ -52,30 +59,32 @@ func (r *PluginResource) Schema(ctx context.Context, req resource.SchemaRequest,
 		MarkdownDescription: "Plugin Resource",
 
 		Attributes: map[string]schema.Attribute{
-			"config": schema.SingleNestedAttribute{
-				Optional: true,
-				Attributes: map[string]schema.Attribute{
-					"hour": schema.Int64Attribute{
-						Optional: true,
-					},
-					"minute": schema.Int64Attribute{
-						Optional: true,
-					},
-				},
-				Description: `The configuration properties for the Plugin`,
-			},
 			"consumer": schema.SingleNestedAttribute{
 				Computed: true,
+				PlanModifiers: []planmodifier.Object{
+					objectplanmodifier.RequiresReplaceIfConfigured(),
+					speakeasy_objectplanmodifier.SuppressDiff(speakeasy_objectplanmodifier.ExplicitSuppress),
+				},
+				Optional: true,
 				Attributes: map[string]schema.Attribute{
 					"id": schema.StringAttribute{
 						Computed: true,
+						PlanModifiers: []planmodifier.String{
+							stringplanmodifier.RequiresReplaceIfConfigured(),
+							speakeasy_stringplanmodifier.SuppressDiff(speakeasy_stringplanmodifier.ExplicitSuppress),
+						},
+						Optional:    true,
+						Description: `Requires replacement if changed. `,
 					},
 				},
-				Description: `If set, the plugin will activate only for requests where the specified has been authenticated. (Note that some plugins can not be restricted to consumers this way.). Leave unset for the plugin to activate regardless of the authenticated Consumer.`,
+				Description: `If set, the plugin will activate only for requests where the specified has been authenticated. (Note that some plugins can not be restricted to consumers this way.). Leave unset for the plugin to activate regardless of the authenticated Consumer. Requires replacement if changed. `,
 			},
 			"control_plane_id": schema.StringAttribute{
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.RequiresReplaceIfConfigured(),
+				},
 				Required:    true,
-				Description: `The UUID of your control plane. This variable is available in the Konnect manager`,
+				Description: `The UUID of your control plane. This variable is available in the Konnect manager. Requires replacement if changed. `,
 			},
 			"created_at": schema.Int64Attribute{
 				Computed:    true,
@@ -83,66 +92,85 @@ func (r *PluginResource) Schema(ctx context.Context, req resource.SchemaRequest,
 			},
 			"enabled": schema.BoolAttribute{
 				Computed: true,
-				Optional: true,
-				MarkdownDescription: `Whether the plugin is applied. Default: ` + "`" + `true` + "`" + `.` + "\n" +
-					`` + "\n" +
-					`Default: true`,
+				PlanModifiers: []planmodifier.Bool{
+					boolplanmodifier.RequiresReplaceIfConfigured(),
+					speakeasy_boolplanmodifier.SuppressDiff(speakeasy_boolplanmodifier.ExplicitSuppress),
+				},
+				Optional:    true,
+				Default:     booldefault.StaticBool(true),
+				Description: `Whether the plugin is applied. Requires replacement if changed. ; Default: true`,
 			},
 			"id": schema.StringAttribute{
 				Computed:    true,
-				Description: `The unique identifier of the Plugin to create or update.`,
-			},
-			"instance_name": schema.StringAttribute{
-				Computed: true,
-				Optional: true,
-				MarkdownDescription: `The Plugin instance name.` + "\n" +
-					``,
+				Description: `ID of the Plugin to lookup`,
 			},
 			"name": schema.StringAttribute{
-				Computed:    true,
-				Optional:    true,
-				Description: `The name of the Plugin that’s going to be added. Currently, the Plugin must be installed in every Kong instance separately.`,
-			},
-			"ordering": schema.SingleNestedAttribute{
-				Computed:   true,
-				Attributes: map[string]schema.Attribute{},
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.RequiresReplaceIfConfigured(),
+					speakeasy_stringplanmodifier.SuppressDiff(speakeasy_stringplanmodifier.ExplicitSuppress),
+				},
+				Required:    true,
+				Description: `The name of the Plugin that's going to be added. Currently, the Plugin must be installed in every Kong instance separately. Requires replacement if changed. `,
 			},
 			"protocols": schema.ListAttribute{
-				Computed:    true,
+				Computed: true,
+				PlanModifiers: []planmodifier.List{
+					listplanmodifier.RequiresReplaceIfConfigured(),
+					speakeasy_listplanmodifier.SuppressDiff(speakeasy_listplanmodifier.ExplicitSuppress),
+				},
 				Optional:    true,
 				ElementType: types.StringType,
-				Description: `A list of the request protocols that will trigger this plugin.`,
+				Description: `A list of the request protocols that will trigger this plugin. The default value, as well as the possible values allowed on this field, may change depending on the plugin type. For example, plugins that only work in stream mode will only support ` + "`" + `"tcp"` + "`" + ` and ` + "`" + `"tls"` + "`" + `. Requires replacement if changed. `,
 			},
 			"route": schema.SingleNestedAttribute{
 				Computed: true,
+				PlanModifiers: []planmodifier.Object{
+					objectplanmodifier.RequiresReplaceIfConfigured(),
+					speakeasy_objectplanmodifier.SuppressDiff(speakeasy_objectplanmodifier.ExplicitSuppress),
+				},
 				Optional: true,
 				Attributes: map[string]schema.Attribute{
 					"id": schema.StringAttribute{
-						Computed:    true,
+						Computed: true,
+						PlanModifiers: []planmodifier.String{
+							stringplanmodifier.RequiresReplaceIfConfigured(),
+							speakeasy_stringplanmodifier.SuppressDiff(speakeasy_stringplanmodifier.ExplicitSuppress),
+						},
 						Optional:    true,
-						Description: `The Id of the route.`,
+						Description: `Requires replacement if changed. `,
 					},
 				},
-				Description: `If set, the plugin will only activate when receiving requests via the specified route. Leave unset for the plugin to activate regardless of the route being used. Default: ` + "`" + `null` + "`" + `.With form-encoded, the notation is ` + "`" + `route.id=<route id> or route.name=<route name>` + "`" + `. With JSON, use ` + "`" + `route:{id:<route id>}` + "`" + ` or ` + "`" + `route:{name:<route name>}` + "`" + `.`,
+				Description: `If set, the plugin will only activate when receiving requests via the specified route. Leave unset for the plugin to activate regardless of the Route being used. Requires replacement if changed. `,
 			},
 			"service": schema.SingleNestedAttribute{
 				Computed: true,
+				PlanModifiers: []planmodifier.Object{
+					objectplanmodifier.RequiresReplaceIfConfigured(),
+					speakeasy_objectplanmodifier.SuppressDiff(speakeasy_objectplanmodifier.ExplicitSuppress),
+				},
 				Optional: true,
 				Attributes: map[string]schema.Attribute{
 					"id": schema.StringAttribute{
-						Computed:    true,
+						Computed: true,
+						PlanModifiers: []planmodifier.String{
+							stringplanmodifier.RequiresReplaceIfConfigured(),
+							speakeasy_stringplanmodifier.SuppressDiff(speakeasy_stringplanmodifier.ExplicitSuppress),
+						},
 						Optional:    true,
-						Description: `The Id of the route.`,
+						Description: `Requires replacement if changed. `,
 					},
 				},
-				Description: `If set, the plugin will only activate when receiving requests via one of the routes belonging to the specified service.`,
+				Description: `If set, the plugin will only activate when receiving requests via one of the routes belonging to the specified Service. Leave unset for the plugin to activate regardless of the Service being matched. Requires replacement if changed. `,
 			},
 			"tags": schema.ListAttribute{
-				Computed:    true,
+				Computed: true,
+				PlanModifiers: []planmodifier.List{
+					listplanmodifier.RequiresReplaceIfConfigured(),
+					speakeasy_listplanmodifier.SuppressDiff(speakeasy_listplanmodifier.ExplicitSuppress),
+				},
 				Optional:    true,
 				ElementType: types.StringType,
-				MarkdownDescription: `An optional set of strings associated with the Plugin for grouping and filtering.` + "\n" +
-					``,
+				Description: `An optional set of strings associated with the Plugin for grouping and filtering. Requires replacement if changed. `,
 			},
 		},
 	}
@@ -186,11 +214,11 @@ func (r *PluginResource) Create(ctx context.Context, req resource.CreateRequest,
 		return
 	}
 
+	createPlugin := *data.ToSharedCreatePlugin()
 	controlPlaneID := data.ControlPlaneID.ValueString()
-	pluginRequest := data.ToSharedPluginRequest()
 	request := operations.CreatePluginRequest{
+		CreatePlugin:   createPlugin,
 		ControlPlaneID: controlPlaneID,
-		PluginRequest:  pluginRequest,
 	}
 	res, err := r.client.Plugins.CreatePlugin(ctx, request)
 	if err != nil {
@@ -213,40 +241,6 @@ func (r *PluginResource) Create(ctx context.Context, req resource.CreateRequest,
 		return
 	}
 	data.RefreshFromSharedPlugin(res.Plugin)
-	refreshPlan(ctx, plan, &data, resp.Diagnostics)
-	controlPlaneId1 := data.ControlPlaneID.ValueString()
-	var filterTags *string
-	var offset *string
-	pluginIDOrInstanceName := data.ID.ValueString()
-	var size *int64
-	request1 := operations.GetPluginRequest{
-		ControlPlaneID:         controlPlaneId1,
-		FilterTags:             filterTags,
-		Offset:                 offset,
-		PluginIDOrInstanceName: pluginIDOrInstanceName,
-		Size:                   size,
-	}
-	res1, err := r.client.Plugins.GetPlugin(ctx, request1)
-	if err != nil {
-		resp.Diagnostics.AddError("failure to invoke API", err.Error())
-		if res1 != nil && res1.RawResponse != nil {
-			resp.Diagnostics.AddError("unexpected http request/response", debugResponse(res1.RawResponse))
-		}
-		return
-	}
-	if res1 == nil {
-		resp.Diagnostics.AddError("unexpected response from API", fmt.Sprintf("%v", res1))
-		return
-	}
-	if res1.StatusCode != 200 {
-		resp.Diagnostics.AddError(fmt.Sprintf("unexpected response from API. Got an unexpected response code %v", res1.StatusCode), debugResponse(res1.RawResponse))
-		return
-	}
-	if res1.Plugin == nil {
-		resp.Diagnostics.AddError("unexpected response from API. No response body", debugResponse(res1.RawResponse))
-		return
-	}
-	data.RefreshFromSharedPlugin(res1.Plugin)
 	refreshPlan(ctx, plan, &data, resp.Diagnostics)
 
 	// Save updated data into Terraform state
@@ -271,17 +265,11 @@ func (r *PluginResource) Read(ctx context.Context, req resource.ReadRequest, res
 		return
 	}
 
+	pluginID := data.ID.ValueString()
 	controlPlaneID := data.ControlPlaneID.ValueString()
-	var filterTags *string
-	var offset *string
-	pluginIDOrInstanceName := data.ID.ValueString()
-	var size *int64
 	request := operations.GetPluginRequest{
-		ControlPlaneID:         controlPlaneID,
-		FilterTags:             filterTags,
-		Offset:                 offset,
-		PluginIDOrInstanceName: pluginIDOrInstanceName,
-		Size:                   size,
+		PluginID:       pluginID,
+		ControlPlaneID: controlPlaneID,
 	}
 	res, err := r.client.Plugins.GetPlugin(ctx, request)
 	if err != nil {
@@ -323,70 +311,7 @@ func (r *PluginResource) Update(ctx context.Context, req resource.UpdateRequest,
 		return
 	}
 
-	controlPlaneID := data.ControlPlaneID.ValueString()
-	pluginRequest := data.ToSharedPluginRequest()
-	pluginIDOrInstanceName := data.ID.ValueString()
-	request := operations.UpsertPluginRequest{
-		ControlPlaneID:         controlPlaneID,
-		PluginRequest:          pluginRequest,
-		PluginIDOrInstanceName: pluginIDOrInstanceName,
-	}
-	res, err := r.client.Plugins.UpsertPlugin(ctx, request)
-	if err != nil {
-		resp.Diagnostics.AddError("failure to invoke API", err.Error())
-		if res != nil && res.RawResponse != nil {
-			resp.Diagnostics.AddError("unexpected http request/response", debugResponse(res.RawResponse))
-		}
-		return
-	}
-	if res == nil {
-		resp.Diagnostics.AddError("unexpected response from API", fmt.Sprintf("%v", res))
-		return
-	}
-	if res.StatusCode != 200 {
-		resp.Diagnostics.AddError(fmt.Sprintf("unexpected response from API. Got an unexpected response code %v", res.StatusCode), debugResponse(res.RawResponse))
-		return
-	}
-	if res.Plugin == nil {
-		resp.Diagnostics.AddError("unexpected response from API. No response body", debugResponse(res.RawResponse))
-		return
-	}
-	data.RefreshFromSharedPlugin(res.Plugin)
-	refreshPlan(ctx, plan, &data, resp.Diagnostics)
-	controlPlaneId1 := data.ControlPlaneID.ValueString()
-	var filterTags *string
-	var offset *string
-	pluginIDOrInstanceName1 := data.ID.ValueString()
-	var size *int64
-	request1 := operations.GetPluginRequest{
-		ControlPlaneID:         controlPlaneId1,
-		FilterTags:             filterTags,
-		Offset:                 offset,
-		PluginIDOrInstanceName: pluginIDOrInstanceName1,
-		Size:                   size,
-	}
-	res1, err := r.client.Plugins.GetPlugin(ctx, request1)
-	if err != nil {
-		resp.Diagnostics.AddError("failure to invoke API", err.Error())
-		if res1 != nil && res1.RawResponse != nil {
-			resp.Diagnostics.AddError("unexpected http request/response", debugResponse(res1.RawResponse))
-		}
-		return
-	}
-	if res1 == nil {
-		resp.Diagnostics.AddError("unexpected response from API", fmt.Sprintf("%v", res1))
-		return
-	}
-	if res1.StatusCode != 200 {
-		resp.Diagnostics.AddError(fmt.Sprintf("unexpected response from API. Got an unexpected response code %v", res1.StatusCode), debugResponse(res1.RawResponse))
-		return
-	}
-	if res1.Plugin == nil {
-		resp.Diagnostics.AddError("unexpected response from API. No response body", debugResponse(res1.RawResponse))
-		return
-	}
-	data.RefreshFromSharedPlugin(res1.Plugin)
-	refreshPlan(ctx, plan, &data, resp.Diagnostics)
+	// Not Implemented; all attributes marked as RequiresReplace
 
 	// Save updated data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
@@ -410,11 +335,11 @@ func (r *PluginResource) Delete(ctx context.Context, req resource.DeleteRequest,
 		return
 	}
 
+	pluginID := data.ID.ValueString()
 	controlPlaneID := data.ControlPlaneID.ValueString()
-	pluginIDOrInstanceName := data.ID.ValueString()
 	request := operations.DeletePluginRequest{
-		ControlPlaneID:         controlPlaneID,
-		PluginIDOrInstanceName: pluginIDOrInstanceName,
+		PluginID:       pluginID,
+		ControlPlaneID: controlPlaneID,
 	}
 	res, err := r.client.Plugins.DeletePlugin(ctx, request)
 	if err != nil {

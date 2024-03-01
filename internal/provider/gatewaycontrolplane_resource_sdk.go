@@ -8,6 +8,59 @@ import (
 	"github.com/kong/terraform-provider-konnect/internal/sdk/pkg/models/shared"
 )
 
+func (r *GatewayControlPlaneResourceModel) ToSharedCreateControlPlaneRequest() *shared.CreateControlPlaneRequest {
+	authType := new(shared.AuthType)
+	if !r.AuthType.IsUnknown() && !r.AuthType.IsNull() {
+		*authType = shared.AuthType(r.AuthType.ValueString())
+	} else {
+		authType = nil
+	}
+	cloudGateway := new(bool)
+	if !r.CloudGateway.IsUnknown() && !r.CloudGateway.IsNull() {
+		*cloudGateway = r.CloudGateway.ValueBool()
+	} else {
+		cloudGateway = nil
+	}
+	clusterType := new(shared.ClusterType)
+	if !r.ClusterType.IsUnknown() && !r.ClusterType.IsNull() {
+		*clusterType = shared.ClusterType(r.ClusterType.ValueString())
+	} else {
+		clusterType = nil
+	}
+	description := new(string)
+	if !r.Description.IsUnknown() && !r.Description.IsNull() {
+		*description = r.Description.ValueString()
+	} else {
+		description = nil
+	}
+	var labels interface{}
+	if !r.Labels.IsUnknown() && !r.Labels.IsNull() {
+		_ = json.Unmarshal([]byte(r.Labels.ValueString()), &labels)
+	}
+	name := r.Name.ValueString()
+	var proxyUrls []shared.ProxyURL = nil
+	for _, proxyUrlsItem := range r.ProxyUrls {
+		host := proxyUrlsItem.Host.ValueString()
+		port := proxyUrlsItem.Port.ValueInt64()
+		protocol := proxyUrlsItem.Protocol.ValueString()
+		proxyUrls = append(proxyUrls, shared.ProxyURL{
+			Host:     host,
+			Port:     port,
+			Protocol: protocol,
+		})
+	}
+	out := shared.CreateControlPlaneRequest{
+		AuthType:     authType,
+		CloudGateway: cloudGateway,
+		ClusterType:  clusterType,
+		Description:  description,
+		Labels:       labels,
+		Name:         name,
+		ProxyUrls:    proxyUrls,
+	}
+	return &out
+}
+
 func (r *GatewayControlPlaneResourceModel) RefreshFromSharedControlPlane(resp *shared.ControlPlane) {
 	if resp.Config == nil {
 		r.Config = nil
@@ -50,11 +103,23 @@ func (r *GatewayControlPlaneResourceModel) ToSharedUpdateControlPlaneRequest() *
 	} else {
 		name = nil
 	}
+	var proxyUrls []shared.ProxyURL = nil
+	for _, proxyUrlsItem := range r.ProxyUrls {
+		host := proxyUrlsItem.Host.ValueString()
+		port := proxyUrlsItem.Port.ValueInt64()
+		protocol := proxyUrlsItem.Protocol.ValueString()
+		proxyUrls = append(proxyUrls, shared.ProxyURL{
+			Host:     host,
+			Port:     port,
+			Protocol: protocol,
+		})
+	}
 	out := shared.UpdateControlPlaneRequest{
 		AuthType:    authType,
 		Description: description,
 		Labels:      labels,
 		Name:        name,
+		ProxyUrls:   proxyUrls,
 	}
 	return &out
 }

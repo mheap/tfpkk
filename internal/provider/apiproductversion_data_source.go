@@ -28,14 +28,15 @@ type APIProductVersionDataSource struct {
 
 // APIProductVersionDataSourceModel describes the data model.
 type APIProductVersionDataSourceModel struct {
-	APIProductID   types.String    `tfsdk:"api_product_id"`
-	CreatedAt      types.String    `tfsdk:"created_at"`
-	Deprecated     types.Bool      `tfsdk:"deprecated"`
-	GatewayService *GatewayService `tfsdk:"gateway_service"`
-	ID             types.String    `tfsdk:"id"`
-	Name           types.String    `tfsdk:"name"`
-	PublishStatus  types.String    `tfsdk:"publish_status"`
-	UpdatedAt      types.String    `tfsdk:"updated_at"`
+	APIProductID           types.String            `tfsdk:"api_product_id"`
+	AuthStrategySyncErrors []AuthStrategySyncError `tfsdk:"auth_strategy_sync_errors"`
+	CreatedAt              types.String            `tfsdk:"created_at"`
+	Deprecated             types.Bool              `tfsdk:"deprecated"`
+	GatewayService         *GatewayService         `tfsdk:"gateway_service"`
+	ID                     types.String            `tfsdk:"id"`
+	Name                   types.String            `tfsdk:"name"`
+	PublishStatus          types.String            `tfsdk:"publish_status"`
+	UpdatedAt              types.String            `tfsdk:"updated_at"`
 }
 
 // Metadata returns the data source type name.
@@ -52,6 +53,51 @@ func (r *APIProductVersionDataSource) Schema(ctx context.Context, req datasource
 			"api_product_id": schema.StringAttribute{
 				Required:    true,
 				Description: `The API product identifier`,
+			},
+			"auth_strategy_sync_errors": schema.ListNestedAttribute{
+				Computed: true,
+				NestedObject: schema.NestedAttributeObject{
+					Attributes: map[string]schema.Attribute{
+						"info": schema.SingleNestedAttribute{
+							Computed: true,
+							Attributes: map[string]schema.Attribute{
+								"additional_properties": schema.StringAttribute{
+									Computed:    true,
+									Description: `Parsed as JSON.`,
+								},
+								"details": schema.ListNestedAttribute{
+									Computed: true,
+									NestedObject: schema.NestedAttributeObject{
+										Attributes: map[string]schema.Attribute{
+											"additional_properties": schema.StringAttribute{
+												Computed:    true,
+												Description: `Parsed as JSON.`,
+											},
+											"message": schema.ListAttribute{
+												Computed:    true,
+												ElementType: types.StringType,
+											},
+											"type": schema.StringAttribute{
+												Computed: true,
+											},
+										},
+									},
+								},
+							},
+						},
+						"message": schema.StringAttribute{
+							Computed: true,
+						},
+						"plugin_name": schema.StringAttribute{
+							Computed: true,
+						},
+						"value": schema.StringAttribute{
+							Computed:    true,
+							Description: `must be one of ["plugin_sync_error_comm", "plugin_sync_error_unknown", "plugin_sync_error_fatal", "plugin_sync_error_updating_plugin_refs"]`,
+						},
+					},
+				},
+				Description: `The set of errors encountered when trying to sync the auth strategies on the version`,
 			},
 			"created_at": schema.StringAttribute{
 				Computed:    true,

@@ -8,9 +8,17 @@ import (
 )
 
 type CreateServiceRequest struct {
-	// The UUID of your control plane. This variable is available in the Konnect manager
-	ControlPlaneID string                 `pathParam:"style=simple,explode=false,name=controlPlaneId"`
-	ServiceRequest *shared.ServiceRequest `request:"mediaType=application/json"`
+	// Description of the new Service for creation
+	CreateService shared.CreateService `request:"mediaType=application/json"`
+	// The UUID of your control plane. This variable is available in the Konnect manager.
+	ControlPlaneID string `pathParam:"style=simple,explode=false,name=controlPlaneId"`
+}
+
+func (o *CreateServiceRequest) GetCreateService() shared.CreateService {
+	if o == nil {
+		return shared.CreateService{}
+	}
+	return o.CreateService
 }
 
 func (o *CreateServiceRequest) GetControlPlaneID() string {
@@ -20,150 +28,23 @@ func (o *CreateServiceRequest) GetControlPlaneID() string {
 	return o.ControlPlaneID
 }
 
-func (o *CreateServiceRequest) GetServiceRequest() *shared.ServiceRequest {
-	if o == nil {
-		return nil
-	}
-	return o.ServiceRequest
-}
-
-// CreateServiceServicesResponseBody - Invalid service
-type CreateServiceServicesResponseBody struct {
-}
-
-// CreateServiceResponseBody - Successfully created service
+// CreateServiceResponseBody - Invalid Service
 type CreateServiceResponseBody struct {
-	ConnectTimeout *int64  `json:"connect_timeout,omitempty"`
-	CreatedAt      *int64  `json:"created_at,omitempty"`
-	Enabled        *bool   `json:"enabled,omitempty"`
-	Host           *string `json:"host,omitempty"`
-	ID             *string `json:"id,omitempty"`
-	Name           *string `json:"name,omitempty"`
-	Path           *string `json:"path,omitempty"`
-	Port           *int64  `json:"port,omitempty"`
-	Protocol       *string `json:"protocol,omitempty"`
-	ReadTimeout    *int64  `json:"read_timeout,omitempty"`
-	Retries        *int64  `json:"retries,omitempty"`
-	UpdatedAt      *int64  `json:"updated_at,omitempty"`
-	WriteTimeout   *int64  `json:"write_timeout,omitempty"`
-}
-
-func (o *CreateServiceResponseBody) GetConnectTimeout() *int64 {
-	if o == nil {
-		return nil
-	}
-	return o.ConnectTimeout
-}
-
-func (o *CreateServiceResponseBody) GetCreatedAt() *int64 {
-	if o == nil {
-		return nil
-	}
-	return o.CreatedAt
-}
-
-func (o *CreateServiceResponseBody) GetEnabled() *bool {
-	if o == nil {
-		return nil
-	}
-	return o.Enabled
-}
-
-func (o *CreateServiceResponseBody) GetHost() *string {
-	if o == nil {
-		return nil
-	}
-	return o.Host
-}
-
-func (o *CreateServiceResponseBody) GetID() *string {
-	if o == nil {
-		return nil
-	}
-	return o.ID
-}
-
-func (o *CreateServiceResponseBody) GetName() *string {
-	if o == nil {
-		return nil
-	}
-	return o.Name
-}
-
-func (o *CreateServiceResponseBody) GetPath() *string {
-	if o == nil {
-		return nil
-	}
-	return o.Path
-}
-
-func (o *CreateServiceResponseBody) GetPort() *int64 {
-	if o == nil {
-		return nil
-	}
-	return o.Port
-}
-
-func (o *CreateServiceResponseBody) GetProtocol() *string {
-	if o == nil {
-		return nil
-	}
-	return o.Protocol
-}
-
-func (o *CreateServiceResponseBody) GetReadTimeout() *int64 {
-	if o == nil {
-		return nil
-	}
-	return o.ReadTimeout
-}
-
-func (o *CreateServiceResponseBody) GetRetries() *int64 {
-	if o == nil {
-		return nil
-	}
-	return o.Retries
-}
-
-func (o *CreateServiceResponseBody) GetUpdatedAt() *int64 {
-	if o == nil {
-		return nil
-	}
-	return o.UpdatedAt
-}
-
-func (o *CreateServiceResponseBody) GetWriteTimeout() *int64 {
-	if o == nil {
-		return nil
-	}
-	return o.WriteTimeout
 }
 
 type CreateServiceResponse struct {
-	// Successfully created service
-	TwoHundredAndOneApplicationJSONObject *CreateServiceResponseBody
-	// Invalid service
-	FourHundredApplicationJSONObject *CreateServiceServicesResponseBody
 	// HTTP response content type for this operation
 	ContentType string
+	// Successfully created Service
+	Service *shared.Service
 	// HTTP response status code for this operation
 	StatusCode int
 	// Raw HTTP response; suitable for custom response parsing
 	RawResponse *http.Response
-}
-
-func (o *CreateServiceResponse) GetTwoHundredAndOneApplicationJSONObject() *CreateServiceResponseBody {
-	if o == nil {
-		return nil
-	}
-	return o.TwoHundredAndOneApplicationJSONObject
-}
-
-func (o *CreateServiceResponse) GetFourHundredApplicationJSONObject() *CreateServiceServicesResponseBody {
-	if o == nil {
-		return nil
-	}
-	return o.FourHundredApplicationJSONObject
+	// Unauthorized
+	UnauthorizedError *shared.UnauthorizedError
+	// Invalid Service
+	Object *CreateServiceResponseBody
 }
 
 func (o *CreateServiceResponse) GetContentType() string {
@@ -171,6 +52,13 @@ func (o *CreateServiceResponse) GetContentType() string {
 		return ""
 	}
 	return o.ContentType
+}
+
+func (o *CreateServiceResponse) GetService() *shared.Service {
+	if o == nil {
+		return nil
+	}
+	return o.Service
 }
 
 func (o *CreateServiceResponse) GetStatusCode() int {
@@ -185,4 +73,18 @@ func (o *CreateServiceResponse) GetRawResponse() *http.Response {
 		return nil
 	}
 	return o.RawResponse
+}
+
+func (o *CreateServiceResponse) GetUnauthorizedError() *shared.UnauthorizedError {
+	if o == nil {
+		return nil
+	}
+	return o.UnauthorizedError
+}
+
+func (o *CreateServiceResponse) GetObject() *CreateServiceResponseBody {
+	if o == nil {
+		return nil
+	}
+	return o.Object
 }

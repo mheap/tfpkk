@@ -3,32 +3,15 @@
 package operations
 
 import (
-	"github.com/kong/terraform-provider-konnect/internal/sdk/pkg/utils"
+	"github.com/kong/terraform-provider-konnect/internal/sdk/pkg/models/shared"
 	"net/http"
 )
 
 type GetConsumerRequest struct {
-	// The unique identifier or the username of the Consumer to retrieve.
-	ConsumerID string `pathParam:"style=simple,explode=false,name=consumer_id"`
-	// The UUID of your control plane. This variable is available in the Konnect manager
+	// ID of the Consumer to lookup
+	ConsumerID string `pathParam:"style=simple,explode=false,name=ConsumerId"`
+	// The UUID of your control plane. This variable is available in the Konnect manager.
 	ControlPlaneID string `pathParam:"style=simple,explode=false,name=controlPlaneId"`
-	// A list of tags to filter the list of resources on. Multiple tags can be concatenated using ',' to mean AND or using '/' to mean OR.
-	FilterTags *string `queryParam:"style=form,explode=true,name=tags"`
-	// Offset from which to return the next set of resources. Use the value of the 'offset' field from the response of a list operation as input here to paginate through all the resources
-	Offset *string `queryParam:"style=form,explode=true,name=offset"`
-	// Number of resources to be returned.
-	Size *int64 `default:"100" queryParam:"style=form,explode=true,name=size"`
-}
-
-func (g GetConsumerRequest) MarshalJSON() ([]byte, error) {
-	return utils.MarshalJSON(g, "", false)
-}
-
-func (g *GetConsumerRequest) UnmarshalJSON(data []byte) error {
-	if err := utils.UnmarshalJSON(data, &g, "", false, false); err != nil {
-		return err
-	}
-	return nil
 }
 
 func (o *GetConsumerRequest) GetConsumerID() string {
@@ -45,96 +28,24 @@ func (o *GetConsumerRequest) GetControlPlaneID() string {
 	return o.ControlPlaneID
 }
 
-func (o *GetConsumerRequest) GetFilterTags() *string {
-	if o == nil {
-		return nil
-	}
-	return o.FilterTags
-}
-
-func (o *GetConsumerRequest) GetOffset() *string {
-	if o == nil {
-		return nil
-	}
-	return o.Offset
-}
-
-func (o *GetConsumerRequest) GetSize() *int64 {
-	if o == nil {
-		return nil
-	}
-	return o.Size
-}
-
-// GetConsumerResponseBody - New consumer created response
-type GetConsumerResponseBody struct {
-	// Unix epoch when the resource was created.
-	//
-	CreatedAt *int64 `json:"created_at,omitempty"`
-	// Field for the unique consumer ID
-	CustomID *string `json:"custom_id,omitempty"`
-	// The unique id of the consumer.
-	ID *string `json:"id,omitempty"`
-	// An optional set of strings associated with the Consumer for grouping and filtering.
-	Tags []string `json:"tags,omitempty"`
-	// Unix epoch when the resource was updated.
-	//
-	UpdatedAt *int64 `json:"updated_at,omitempty"`
-	// The unique username of the consumer.
-	Username *string `json:"username,omitempty"`
-}
-
-func (o *GetConsumerResponseBody) GetCreatedAt() *int64 {
-	if o == nil {
-		return nil
-	}
-	return o.CreatedAt
-}
-
-func (o *GetConsumerResponseBody) GetCustomID() *string {
-	if o == nil {
-		return nil
-	}
-	return o.CustomID
-}
-
-func (o *GetConsumerResponseBody) GetID() *string {
-	if o == nil {
-		return nil
-	}
-	return o.ID
-}
-
-func (o *GetConsumerResponseBody) GetTags() []string {
-	if o == nil {
-		return nil
-	}
-	return o.Tags
-}
-
-func (o *GetConsumerResponseBody) GetUpdatedAt() *int64 {
-	if o == nil {
-		return nil
-	}
-	return o.UpdatedAt
-}
-
-func (o *GetConsumerResponseBody) GetUsername() *string {
-	if o == nil {
-		return nil
-	}
-	return o.Username
-}
-
 type GetConsumerResponse struct {
+	// Successfully fetched Consumer
+	Consumer *shared.Consumer
 	// HTTP response content type for this operation
 	ContentType string
 	// HTTP response status code for this operation
 	StatusCode int
 	// Raw HTTP response; suitable for custom response parsing
 	RawResponse *http.Response
-	// New consumer created response
-	Object *GetConsumerResponseBody
+	// Unauthorized
+	UnauthorizedError *shared.UnauthorizedError
+}
+
+func (o *GetConsumerResponse) GetConsumer() *shared.Consumer {
+	if o == nil {
+		return nil
+	}
+	return o.Consumer
 }
 
 func (o *GetConsumerResponse) GetContentType() string {
@@ -158,9 +69,9 @@ func (o *GetConsumerResponse) GetRawResponse() *http.Response {
 	return o.RawResponse
 }
 
-func (o *GetConsumerResponse) GetObject() *GetConsumerResponseBody {
+func (o *GetConsumerResponse) GetUnauthorizedError() *shared.UnauthorizedError {
 	if o == nil {
 		return nil
 	}
-	return o.Object
+	return o.UnauthorizedError
 }

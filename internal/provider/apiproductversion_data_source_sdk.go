@@ -3,12 +3,66 @@
 package provider
 
 import (
+	"encoding/json"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/kong/terraform-provider-konnect/internal/sdk/pkg/models/shared"
 	"time"
 )
 
 func (r *APIProductVersionDataSourceModel) RefreshFromSharedAPIProductVersion(resp *shared.APIProductVersion) {
+	if len(r.AuthStrategySyncErrors) > len(resp.AuthStrategySyncErrors) {
+		r.AuthStrategySyncErrors = r.AuthStrategySyncErrors[:len(resp.AuthStrategySyncErrors)]
+	}
+	for authStrategySyncErrorsCount, authStrategySyncErrorsItem := range resp.AuthStrategySyncErrors {
+		var authStrategySyncErrors1 AuthStrategySyncError
+		if authStrategySyncErrorsItem.Info == nil {
+			authStrategySyncErrors1.Info = nil
+		} else {
+			authStrategySyncErrors1.Info = &Info{}
+			if authStrategySyncErrorsItem.Info.AdditionalProperties == nil {
+				authStrategySyncErrors1.Info.AdditionalProperties = types.StringNull()
+			} else {
+				additionalPropertiesResult, _ := json.Marshal(authStrategySyncErrorsItem.Info.AdditionalProperties)
+				authStrategySyncErrors1.Info.AdditionalProperties = types.StringValue(string(additionalPropertiesResult))
+			}
+			for detailsCount, detailsItem := range authStrategySyncErrorsItem.Info.Details {
+				var details1 Details
+				if detailsItem.AdditionalProperties == nil {
+					details1.AdditionalProperties = types.StringNull()
+				} else {
+					additionalPropertiesResult1, _ := json.Marshal(detailsItem.AdditionalProperties)
+					details1.AdditionalProperties = types.StringValue(string(additionalPropertiesResult1))
+				}
+				details1.Message = nil
+				for _, v := range detailsItem.Message {
+					details1.Message = append(details1.Message, types.StringValue(v))
+				}
+				details1.Type = types.StringPointerValue(detailsItem.Type)
+				if detailsCount+1 > len(authStrategySyncErrors1.Info.Details) {
+					authStrategySyncErrors1.Info.Details = append(authStrategySyncErrors1.Info.Details, details1)
+				} else {
+					authStrategySyncErrors1.Info.Details[detailsCount].AdditionalProperties = details1.AdditionalProperties
+					authStrategySyncErrors1.Info.Details[detailsCount].Message = details1.Message
+					authStrategySyncErrors1.Info.Details[detailsCount].Type = details1.Type
+				}
+			}
+		}
+		authStrategySyncErrors1.Message = types.StringValue(authStrategySyncErrorsItem.Message)
+		authStrategySyncErrors1.PluginName = types.StringPointerValue(authStrategySyncErrorsItem.PluginName)
+		if authStrategySyncErrorsItem.Value != nil {
+			authStrategySyncErrors1.Value = types.StringValue(string(*authStrategySyncErrorsItem.Value))
+		} else {
+			authStrategySyncErrors1.Value = types.StringNull()
+		}
+		if authStrategySyncErrorsCount+1 > len(r.AuthStrategySyncErrors) {
+			r.AuthStrategySyncErrors = append(r.AuthStrategySyncErrors, authStrategySyncErrors1)
+		} else {
+			r.AuthStrategySyncErrors[authStrategySyncErrorsCount].Info = authStrategySyncErrors1.Info
+			r.AuthStrategySyncErrors[authStrategySyncErrorsCount].Message = authStrategySyncErrors1.Message
+			r.AuthStrategySyncErrors[authStrategySyncErrorsCount].PluginName = authStrategySyncErrors1.PluginName
+			r.AuthStrategySyncErrors[authStrategySyncErrorsCount].Value = authStrategySyncErrors1.Value
+		}
+	}
 	r.CreatedAt = types.StringValue(resp.CreatedAt.Format(time.RFC3339Nano))
 	r.Deprecated = types.BoolValue(resp.Deprecated)
 	if resp.GatewayService == nil {

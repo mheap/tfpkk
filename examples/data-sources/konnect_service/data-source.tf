@@ -1,7 +1,4 @@
 data "konnect_service" "my_service" {
-  control_plane_id = "9524ec7d-36d9-465d-a8c5-83a3c9390458"
-  filter_tags      = "...my_filter_tags..."
-  id               = "44b6b57d-e0b2-41fc-8ebf-7e058032ea6f"
-  offset           = "...my_offset..."
-  size             = 1
+  control_plane_id = "9d95eec9-f556-4681-bf81-ad3bc3179461"
+  id               = "97bf3dd4-4c3b-48da-8c0c-3d43a213347c"
 }

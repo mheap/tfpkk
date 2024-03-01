@@ -7,24 +7,17 @@ import (
 	"github.com/kong/terraform-provider-konnect/internal/sdk/pkg/models/shared"
 )
 
-func (r *PluginResourceModel) ToSharedPluginRequest() *shared.PluginRequest {
-	var config *shared.Config
-	if r.Config != nil {
-		hour := new(int64)
-		if !r.Config.Hour.IsUnknown() && !r.Config.Hour.IsNull() {
-			*hour = r.Config.Hour.ValueInt64()
+func (r *PluginResourceModel) ToSharedCreatePlugin() *shared.CreatePlugin {
+	var consumer *shared.CreatePluginConsumer
+	if r.Consumer != nil {
+		id := new(string)
+		if !r.Consumer.ID.IsUnknown() && !r.Consumer.ID.IsNull() {
+			*id = r.Consumer.ID.ValueString()
 		} else {
-			hour = nil
+			id = nil
 		}
-		minute := new(int64)
-		if !r.Config.Minute.IsUnknown() && !r.Config.Minute.IsNull() {
-			*minute = r.Config.Minute.ValueInt64()
-		} else {
-			minute = nil
-		}
-		config = &shared.Config{
-			Hour:   hour,
-			Minute: minute,
+		consumer = &shared.CreatePluginConsumer{
+			ID: id,
 		}
 	}
 	enabled := new(bool)
@@ -33,85 +26,62 @@ func (r *PluginResourceModel) ToSharedPluginRequest() *shared.PluginRequest {
 	} else {
 		enabled = nil
 	}
-	instanceName := new(string)
-	if !r.InstanceName.IsUnknown() && !r.InstanceName.IsNull() {
-		*instanceName = r.InstanceName.ValueString()
-	} else {
-		instanceName = nil
-	}
-	name := new(string)
-	if !r.Name.IsUnknown() && !r.Name.IsNull() {
-		*name = r.Name.ValueString()
-	} else {
-		name = nil
-	}
-	var protocols []shared.Protocols = nil
+	name := r.Name.ValueString()
+	var protocols []shared.CreatePluginProtocols = nil
 	for _, protocolsItem := range r.Protocols {
-		protocols = append(protocols, shared.Protocols(protocolsItem.ValueString()))
+		protocols = append(protocols, shared.CreatePluginProtocols(protocolsItem.ValueString()))
 	}
-	var route *shared.PluginRequestRoute
+	var route *shared.CreatePluginRoute
 	if r.Route != nil {
-		id := new(string)
-		if !r.Route.ID.IsUnknown() && !r.Route.ID.IsNull() {
-			*id = r.Route.ID.ValueString()
-		} else {
-			id = nil
-		}
-		route = &shared.PluginRequestRoute{
-			ID: id,
-		}
-	}
-	var service *shared.Service
-	if r.Service != nil {
 		id1 := new(string)
-		if !r.Service.ID.IsUnknown() && !r.Service.ID.IsNull() {
-			*id1 = r.Service.ID.ValueString()
+		if !r.Route.ID.IsUnknown() && !r.Route.ID.IsNull() {
+			*id1 = r.Route.ID.ValueString()
 		} else {
 			id1 = nil
 		}
-		service = &shared.Service{
+		route = &shared.CreatePluginRoute{
 			ID: id1,
+		}
+	}
+	var service *shared.CreatePluginService
+	if r.Service != nil {
+		id2 := new(string)
+		if !r.Service.ID.IsUnknown() && !r.Service.ID.IsNull() {
+			*id2 = r.Service.ID.ValueString()
+		} else {
+			id2 = nil
+		}
+		service = &shared.CreatePluginService{
+			ID: id2,
 		}
 	}
 	var tags []string = nil
 	for _, tagsItem := range r.Tags {
 		tags = append(tags, tagsItem.ValueString())
 	}
-	out := shared.PluginRequest{
-		Config:       config,
-		Enabled:      enabled,
-		InstanceName: instanceName,
-		Name:         name,
-		Protocols:    protocols,
-		Route:        route,
-		Service:      service,
-		Tags:         tags,
+	out := shared.CreatePlugin{
+		Consumer:  consumer,
+		Enabled:   enabled,
+		Name:      name,
+		Protocols: protocols,
+		Route:     route,
+		Service:   service,
+		Tags:      tags,
 	}
 	return &out
 }
 
 func (r *PluginResourceModel) RefreshFromSharedPlugin(resp *shared.Plugin) {
-	if resp.Config == nil {
-		r.Config = nil
-	} else {
-		r.Config = &Config{}
-	}
 	if resp.Consumer == nil {
 		r.Consumer = nil
 	} else {
-		r.Consumer = &PluginConsumer{}
+		r.Consumer = &CreateACLConsumer{}
 		r.Consumer.ID = types.StringPointerValue(resp.Consumer.ID)
 	}
 	r.CreatedAt = types.Int64PointerValue(resp.CreatedAt)
 	r.Enabled = types.BoolPointerValue(resp.Enabled)
 	r.ID = types.StringPointerValue(resp.ID)
-	r.InstanceName = types.StringPointerValue(resp.InstanceName)
-	r.Name = types.StringPointerValue(resp.Name)
-	if resp.Ordering == nil {
-		r.Ordering = nil
-	} else {
-		r.Ordering = &Ordering{}
-	}
+	r.Name = types.StringValue(resp.Name)
 	r.Protocols = nil
 	for _, v := range resp.Protocols {
 		r.Protocols = append(r.Protocols, types.StringValue(string(v)))
@@ -119,13 +89,13 @@ func (r *PluginResourceModel) RefreshFromSharedPlugin(resp *shared.Plugin) {
 	if resp.Route == nil {
 		r.Route = nil
 	} else {
-		r.Route = &PluginConsumer{}
+		r.Route = &CreateACLConsumer{}
 		r.Route.ID = types.StringPointerValue(resp.Route.ID)
 	}
 	if resp.Service == nil {
 		r.Service = nil
 	} else {
-		r.Service = &PluginConsumer{}
+		r.Service = &CreateACLConsumer{}
 		r.Service.ID = types.StringPointerValue(resp.Service.ID)
 	}
 	r.Tags = nil

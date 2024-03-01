@@ -4,10 +4,10 @@ package provider
 
 import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/kong/terraform-provider-konnect/internal/sdk/pkg/models/operations"
+	"github.com/kong/terraform-provider-konnect/internal/sdk/pkg/models/shared"
 )
 
-func (r *ConsumerDataSourceModel) RefreshFromOperationsGetConsumerResponseBody(resp *operations.GetConsumerResponseBody) {
+func (r *ConsumerDataSourceModel) RefreshFromSharedConsumer(resp *shared.Consumer) {
 	r.CreatedAt = types.Int64PointerValue(resp.CreatedAt)
 	r.CustomID = types.StringPointerValue(resp.CustomID)
 	r.ID = types.StringPointerValue(resp.ID)
@@ -15,6 +15,5 @@ func (r *ConsumerDataSourceModel) RefreshFromOperationsGetConsumerResponseBody(r
 	for _, v := range resp.Tags {
 		r.Tags = append(r.Tags, types.StringValue(v))
 	}
-	r.UpdatedAt = types.Int64PointerValue(resp.UpdatedAt)
 	r.Username = types.StringPointerValue(resp.Username)
 }

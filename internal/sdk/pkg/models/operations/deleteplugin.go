@@ -3,14 +3,22 @@
 package operations
 
 import (
+	"github.com/kong/terraform-provider-konnect/internal/sdk/pkg/models/shared"
 	"net/http"
 )
 
 type DeletePluginRequest struct {
-	// The UUID of your control plane. This variable is available in the Konnect manager
+	// ID of the Plugin to lookup
+	PluginID string `pathParam:"style=simple,explode=false,name=PluginId"`
+	// The UUID of your control plane. This variable is available in the Konnect manager.
 	ControlPlaneID string `pathParam:"style=simple,explode=false,name=controlPlaneId"`
-	// The unique identifier of the Plugin to create or update.
-	PluginIDOrInstanceName string `pathParam:"style=simple,explode=false,name=plugin_id_or_instance_name"`
+}
+
+func (o *DeletePluginRequest) GetPluginID() string {
+	if o == nil {
+		return ""
+	}
+	return o.PluginID
 }
 
 func (o *DeletePluginRequest) GetControlPlaneID() string {
@@ -20,13 +28,6 @@ func (o *DeletePluginRequest) GetControlPlaneID() string {
 	return o.ControlPlaneID
 }
 
-func (o *DeletePluginRequest) GetPluginIDOrInstanceName() string {
-	if o == nil {
-		return ""
-	}
-	return o.PluginIDOrInstanceName
-}
-
 type DeletePluginResponse struct {
 	// HTTP response content type for this operation
 	ContentType string
@@ -34,6 +35,8 @@ type DeletePluginResponse struct {
 	StatusCode int
 	// Raw HTTP response; suitable for custom response parsing
 	RawResponse *http.Response
+	// Unauthorized
+	UnauthorizedError *shared.UnauthorizedError
 }
 
 func (o *DeletePluginResponse) GetContentType() string {
@@ -55,4 +58,11 @@ func (o *DeletePluginResponse) GetRawResponse() *http.Response {
 		return nil
 	}
 	return o.RawResponse
+}
+
+func (o *DeletePluginResponse) GetUnauthorizedError() *shared.UnauthorizedError {
+	if o == nil {
+		return nil
+	}
+	return o.UnauthorizedError
 }

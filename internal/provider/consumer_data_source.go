@@ -31,12 +31,8 @@ type ConsumerDataSourceModel struct {
 	ControlPlaneID types.String   `tfsdk:"control_plane_id"`
 	CreatedAt      types.Int64    `tfsdk:"created_at"`
 	CustomID       types.String   `tfsdk:"custom_id"`
-	FilterTags     types.String   `tfsdk:"filter_tags"`
 	ID             types.String   `tfsdk:"id"`
-	Offset         types.String   `tfsdk:"offset"`
-	Size           types.Int64    `tfsdk:"size"`
 	Tags           []types.String `tfsdk:"tags"`
-	UpdatedAt      types.Int64    `tfsdk:"updated_at"`
 	Username       types.String   `tfsdk:"username"`
 }
 
@@ -53,46 +49,28 @@ func (r *ConsumerDataSource) Schema(ctx context.Context, req datasource.SchemaRe
 		Attributes: map[string]schema.Attribute{
 			"control_plane_id": schema.StringAttribute{
 				Required:    true,
-				Description: `The UUID of your control plane. This variable is available in the Konnect manager`,
+				Description: `The UUID of your control plane. This variable is available in the Konnect manager.`,
 			},
 			"created_at": schema.Int64Attribute{
-				Computed: true,
-				MarkdownDescription: `Unix epoch when the resource was created.` + "\n" +
-					``,
+				Computed:    true,
+				Description: `Unix epoch when the resource was created.`,
 			},
 			"custom_id": schema.StringAttribute{
 				Computed:    true,
-				Description: `Field for the unique consumer ID`,
-			},
-			"filter_tags": schema.StringAttribute{
-				Optional:    true,
-				Description: `A list of tags to filter the list of resources on. Multiple tags can be concatenated using ',' to mean AND or using '/' to mean OR.`,
+				Description: `Field for storing an existing unique ID for the Consumer - useful for mapping Kong with users in your existing database. You must send either this field or ` + "`" + `username` + "`" + ` with the request.`,
 			},
 			"id": schema.StringAttribute{
 				Required:    true,
-				Description: `The unique identifier or the username of the Consumer to retrieve.`,
-			},
-			"offset": schema.StringAttribute{
-				Optional:    true,
-				Description: `Offset from which to return the next set of resources. Use the value of the 'offset' field from the response of a list operation as input here to paginate through all the resources`,
-			},
-			"size": schema.Int64Attribute{
-				Optional:    true,
-				Description: `Number of resources to be returned. Default: 100`,
+				Description: `ID of the Consumer to lookup`,
 			},
 			"tags": schema.ListAttribute{
 				Computed:    true,
 				ElementType: types.StringType,
 				Description: `An optional set of strings associated with the Consumer for grouping and filtering.`,
 			},
-			"updated_at": schema.Int64Attribute{
-				Computed: true,
-				MarkdownDescription: `Unix epoch when the resource was updated.` + "\n" +
-					``,
-			},
 			"username": schema.StringAttribute{
 				Computed:    true,
-				Description: `The unique username of the consumer.`,
+				Description: `The unique username of the Consumer. You must send either this field or ` + "`" + `custom_id` + "`" + ` with the request.`,
 			},
 		},
 	}
@@ -138,30 +116,9 @@ func (r *ConsumerDataSource) Read(ctx context.Context, req datasource.ReadReques
 
 	consumerID := data.ID.ValueString()
 	controlPlaneID := data.ControlPlaneID.ValueString()
-	filterTags := new(string)
-	if !data.FilterTags.IsUnknown() && !data.FilterTags.IsNull() {
-		*filterTags = data.FilterTags.ValueString()
-	} else {
-		filterTags = nil
-	}
-	offset := new(string)
-	if !data.Offset.IsUnknown() && !data.Offset.IsNull() {
-		*offset = data.Offset.ValueString()
-	} else {
-		offset = nil
-	}
-	size := new(int64)
-	if !data.Size.IsUnknown() && !data.Size.IsNull() {
-		*size = data.Size.ValueInt64()
-	} else {
-		size = nil
-	}
 	request := operations.GetConsumerRequest{
 		ConsumerID:     consumerID,
 		ControlPlaneID: controlPlaneID,
-		FilterTags:     filterTags,
-		Offset:         offset,
-		Size:           size,
 	}
 	res, err := r.client.Consumers.GetConsumer(ctx, request)
 	if err != nil {
@@ -179,11 +136,11 @@ func (r *ConsumerDataSource) Read(ctx context.Context, req datasource.ReadReques
 		resp.Diagnostics.AddError(fmt.Sprintf("unexpected response from API. Got an unexpected response code %v", res.StatusCode), debugResponse(res.RawResponse))
 		return
 	}
-	if res.Object == nil {
+	if res.Consumer == nil {
 		resp.Diagnostics.AddError("unexpected response from API. No response body", debugResponse(res.RawResponse))
 		return
 	}
-	data.RefreshFromOperationsGetConsumerResponseBody(res.Object)
+	data.RefreshFromSharedConsumer(res.Consumer)
 
 	// Save updated data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)

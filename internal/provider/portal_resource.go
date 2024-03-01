@@ -30,18 +30,19 @@ type PortalResource struct {
 
 // PortalResourceModel describes the resource data model.
 type PortalResourceModel struct {
-	AutoApproveApplications types.Bool   `tfsdk:"auto_approve_applications"`
-	AutoApproveDevelopers   types.Bool   `tfsdk:"auto_approve_developers"`
-	CreatedAt               types.String `tfsdk:"created_at"`
-	CustomClientDomain      types.String `tfsdk:"custom_client_domain"`
-	CustomDomain            types.String `tfsdk:"custom_domain"`
-	DefaultDomain           types.String `tfsdk:"default_domain"`
-	ID                      types.String `tfsdk:"id"`
-	IsPublic                types.Bool   `tfsdk:"is_public"`
-	Name                    types.String `tfsdk:"name"`
-	PortalID                types.String `tfsdk:"portal_id"`
-	RbacEnabled             types.Bool   `tfsdk:"rbac_enabled"`
-	UpdatedAt               types.String `tfsdk:"updated_at"`
+	AutoApproveApplications          types.Bool   `tfsdk:"auto_approve_applications"`
+	AutoApproveDevelopers            types.Bool   `tfsdk:"auto_approve_developers"`
+	CreatedAt                        types.String `tfsdk:"created_at"`
+	CustomClientDomain               types.String `tfsdk:"custom_client_domain"`
+	CustomDomain                     types.String `tfsdk:"custom_domain"`
+	DefaultDomain                    types.String `tfsdk:"default_domain"`
+	DefaultApplicationAuthStrategyID types.String `tfsdk:"default_application_auth_strategy_id"`
+	ID                               types.String `tfsdk:"id"`
+	IsPublic                         types.Bool   `tfsdk:"is_public"`
+	Name                             types.String `tfsdk:"name"`
+	PortalID                         types.String `tfsdk:"portal_id"`
+	RbacEnabled                      types.Bool   `tfsdk:"rbac_enabled"`
+	UpdatedAt                        types.String `tfsdk:"updated_at"`
 }
 
 func (r *PortalResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
@@ -83,6 +84,11 @@ func (r *PortalResource) Schema(ctx context.Context, req resource.SchemaRequest,
 			"default_domain": schema.StringAttribute{
 				Computed:    true,
 				Description: `The domain assigned to the portal by Konnect. This is the default place to access the portal and its API if not using a ` + "`" + `custom_domain` + "``" + `.`,
+			},
+			"default_application_auth_strategy_id": schema.StringAttribute{
+				Computed:    true,
+				Optional:    true,
+				Description: `Default strategy ID applied on applications for the portal`,
 			},
 			"id": schema.StringAttribute{
 				Computed:    true,

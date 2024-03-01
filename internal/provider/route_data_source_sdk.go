@@ -3,6 +3,7 @@
 package provider
 
 import (
+	"encoding/json"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/kong/terraform-provider-konnect/internal/sdk/pkg/models/shared"
 )
@@ -23,23 +24,33 @@ func (r *RouteDataSourceModel) RefreshFromSharedRoute(resp *shared.Route) {
 			r.Destinations[destinationsCount].Port = destinations1.Port
 		}
 	}
-	if resp.Headers == nil {
-		r.Headers = nil
-	} else {
-		r.Headers = &Ordering{}
+	if len(resp.Headers) > 0 {
+		r.Headers = make(map[string]types.String)
+		for key, value := range resp.Headers {
+			result, _ := json.Marshal(value)
+			r.Headers[key] = types.StringValue(string(result))
+		}
 	}
 	r.Hosts = nil
 	for _, v := range resp.Hosts {
 		r.Hosts = append(r.Hosts, types.StringValue(v))
 	}
-	r.HTTPSRedirectStatusCode = types.Int64PointerValue(resp.HTTPSRedirectStatusCode)
+	if resp.HTTPSRedirectStatusCode != nil {
+		r.HTTPSRedirectStatusCode = types.Int64Value(int64(*resp.HTTPSRedirectStatusCode))
+	} else {
+		r.HTTPSRedirectStatusCode = types.Int64Null()
+	}
 	r.ID = types.StringPointerValue(resp.ID)
 	r.Methods = nil
 	for _, v := range resp.Methods {
 		r.Methods = append(r.Methods, types.StringValue(v))
 	}
 	r.Name = types.StringPointerValue(resp.Name)
-	r.PathHandling = types.StringPointerValue(resp.PathHandling)
+	if resp.PathHandling != nil {
+		r.PathHandling = types.StringValue(string(*resp.PathHandling))
+	} else {
+		r.PathHandling = types.StringNull()
+	}
 	r.Paths = nil
 	for _, v := range resp.Paths {
 		r.Paths = append(r.Paths, types.StringValue(v))
@@ -47,7 +58,7 @@ func (r *RouteDataSourceModel) RefreshFromSharedRoute(resp *shared.Route) {
 	r.PreserveHost = types.BoolPointerValue(resp.PreserveHost)
 	r.Protocols = nil
 	for _, v := range resp.Protocols {
-		r.Protocols = append(r.Protocols, types.StringValue(v))
+		r.Protocols = append(r.Protocols, types.StringValue(string(v)))
 	}
 	r.RegexPriority = types.Int64PointerValue(resp.RegexPriority)
 	r.RequestBuffering = types.BoolPointerValue(resp.RequestBuffering)
@@ -55,12 +66,15 @@ func (r *RouteDataSourceModel) RefreshFromSharedRoute(resp *shared.Route) {
 	if resp.Service == nil {
 		r.Service = nil
 	} else {
-		r.Service = &PluginConsumer{}
+		r.Service = &CreateACLConsumer{}
 		r.Service.ID = types.StringPointerValue(resp.Service.ID)
 	}
 	r.Snis = nil
-	for _, v := range resp.Snis {
-		r.Snis = append(r.Snis, types.StringValue(v))
+	for _, snisItem := range resp.Snis {
+		var snis1 types.String
+		snis1Result, _ := json.Marshal(snisItem)
+		snis1 = types.StringValue(string(snis1Result))
+		r.Snis = append(r.Snis, snis1)
 	}
 	if len(r.Sources) > len(resp.Sources) {
 		r.Sources = r.Sources[:len(resp.Sources)]

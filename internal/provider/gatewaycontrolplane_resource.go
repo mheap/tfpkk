@@ -4,7 +4,6 @@ package provider
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -20,7 +19,6 @@ import (
 	speakeasy_stringplanmodifier "github.com/kong/terraform-provider-konnect/internal/planmodifiers/stringplanmodifier"
 	"github.com/kong/terraform-provider-konnect/internal/sdk"
 	"github.com/kong/terraform-provider-konnect/internal/sdk/pkg/models/operations"
-	"github.com/kong/terraform-provider-konnect/internal/sdk/pkg/models/shared"
 	"github.com/kong/terraform-provider-konnect/internal/validators"
 )
 
@@ -47,6 +45,7 @@ type GatewayControlPlaneResourceModel struct {
 	ID           types.String        `tfsdk:"id"`
 	Labels       types.String        `tfsdk:"labels"`
 	Name         types.String        `tfsdk:"name"`
+	ProxyUrls    []ProxyURL          `tfsdk:"proxy_urls"`
 }
 
 func (r *GatewayControlPlaneResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
@@ -136,6 +135,26 @@ func (r *GatewayControlPlaneResource) Schema(ctx context.Context, req resource.S
 				Required:    true,
 				Description: `The name of the control plane.`,
 			},
+			"proxy_urls": schema.ListNestedAttribute{
+				Optional: true,
+				NestedObject: schema.NestedAttributeObject{
+					Attributes: map[string]schema.Attribute{
+						"host": schema.StringAttribute{
+							Required:    true,
+							Description: `Hostname of the proxy URL.`,
+						},
+						"port": schema.Int64Attribute{
+							Required:    true,
+							Description: `Port of the proxy URL.`,
+						},
+						"protocol": schema.StringAttribute{
+							Required:    true,
+							Description: `Protocol of the proxy URL.`,
+						},
+					},
+				},
+				Description: `Array of proxy URLs associated with reaching the data-planes connected to a control-plane.`,
+			},
 		},
 	}
 }
@@ -178,43 +197,7 @@ func (r *GatewayControlPlaneResource) Create(ctx context.Context, req resource.C
 		return
 	}
 
-	authType := new(shared.AuthType)
-	if !data.AuthType.IsUnknown() && !data.AuthType.IsNull() {
-		*authType = shared.AuthType(data.AuthType.ValueString())
-	} else {
-		authType = nil
-	}
-	cloudGateway := new(bool)
-	if !data.CloudGateway.IsUnknown() && !data.CloudGateway.IsNull() {
-		*cloudGateway = data.CloudGateway.ValueBool()
-	} else {
-		cloudGateway = nil
-	}
-	clusterType := new(shared.ClusterType)
-	if !data.ClusterType.IsUnknown() && !data.ClusterType.IsNull() {
-		*clusterType = shared.ClusterType(data.ClusterType.ValueString())
-	} else {
-		clusterType = nil
-	}
-	description := new(string)
-	if !data.Description.IsUnknown() && !data.Description.IsNull() {
-		*description = data.Description.ValueString()
-	} else {
-		description = nil
-	}
-	var labels interface{}
-	if !data.Labels.IsUnknown() && !data.Labels.IsNull() {
-		_ = json.Unmarshal([]byte(data.Labels.ValueString()), &labels)
-	}
-	name := data.Name.ValueString()
-	request := shared.CreateControlPlaneRequest{
-		AuthType:     authType,
-		CloudGateway: cloudGateway,
-		ClusterType:  clusterType,
-		Description:  description,
-		Labels:       labels,
-		Name:         name,
-	}
+	request := *data.ToSharedCreateControlPlaneRequest()
 	res, err := r.client.ControlPlanes.CreateControlPlane(ctx, request)
 	if err != nil {
 		resp.Diagnostics.AddError("failure to invoke API", err.Error())

@@ -28,23 +28,10 @@ type ServiceDataSource struct {
 
 // ServiceDataSourceModel describes the data model.
 type ServiceDataSourceModel struct {
-	ConnectTimeout types.Int64  `tfsdk:"connect_timeout"`
 	ControlPlaneID types.String `tfsdk:"control_plane_id"`
 	CreatedAt      types.Int64  `tfsdk:"created_at"`
-	Enabled        types.Bool   `tfsdk:"enabled"`
-	FilterTags     types.String `tfsdk:"filter_tags"`
-	Host           types.String `tfsdk:"host"`
 	ID             types.String `tfsdk:"id"`
-	Name           types.String `tfsdk:"name"`
-	Offset         types.String `tfsdk:"offset"`
-	Path           types.String `tfsdk:"path"`
-	Port           types.Int64  `tfsdk:"port"`
-	Protocol       types.String `tfsdk:"protocol"`
-	ReadTimeout    types.Int64  `tfsdk:"read_timeout"`
-	Retries        types.Int64  `tfsdk:"retries"`
-	Size           types.Int64  `tfsdk:"size"`
 	UpdatedAt      types.Int64  `tfsdk:"updated_at"`
-	WriteTimeout   types.Int64  `tfsdk:"write_timeout"`
 }
 
 // Metadata returns the data source type name.
@@ -58,63 +45,21 @@ func (r *ServiceDataSource) Schema(ctx context.Context, req datasource.SchemaReq
 		MarkdownDescription: "Service DataSource",
 
 		Attributes: map[string]schema.Attribute{
-			"connect_timeout": schema.Int64Attribute{
-				Computed: true,
-			},
 			"control_plane_id": schema.StringAttribute{
 				Required:    true,
-				Description: `The UUID of your control plane. This variable is available in the Konnect manager`,
+				Description: `The UUID of your control plane. This variable is available in the Konnect manager.`,
 			},
 			"created_at": schema.Int64Attribute{
 				Computed:    true,
-				Description: `Unix epoch when the resource was last created.`,
-			},
-			"enabled": schema.BoolAttribute{
-				Computed:    true,
-				Description: `Service enabled boolean`,
-			},
-			"filter_tags": schema.StringAttribute{
-				Optional:    true,
-				Description: `A list of tags to filter the list of resources on. Multiple tags can be concatenated using ',' to mean AND or using '/' to mean OR.`,
-			},
-			"host": schema.StringAttribute{
-				Computed: true,
+				Description: `Unix epoch when the resource was created.`,
 			},
 			"id": schema.StringAttribute{
 				Required:    true,
-				Description: `UUID of the service to lookup`,
-			},
-			"name": schema.StringAttribute{
-				Computed: true,
-			},
-			"offset": schema.StringAttribute{
-				Optional:    true,
-				Description: `Offset from which to return the next set of resources. Use the value of the 'offset' field from the response of a list operation as input here to paginate through all the resources`,
-			},
-			"path": schema.StringAttribute{
-				Computed: true,
-			},
-			"port": schema.Int64Attribute{
-				Computed: true,
-			},
-			"protocol": schema.StringAttribute{
-				Computed: true,
-			},
-			"read_timeout": schema.Int64Attribute{
-				Computed: true,
-			},
-			"retries": schema.Int64Attribute{
-				Computed: true,
-			},
-			"size": schema.Int64Attribute{
-				Optional:    true,
-				Description: `Number of resources to be returned. Default: 100`,
+				Description: `ID of the Service to lookup`,
 			},
 			"updated_at": schema.Int64Attribute{
-				Computed: true,
-			},
-			"write_timeout": schema.Int64Attribute{
-				Computed: true,
+				Computed:    true,
+				Description: `Unix epoch when the resource was last updated.`,
 			},
 		},
 	}
@@ -158,32 +103,11 @@ func (r *ServiceDataSource) Read(ctx context.Context, req datasource.ReadRequest
 		return
 	}
 
-	controlPlaneID := data.ControlPlaneID.ValueString()
-	filterTags := new(string)
-	if !data.FilterTags.IsUnknown() && !data.FilterTags.IsNull() {
-		*filterTags = data.FilterTags.ValueString()
-	} else {
-		filterTags = nil
-	}
-	offset := new(string)
-	if !data.Offset.IsUnknown() && !data.Offset.IsNull() {
-		*offset = data.Offset.ValueString()
-	} else {
-		offset = nil
-	}
 	serviceID := data.ID.ValueString()
-	size := new(int64)
-	if !data.Size.IsUnknown() && !data.Size.IsNull() {
-		*size = data.Size.ValueInt64()
-	} else {
-		size = nil
-	}
+	controlPlaneID := data.ControlPlaneID.ValueString()
 	request := operations.GetServiceRequest{
-		ControlPlaneID: controlPlaneID,
-		FilterTags:     filterTags,
-		Offset:         offset,
 		ServiceID:      serviceID,
-		Size:           size,
+		ControlPlaneID: controlPlaneID,
 	}
 	res, err := r.client.Services.GetService(ctx, request)
 	if err != nil {
@@ -201,11 +125,11 @@ func (r *ServiceDataSource) Read(ctx context.Context, req datasource.ReadRequest
 		resp.Diagnostics.AddError(fmt.Sprintf("unexpected response from API. Got an unexpected response code %v", res.StatusCode), debugResponse(res.RawResponse))
 		return
 	}
-	if res.Object == nil {
+	if res.Service == nil {
 		resp.Diagnostics.AddError("unexpected response from API. No response body", debugResponse(res.RawResponse))
 		return
 	}
-	data.RefreshFromOperationsGetServiceResponseBody(res.Object)
+	data.RefreshFromSharedService(res.Service)
 
 	// Save updated data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)

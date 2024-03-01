@@ -45,6 +45,8 @@ type UpdateControlPlaneRequest struct {
 	Labels interface{} `json:"labels,omitempty"`
 	// The name of the control plane.
 	Name *string `json:"name,omitempty"`
+	// Array of proxy URLs associated with reaching the data-planes connected to a control-plane.
+	ProxyUrls []ProxyURL `json:"proxy_urls,omitempty"`
 }
 
 func (o *UpdateControlPlaneRequest) GetAuthType() *UpdateControlPlaneRequestAuthType {
@@ -73,4 +75,11 @@ func (o *UpdateControlPlaneRequest) GetName() *string {
 		return nil
 	}
 	return o.Name
+}
+
+func (o *UpdateControlPlaneRequest) GetProxyUrls() []ProxyURL {
+	if o == nil {
+		return nil
+	}
+	return o.ProxyUrls
 }

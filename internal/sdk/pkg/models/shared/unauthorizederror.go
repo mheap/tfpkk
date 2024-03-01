@@ -6,7 +6,8 @@ package shared
 type UnauthorizedError struct {
 	Detail   interface{} `json:"detail"`
 	Instance interface{} `json:"instance"`
-	Status   interface{} `json:"status"`
+	Message  string      `json:"message"`
+	Status   int64       `json:"status"`
 	Title    interface{} `json:"title"`
 	Type     interface{} `json:"type,omitempty"`
 }
@@ -25,9 +26,16 @@ func (o *UnauthorizedError) GetInstance() interface{} {
 	return o.Instance
 }
 
-func (o *UnauthorizedError) GetStatus() interface{} {
+func (o *UnauthorizedError) GetMessage() string {
 	if o == nil {
-		return nil
+		return ""
+	}
+	return o.Message
+}
+
+func (o *UnauthorizedError) GetStatus() int64 {
+	if o == nil {
+		return 0
 	}
 	return o.Status
 }

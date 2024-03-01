@@ -14,7 +14,8 @@ import (
 	"net/http"
 )
 
-// Consumers
+// Consumers - The consumer object represents a consumer - or a user - of a service.
+// You can either rely on Kong Gateway as the primary datastore, or you can map the consumer list with your database to keep consistency between Kong Gateway and your existing primary datastore.
 type Consumers struct {
 	sdkConfiguration sdkConfiguration
 }
@@ -34,10 +35,14 @@ func (s *Consumers) CreateConsumer(ctx context.Context, request operations.Creat
 		return nil, fmt.Errorf("error generating URL: %w", err)
 	}
 
-	bodyReader, reqContentType, err := utils.SerializeRequestBody(ctx, request, false, true, "ConsumerRequest", "json", `request:"mediaType=application/json"`)
+	bodyReader, reqContentType, err := utils.SerializeRequestBody(ctx, request, false, false, "CreateConsumer", "json", `request:"mediaType=application/json"`)
 	if err != nil {
 		return nil, fmt.Errorf("error serializing request body: %w", err)
 	}
+	if bodyReader == nil {
+		return nil, fmt.Errorf("request body is required")
+	}
+
 	debugBody := bytes.NewBuffer([]byte{})
 	debugReader := io.TeeReader(bodyReader, debugBody)
 
@@ -100,16 +105,28 @@ func (s *Consumers) CreateConsumer(ctx context.Context, request operations.Creat
 		default:
 			return nil, sdkerrors.NewSDKError(fmt.Sprintf("unknown content-type received: %s", contentType), httpRes.StatusCode, string(rawBody), httpRes)
 		}
+	case httpRes.StatusCode == 401:
+		switch {
+		case utils.MatchContentType(contentType, `application/json`):
+			var out shared.UnauthorizedError
+			if err := utils.UnmarshalJsonFromResponseBody(bytes.NewBuffer(rawBody), &out, ""); err != nil {
+				return nil, err
+			}
+
+			res.UnauthorizedError = &out
+		default:
+			return nil, sdkerrors.NewSDKError(fmt.Sprintf("unknown content-type received: %s", contentType), httpRes.StatusCode, string(rawBody), httpRes)
+		}
 	}
 
 	return res, nil
 }
 
 // DeleteConsumer - Delete a Consumer
-// Delete a specific consumer from the system using either the consumer ID or the consumer username. This operation is irreversible and permanently removes all data associated with the specified consumer. If the consumer was deleted succesfully the endpoint will return a 204 response indicating that the resource did not exist.
+// Delete a Consumer
 func (s *Consumers) DeleteConsumer(ctx context.Context, request operations.DeleteConsumerRequest) (*operations.DeleteConsumerResponse, error) {
 	baseURL := utils.ReplaceParameters(s.sdkConfiguration.GetServerDetails())
-	url, err := utils.GenerateURL(ctx, baseURL, "/control-planes/{controlPlaneId}/core-entities/consumers/{consumer_id}", request, nil)
+	url, err := utils.GenerateURL(ctx, baseURL, "/control-planes/{controlPlaneId}/core-entities/consumers/{ConsumerId}", request, nil)
 	if err != nil {
 		return nil, fmt.Errorf("error generating URL: %w", err)
 	}
@@ -118,7 +135,7 @@ func (s *Consumers) DeleteConsumer(ctx context.Context, request operations.Delet
 	if err != nil {
 		return nil, fmt.Errorf("error creating request: %w", err)
 	}
-	req.Header.Set("Accept", "*/*")
+	req.Header.Set("Accept", "application/json")
 	req.Header.Set("user-agent", s.sdkConfiguration.UserAgent)
 
 	client := s.sdkConfiguration.SecurityClient
@@ -147,16 +164,28 @@ func (s *Consumers) DeleteConsumer(ctx context.Context, request operations.Delet
 	}
 	switch {
 	case httpRes.StatusCode == 204:
+	case httpRes.StatusCode == 401:
+		switch {
+		case utils.MatchContentType(contentType, `application/json`):
+			var out shared.UnauthorizedError
+			if err := utils.UnmarshalJsonFromResponseBody(bytes.NewBuffer(rawBody), &out, ""); err != nil {
+				return nil, err
+			}
+
+			res.UnauthorizedError = &out
+		default:
+			return nil, sdkerrors.NewSDKError(fmt.Sprintf("unknown content-type received: %s", contentType), httpRes.StatusCode, string(rawBody), httpRes)
+		}
 	}
 
 	return res, nil
 }
 
 // GetConsumer - Fetch a Consumer
-// Retrieve the details of a specific consumer in the system using either the consumer ID or the consumer username. If the consumer with the specified ID or username cannot be found, the endpoint will return a 404.
+// Get a Consumer using ID or username.
 func (s *Consumers) GetConsumer(ctx context.Context, request operations.GetConsumerRequest) (*operations.GetConsumerResponse, error) {
 	baseURL := utils.ReplaceParameters(s.sdkConfiguration.GetServerDetails())
-	url, err := utils.GenerateURL(ctx, baseURL, "/control-planes/{controlPlaneId}/core-entities/consumers/{consumer_id}", request, nil)
+	url, err := utils.GenerateURL(ctx, baseURL, "/control-planes/{controlPlaneId}/core-entities/consumers/{ConsumerId}", request, nil)
 	if err != nil {
 		return nil, fmt.Errorf("error generating URL: %w", err)
 	}
@@ -167,10 +196,6 @@ func (s *Consumers) GetConsumer(ctx context.Context, request operations.GetConsu
 	}
 	req.Header.Set("Accept", "application/json")
 	req.Header.Set("user-agent", s.sdkConfiguration.UserAgent)
-
-	if err := utils.PopulateQueryParams(ctx, req, request, nil); err != nil {
-		return nil, fmt.Errorf("error populating query params: %w", err)
-	}
 
 	client := s.sdkConfiguration.SecurityClient
 
@@ -200,92 +225,27 @@ func (s *Consumers) GetConsumer(ctx context.Context, request operations.GetConsu
 	case httpRes.StatusCode == 200:
 		switch {
 		case utils.MatchContentType(contentType, `application/json`):
-			var out operations.GetConsumerResponseBody
+			var out shared.Consumer
 			if err := utils.UnmarshalJsonFromResponseBody(bytes.NewBuffer(rawBody), &out, ""); err != nil {
 				return nil, err
 			}
 
-			res.Object = &out
+			res.Consumer = &out
 		default:
 			return nil, sdkerrors.NewSDKError(fmt.Sprintf("unknown content-type received: %s", contentType), httpRes.StatusCode, string(rawBody), httpRes)
 		}
-	case httpRes.StatusCode == 404:
-	}
-
-	return res, nil
-}
-
-// UpsertConsumer - Update a Consumer
-// Create or Update Consumer using ID or username. The consumer will be identified via the username or id attribute.If the consumer with the specified ID or username cannot be found, the endpoint will return a 404.
-//
-// When the username or id attribute has the structure of a UUID, the Consumer being inserted/replaced will be identified by its id. Otherwise it will be identified by its username.
-//
-// When creating a new Consumer without specifying id (neither in the URL nor in the body), then it will be auto-generated.
-//
-// Notice that specifying a username in the URL and a different one in the request body is not allowed.
-func (s *Consumers) UpsertConsumer(ctx context.Context, request operations.UpsertConsumerRequest) (*operations.UpsertConsumerResponse, error) {
-	baseURL := utils.ReplaceParameters(s.sdkConfiguration.GetServerDetails())
-	url, err := utils.GenerateURL(ctx, baseURL, "/control-planes/{controlPlaneId}/core-entities/consumers/{consumer_id}", request, nil)
-	if err != nil {
-		return nil, fmt.Errorf("error generating URL: %w", err)
-	}
-
-	bodyReader, reqContentType, err := utils.SerializeRequestBody(ctx, request, false, true, "ConsumerRequest", "json", `request:"mediaType=application/json"`)
-	if err != nil {
-		return nil, fmt.Errorf("error serializing request body: %w", err)
-	}
-	debugBody := bytes.NewBuffer([]byte{})
-	debugReader := io.TeeReader(bodyReader, debugBody)
-
-	req, err := http.NewRequestWithContext(ctx, "PUT", url, debugReader)
-	if err != nil {
-		return nil, fmt.Errorf("error creating request: %w", err)
-	}
-	req.Header.Set("Accept", "application/json")
-	req.Header.Set("user-agent", s.sdkConfiguration.UserAgent)
-
-	req.Header.Set("Content-Type", reqContentType)
-
-	client := s.sdkConfiguration.SecurityClient
-
-	httpRes, err := client.Do(req)
-	if err != nil {
-		return nil, fmt.Errorf("error sending request: %w", err)
-	}
-	if httpRes == nil {
-		return nil, fmt.Errorf("error sending request: no response")
-	}
-
-	rawBody, err := io.ReadAll(httpRes.Body)
-	if err != nil {
-		return nil, fmt.Errorf("error reading response body: %w", err)
-	}
-	httpRes.Request.Body = io.NopCloser(debugBody)
-	httpRes.Body.Close()
-	httpRes.Body = io.NopCloser(bytes.NewBuffer(rawBody))
-
-	contentType := httpRes.Header.Get("Content-Type")
-
-	res := &operations.UpsertConsumerResponse{
-		StatusCode:  httpRes.StatusCode,
-		ContentType: contentType,
-		RawResponse: httpRes,
-	}
-	switch {
-	case httpRes.StatusCode == 200:
+	case httpRes.StatusCode == 401:
 		switch {
 		case utils.MatchContentType(contentType, `application/json`):
-			var out operations.UpsertConsumerResponseBody
+			var out shared.UnauthorizedError
 			if err := utils.UnmarshalJsonFromResponseBody(bytes.NewBuffer(rawBody), &out, ""); err != nil {
 				return nil, err
 			}
 
-			res.Object = &out
+			res.UnauthorizedError = &out
 		default:
 			return nil, sdkerrors.NewSDKError(fmt.Sprintf("unknown content-type received: %s", contentType), httpRes.StatusCode, string(rawBody), httpRes)
 		}
-	case httpRes.StatusCode == 400:
-		fallthrough
 	case httpRes.StatusCode == 404:
 	}
 

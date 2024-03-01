@@ -28,22 +28,16 @@ type PluginDataSource struct {
 
 // PluginDataSourceModel describes the data model.
 type PluginDataSourceModel struct {
-	Config         types.String    `tfsdk:"config"`
-	Consumer       *PluginConsumer `tfsdk:"consumer"`
-	ControlPlaneID types.String    `tfsdk:"control_plane_id"`
-	CreatedAt      types.Int64     `tfsdk:"created_at"`
-	Enabled        types.Bool      `tfsdk:"enabled"`
-	FilterTags     types.String    `tfsdk:"filter_tags"`
-	ID             types.String    `tfsdk:"id"`
-	InstanceName   types.String    `tfsdk:"instance_name"`
-	Name           types.String    `tfsdk:"name"`
-	Offset         types.String    `tfsdk:"offset"`
-	Ordering       *Ordering       `tfsdk:"ordering"`
-	Protocols      []types.String  `tfsdk:"protocols"`
-	Route          *PluginConsumer `tfsdk:"route"`
-	Service        *PluginConsumer `tfsdk:"service"`
-	Size           types.Int64     `tfsdk:"size"`
-	Tags           []types.String  `tfsdk:"tags"`
+	Consumer       *CreateACLConsumer `tfsdk:"consumer"`
+	ControlPlaneID types.String       `tfsdk:"control_plane_id"`
+	CreatedAt      types.Int64        `tfsdk:"created_at"`
+	Enabled        types.Bool         `tfsdk:"enabled"`
+	ID             types.String       `tfsdk:"id"`
+	Name           types.String       `tfsdk:"name"`
+	Protocols      []types.String     `tfsdk:"protocols"`
+	Route          *CreateACLConsumer `tfsdk:"route"`
+	Service        *CreateACLConsumer `tfsdk:"service"`
+	Tags           []types.String     `tfsdk:"tags"`
 }
 
 // Metadata returns the data source type name.
@@ -57,10 +51,6 @@ func (r *PluginDataSource) Schema(ctx context.Context, req datasource.SchemaRequ
 		MarkdownDescription: "Plugin DataSource",
 
 		Attributes: map[string]schema.Attribute{
-			"config": schema.StringAttribute{
-				Computed:    true,
-				Description: `The configuration properties for the Plugin which can be found on the plugins documentation page in the [Kong Hub](https://docs.konghq.com/hub/). Parsed as JSON.`,
-			},
 			"consumer": schema.SingleNestedAttribute{
 				Computed: true,
 				Attributes: map[string]schema.Attribute{
@@ -72,7 +62,7 @@ func (r *PluginDataSource) Schema(ctx context.Context, req datasource.SchemaRequ
 			},
 			"control_plane_id": schema.StringAttribute{
 				Required:    true,
-				Description: `The UUID of your control plane. This variable is available in the Konnect manager`,
+				Description: `The UUID of your control plane. This variable is available in the Konnect manager.`,
 			},
 			"created_at": schema.Int64Attribute{
 				Computed:    true,
@@ -80,35 +70,20 @@ func (r *PluginDataSource) Schema(ctx context.Context, req datasource.SchemaRequ
 			},
 			"enabled": schema.BoolAttribute{
 				Computed:    true,
-				Description: `Whether the plugin is applied. Default: true`,
-			},
-			"filter_tags": schema.StringAttribute{
-				Optional:    true,
-				Description: `A list of tags to filter the list of resources on. Multiple tags can be concatenated using ',' to mean AND or using '/' to mean OR.`,
+				Description: `Whether the plugin is applied.`,
 			},
 			"id": schema.StringAttribute{
 				Required:    true,
-				Description: `The unique identifier of the Plugin to create or update.`,
-			},
-			"instance_name": schema.StringAttribute{
-				Computed: true,
+				Description: `ID of the Plugin to lookup`,
 			},
 			"name": schema.StringAttribute{
 				Computed:    true,
 				Description: `The name of the Plugin that's going to be added. Currently, the Plugin must be installed in every Kong instance separately.`,
 			},
-			"offset": schema.StringAttribute{
-				Optional:    true,
-				Description: `Offset from which to return the next set of resources. Use the value of the 'offset' field from the response of a list operation as input here to paginate through all the resources`,
-			},
-			"ordering": schema.SingleNestedAttribute{
-				Computed:   true,
-				Attributes: map[string]schema.Attribute{},
-			},
 			"protocols": schema.ListAttribute{
 				Computed:    true,
 				ElementType: types.StringType,
-				Description: `A list of the request protocols that will trigger this plugin. The default value, as well as the possible values allowed on this field, may change depending on the plugin type. For example, plugins that only work in stream mode will only support ` + "`" + `tcp` + "`" + ` and ` + "`" + `tls` + "`" + `.`,
+				Description: `A list of the request protocols that will trigger this plugin. The default value, as well as the possible values allowed on this field, may change depending on the plugin type. For example, plugins that only work in stream mode will only support ` + "`" + `"tcp"` + "`" + ` and ` + "`" + `"tls"` + "`" + `.`,
 			},
 			"route": schema.SingleNestedAttribute{
 				Computed: true,
@@ -117,7 +92,7 @@ func (r *PluginDataSource) Schema(ctx context.Context, req datasource.SchemaRequ
 						Computed: true,
 					},
 				},
-				Description: `If set, the plugin will only activate when receiving requests via the specified route. Leave unset for the plugin to activate regardless of the route being used.`,
+				Description: `If set, the plugin will only activate when receiving requests via the specified route. Leave unset for the plugin to activate regardless of the Route being used.`,
 			},
 			"service": schema.SingleNestedAttribute{
 				Computed: true,
@@ -126,11 +101,7 @@ func (r *PluginDataSource) Schema(ctx context.Context, req datasource.SchemaRequ
 						Computed: true,
 					},
 				},
-				Description: `If set, the plugin will only activate when receiving requests via one of the routes belonging to the specified service. Leave unset for the plugin to activate regardless of the service being matched.`,
-			},
-			"size": schema.Int64Attribute{
-				Optional:    true,
-				Description: `Number of resources to be returned. Default: 100`,
+				Description: `If set, the plugin will only activate when receiving requests via one of the routes belonging to the specified Service. Leave unset for the plugin to activate regardless of the Service being matched.`,
 			},
 			"tags": schema.ListAttribute{
 				Computed:    true,
@@ -179,32 +150,11 @@ func (r *PluginDataSource) Read(ctx context.Context, req datasource.ReadRequest,
 		return
 	}
 
+	pluginID := data.ID.ValueString()
 	controlPlaneID := data.ControlPlaneID.ValueString()
-	filterTags := new(string)
-	if !data.FilterTags.IsUnknown() && !data.FilterTags.IsNull() {
-		*filterTags = data.FilterTags.ValueString()
-	} else {
-		filterTags = nil
-	}
-	offset := new(string)
-	if !data.Offset.IsUnknown() && !data.Offset.IsNull() {
-		*offset = data.Offset.ValueString()
-	} else {
-		offset = nil
-	}
-	pluginIDOrInstanceName := data.ID.ValueString()
-	size := new(int64)
-	if !data.Size.IsUnknown() && !data.Size.IsNull() {
-		*size = data.Size.ValueInt64()
-	} else {
-		size = nil
-	}
 	request := operations.GetPluginRequest{
-		ControlPlaneID:         controlPlaneID,
-		FilterTags:             filterTags,
-		Offset:                 offset,
-		PluginIDOrInstanceName: pluginIDOrInstanceName,
-		Size:                   size,
+		PluginID:       pluginID,
+		ControlPlaneID: controlPlaneID,
 	}
 	res, err := r.client.Plugins.GetPlugin(ctx, request)
 	if err != nil {

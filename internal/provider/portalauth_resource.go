@@ -8,6 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 	"github.com/kong/terraform-provider-konnect/internal/sdk"
@@ -68,16 +69,13 @@ func (r *PortalAuthResource) Schema(ctx context.Context, req resource.SchemaRequ
 						Computed: true,
 						Attributes: map[string]schema.Attribute{
 							"email": schema.StringAttribute{
-								Computed:    true,
-								Description: `Default: "email"`,
+								Computed: true,
 							},
 							"groups": schema.StringAttribute{
-								Computed:    true,
-								Description: `Default: "groups"`,
+								Computed: true,
 							},
 							"name": schema.StringAttribute{
-								Computed:    true,
-								Description: `Default: "name"`,
+								Computed: true,
 							},
 						},
 						Description: `Mappings from a portal developer atribute to an Identity Provider claim.`,
@@ -104,15 +102,21 @@ func (r *PortalAuthResource) Schema(ctx context.Context, req resource.SchemaRequ
 				Optional: true,
 				Attributes: map[string]schema.Attribute{
 					"email": schema.StringAttribute{
+						Computed:    true,
 						Optional:    true,
+						Default:     stringdefault.StaticString("email"),
 						Description: `Default: "email"`,
 					},
 					"groups": schema.StringAttribute{
+						Computed:    true,
 						Optional:    true,
+						Default:     stringdefault.StaticString("groups"),
 						Description: `Default: "groups"`,
 					},
 					"name": schema.StringAttribute{
+						Computed:    true,
 						Optional:    true,
+						Default:     stringdefault.StaticString("name"),
 						Description: `Default: "name"`,
 					},
 				},

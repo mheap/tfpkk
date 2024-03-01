@@ -1,29 +1,45 @@
 lockVersion: 2.0.0
 id: f7a08c6a-272d-43a4-951c-9da08faf703d
 management:
-  docChecksum: 5e7f1ec1c3cfed98bec92884ab36a878
-  docVersion: 2.0.0
+  docChecksum: 2902e330978c84c6547923a460e9dcda
+  docVersion: 2.1.0
   speakeasyVersion: internal
-  generationVersion: 2.237.2
-  releaseVersion: 0.7.9
-  configChecksum: de47cd605a033f5a9f14951d07c3e632
+  generationVersion: 2.250.15
+  releaseVersion: 0.19.4
+  configChecksum: cb4e2b918d05df58efeed9d0d9037610
 features:
   terraform:
-    constsAndDefaults: 0.1.2
-    core: 3.8.4
+    additionalProperties: 0.1.2
+    constsAndDefaults: 0.1.3
+    core: 3.9.4
     deprecations: 2.81.1
     globalSecurity: 2.81.3
     globalServerURLs: 2.82.1
-    nameOverrides: 2.81.1
+    methodServerURLs: 2.82.1
     typeOverrides: 2.81.1
 generatedFiles:
   - internal/sdk/apiproducts.go
   - internal/sdk/apiproductversions.go
   - internal/sdk/controlplanes.go
+  - internal/sdk/acls.go
+  - internal/sdk/basicauthcredentials.go
+  - internal/sdk/cacertificates.go
+  - internal/sdk/certificates.go
+  - internal/sdk/snis.go
+  - internal/sdk/consumergroups.go
   - internal/sdk/consumers.go
+  - internal/sdk/hmacauthcredentials.go
+  - internal/sdk/jwts.go
+  - internal/sdk/apikeys.go
   - internal/sdk/plugins.go
+  - internal/sdk/keysets.go
+  - internal/sdk/keys.go
   - internal/sdk/routes.go
   - internal/sdk/services.go
+  - internal/sdk/upstreams.go
+  - internal/sdk/targets.go
+  - internal/sdk/vaults.go
+  - internal/sdk/mesh.go
   - internal/sdk/portals.go
   - internal/sdk/portalauthsettings.go
   - internal/sdk/sdk.go
@@ -99,22 +115,132 @@ generatedFiles:
   - internal/sdk/pkg/models/operations/deletecontrolplane.go
   - internal/sdk/pkg/models/operations/getcontrolplane.go
   - internal/sdk/pkg/models/operations/updatecontrolplane.go
+  - internal/sdk/pkg/models/operations/createacl.go
+  - internal/sdk/pkg/models/operations/deleteacl.go
+  - internal/sdk/pkg/models/operations/deletecontrolplanescontrolplaneidcoreentitiesconsumersconsumeridaclsaclid.go
+  - internal/sdk/pkg/models/operations/getacl.go
+  - internal/sdk/pkg/models/operations/getcontrolplanescontrolplaneidcoreentitiesconsumersconsumeridacls.go
+  - internal/sdk/pkg/models/operations/getcontrolplanescontrolplaneidcoreentitiesconsumersconsumeridaclsaclid.go
+  - internal/sdk/pkg/models/operations/postcontrolplanescontrolplaneidcoreentitiesconsumersconsumeridacls.go
+  - internal/sdk/pkg/models/operations/putcontrolplanescontrolplaneidcoreentitiesconsumersconsumeridaclsaclid.go
+  - internal/sdk/pkg/models/operations/createbasicauth.go
+  - internal/sdk/pkg/models/operations/deletebasicauth.go
+  - internal/sdk/pkg/models/operations/deletecontrolplanescontrolplaneidcoreentitiesconsumersconsumeridbasicauthbasicauthid.go
+  - internal/sdk/pkg/models/operations/getbasicauth.go
+  - internal/sdk/pkg/models/operations/getcontrolplanescontrolplaneidcoreentitiesconsumersconsumeridbasicauth.go
+  - internal/sdk/pkg/models/operations/getcontrolplanescontrolplaneidcoreentitiesconsumersconsumeridbasicauthbasicauthid.go
+  - internal/sdk/pkg/models/operations/postcontrolplanescontrolplaneidcoreentitiesconsumersconsumeridbasicauth.go
+  - internal/sdk/pkg/models/operations/putcontrolplanescontrolplaneidcoreentitiesconsumersconsumeridbasicauthbasicauthid.go
+  - internal/sdk/pkg/models/operations/createcacertificate.go
+  - internal/sdk/pkg/models/operations/deletecacertificate.go
+  - internal/sdk/pkg/models/operations/getcacertificate.go
+  - internal/sdk/pkg/models/operations/createcertificate.go
+  - internal/sdk/pkg/models/operations/deletecertificate.go
+  - internal/sdk/pkg/models/operations/getcertificate.go
+  - internal/sdk/pkg/models/operations/createsni.go
+  - internal/sdk/pkg/models/operations/deletesni.go
+  - internal/sdk/pkg/models/operations/deletecontrolplanescontrolplaneidcoreentitiescertificatescertificateidsnissniid.go
+  - internal/sdk/pkg/models/operations/getsni.go
+  - internal/sdk/pkg/models/operations/getcontrolplanescontrolplaneidcoreentitiescertificatescertificateidsnis.go
+  - internal/sdk/pkg/models/operations/getcontrolplanescontrolplaneidcoreentitiescertificatescertificateidsnissniid.go
+  - internal/sdk/pkg/models/operations/postcontrolplanescontrolplaneidcoreentitiescertificatescertificateidsnis.go
+  - internal/sdk/pkg/models/operations/putcontrolplanescontrolplaneidcoreentitiescertificatescertificateidsnissniid.go
+  - internal/sdk/pkg/models/operations/createconsumergroup.go
+  - internal/sdk/pkg/models/operations/deleteconsumergroup.go
+  - internal/sdk/pkg/models/operations/getconsumergroup.go
   - internal/sdk/pkg/models/operations/createconsumer.go
   - internal/sdk/pkg/models/operations/deleteconsumer.go
   - internal/sdk/pkg/models/operations/getconsumer.go
-  - internal/sdk/pkg/models/operations/upsertconsumer.go
+  - internal/sdk/pkg/models/operations/createhmacauth.go
+  - internal/sdk/pkg/models/operations/deletehmacauth.go
+  - internal/sdk/pkg/models/operations/deletecontrolplanescontrolplaneidcoreentitiesconsumersconsumeridhmacauthhmacauthid.go
+  - internal/sdk/pkg/models/operations/gethmacauth.go
+  - internal/sdk/pkg/models/operations/getcontrolplanescontrolplaneidcoreentitiesconsumersconsumeridhmacauth.go
+  - internal/sdk/pkg/models/operations/getcontrolplanescontrolplaneidcoreentitiesconsumersconsumeridhmacauthhmacauthid.go
+  - internal/sdk/pkg/models/operations/postcontrolplanescontrolplaneidcoreentitiesconsumersconsumeridhmacauth.go
+  - internal/sdk/pkg/models/operations/putcontrolplanescontrolplaneidcoreentitiesconsumersconsumeridhmacauthhmacauthid.go
+  - internal/sdk/pkg/models/operations/createjwt.go
+  - internal/sdk/pkg/models/operations/deletejwt.go
+  - internal/sdk/pkg/models/operations/deletecontrolplanescontrolplaneidcoreentitiesconsumersconsumeridjwtjwtid.go
+  - internal/sdk/pkg/models/operations/getjwt.go
+  - internal/sdk/pkg/models/operations/getcontrolplanescontrolplaneidcoreentitiesconsumersconsumeridjwt.go
+  - internal/sdk/pkg/models/operations/getcontrolplanescontrolplaneidcoreentitiesconsumersconsumeridjwtjwtid.go
+  - internal/sdk/pkg/models/operations/postcontrolplanescontrolplaneidcoreentitiesconsumersconsumeridjwt.go
+  - internal/sdk/pkg/models/operations/putcontrolplanescontrolplaneidcoreentitiesconsumersconsumeridjwtjwtid.go
+  - internal/sdk/pkg/models/operations/createkeyauth.go
+  - internal/sdk/pkg/models/operations/getcontrolplanescontrolplaneidcoreentitiesconsumersconsumeridkeyauth.go
+  - internal/sdk/pkg/models/operations/postcontrolplanescontrolplaneidcoreentitiesconsumersconsumeridkeyauth.go
+  - internal/sdk/pkg/models/operations/createaiproxyplugin.go
+  - internal/sdk/pkg/models/operations/createbasicauthplugin.go
+  - internal/sdk/pkg/models/operations/createkeyauthplugin.go
   - internal/sdk/pkg/models/operations/createplugin.go
+  - internal/sdk/pkg/models/operations/createratelimitingplugin.go
+  - internal/sdk/pkg/models/operations/createrequesttransformerplugin.go
+  - internal/sdk/pkg/models/operations/deleteaiproxyplugin.go
+  - internal/sdk/pkg/models/operations/deletebasicauthplugin.go
+  - internal/sdk/pkg/models/operations/deletekeyauthplugin.go
   - internal/sdk/pkg/models/operations/deleteplugin.go
+  - internal/sdk/pkg/models/operations/deleteratelimitingplugin.go
+  - internal/sdk/pkg/models/operations/deleterequesttransformerplugin.go
+  - internal/sdk/pkg/models/operations/deletecontrolplanescontrolplaneidcoreentitiesconsumersconsumeridpluginspluginid.go
+  - internal/sdk/pkg/models/operations/deletecontrolplanescontrolplaneidcoreentitiesroutesrouteidpluginspluginid.go
+  - internal/sdk/pkg/models/operations/deletecontrolplanescontrolplaneidcoreentitiesservicesserviceidpluginspluginid.go
+  - internal/sdk/pkg/models/operations/getaiproxyplugin.go
+  - internal/sdk/pkg/models/operations/getbasicauthplugin.go
+  - internal/sdk/pkg/models/operations/getkeyauthplugin.go
   - internal/sdk/pkg/models/operations/getplugin.go
-  - internal/sdk/pkg/models/operations/upsertplugin.go
+  - internal/sdk/pkg/models/operations/getratelimitingplugin.go
+  - internal/sdk/pkg/models/operations/getrequesttransformerplugin.go
+  - internal/sdk/pkg/models/operations/getcontrolplanescontrolplaneidcoreentitiesconsumersconsumeridplugins.go
+  - internal/sdk/pkg/models/operations/getcontrolplanescontrolplaneidcoreentitiesconsumersconsumeridpluginspluginid.go
+  - internal/sdk/pkg/models/operations/getcontrolplanescontrolplaneidcoreentitiesroutesrouteidplugins.go
+  - internal/sdk/pkg/models/operations/getcontrolplanescontrolplaneidcoreentitiesroutesrouteidpluginspluginid.go
+  - internal/sdk/pkg/models/operations/getcontrolplanescontrolplaneidcoreentitiesservicesserviceidplugins.go
+  - internal/sdk/pkg/models/operations/getcontrolplanescontrolplaneidcoreentitiesservicesserviceidpluginspluginid.go
+  - internal/sdk/pkg/models/operations/postcontrolplanescontrolplaneidcoreentitiesconsumersconsumeridplugins.go
+  - internal/sdk/pkg/models/operations/postcontrolplanescontrolplaneidcoreentitiesroutesrouteidplugins.go
+  - internal/sdk/pkg/models/operations/postcontrolplanescontrolplaneidcoreentitiesservicesserviceidplugins.go
+  - internal/sdk/pkg/models/operations/putcontrolplanescontrolplaneidcoreentitiesconsumersconsumeridpluginspluginid.go
+  - internal/sdk/pkg/models/operations/putcontrolplanescontrolplaneidcoreentitiesroutesrouteidpluginspluginid.go
+  - internal/sdk/pkg/models/operations/putcontrolplanescontrolplaneidcoreentitiesservicesserviceidpluginspluginid.go
+  - internal/sdk/pkg/models/operations/updateaiproxyplugin.go
+  - internal/sdk/pkg/models/operations/updatebasicauthplugin.go
+  - internal/sdk/pkg/models/operations/updatekeyauthplugin.go
+  - internal/sdk/pkg/models/operations/updateratelimitingplugin.go
+  - internal/sdk/pkg/models/operations/updaterequesttransformerplugin.go
+  - internal/sdk/pkg/models/operations/createkeyset.go
+  - internal/sdk/pkg/models/operations/deletekeyset.go
+  - internal/sdk/pkg/models/operations/getkeyset.go
+  - internal/sdk/pkg/models/operations/createkey.go
+  - internal/sdk/pkg/models/operations/deletekey.go
+  - internal/sdk/pkg/models/operations/getkey.go
   - internal/sdk/pkg/models/operations/createroute.go
   - internal/sdk/pkg/models/operations/deleteroute.go
+  - internal/sdk/pkg/models/operations/deletecontrolplanescontrolplaneidcoreentitiesservicesserviceidroutesrouteid.go
   - internal/sdk/pkg/models/operations/getroute.go
-  - internal/sdk/pkg/models/operations/upsertroute.go
+  - internal/sdk/pkg/models/operations/getcontrolplanescontrolplaneidcoreentitiesservicesserviceidroutes.go
+  - internal/sdk/pkg/models/operations/getcontrolplanescontrolplaneidcoreentitiesservicesserviceidroutesrouteid.go
+  - internal/sdk/pkg/models/operations/postcontrolplanescontrolplaneidcoreentitiesservicesserviceidroutes.go
+  - internal/sdk/pkg/models/operations/putcontrolplanescontrolplaneidcoreentitiesservicesserviceidroutesrouteid.go
   - internal/sdk/pkg/models/operations/createservice.go
   - internal/sdk/pkg/models/operations/deleteservice.go
   - internal/sdk/pkg/models/operations/getservice.go
-  - internal/sdk/pkg/models/operations/upsertservice.go
+  - internal/sdk/pkg/models/operations/createupstream.go
+  - internal/sdk/pkg/models/operations/deleteupstream.go
+  - internal/sdk/pkg/models/operations/getupstream.go
+  - internal/sdk/pkg/models/operations/createtarget.go
+  - internal/sdk/pkg/models/operations/deletetarget.go
+  - internal/sdk/pkg/models/operations/getcontrolplanescontrolplaneidcoreentitiesupstreamsupstreamidtargets.go
+  - internal/sdk/pkg/models/operations/readtarget.go
+  - internal/sdk/pkg/models/operations/updatetarget.go
+  - internal/sdk/pkg/models/operations/createvault.go
+  - internal/sdk/pkg/models/operations/deletevault.go
+  - internal/sdk/pkg/models/operations/getvault.go
+  - internal/sdk/pkg/models/operations/createcp.go
+  - internal/sdk/pkg/models/operations/deletemeshcontrolplane.go
+  - internal/sdk/pkg/models/operations/getmeshcontrolplane.go
+  - internal/sdk/pkg/models/operations/updatemeshcontrolplane.go
+  - internal/sdk/pkg/models/operations/listportals.go
   - internal/sdk/pkg/models/operations/updateportal.go
   - internal/sdk/pkg/models/operations/getportalauthenticationsettings.go
   - internal/sdk/pkg/models/operations/updateportalauthenticationsettings.go
@@ -129,20 +255,76 @@ generatedFiles:
   - internal/sdk/pkg/models/shared/notfounderror.go
   - internal/sdk/pkg/models/shared/updateapiproductdto.go
   - internal/sdk/pkg/models/shared/apiproductversion.go
+  - internal/sdk/pkg/models/shared/authstrategysyncerror.go
   - internal/sdk/pkg/models/shared/createapiproductversiondto.go
   - internal/sdk/pkg/models/shared/gatewayservicepayload.go
   - internal/sdk/pkg/models/shared/updateapiproductversiondto.go
   - internal/sdk/pkg/models/shared/controlplane.go
   - internal/sdk/pkg/models/shared/conflicterror.go
   - internal/sdk/pkg/models/shared/createcontrolplanerequest.go
+  - internal/sdk/pkg/models/shared/proxyurl.go
   - internal/sdk/pkg/models/shared/updatecontrolplanerequest.go
+  - internal/sdk/pkg/models/shared/acl.go
+  - internal/sdk/pkg/models/shared/createacl.go
+  - internal/sdk/pkg/models/shared/createaclwithoutparents.go
+  - internal/sdk/pkg/models/shared/basicauth.go
+  - internal/sdk/pkg/models/shared/createbasicauth.go
+  - internal/sdk/pkg/models/shared/createbasicauthwithoutparents.go
+  - internal/sdk/pkg/models/shared/cacertificate.go
+  - internal/sdk/pkg/models/shared/createcacertificate.go
+  - internal/sdk/pkg/models/shared/certificate.go
+  - internal/sdk/pkg/models/shared/createcertificate.go
+  - internal/sdk/pkg/models/shared/sni.go
+  - internal/sdk/pkg/models/shared/createsni.go
+  - internal/sdk/pkg/models/shared/createsniwithoutparents.go
+  - internal/sdk/pkg/models/shared/consumergroup.go
+  - internal/sdk/pkg/models/shared/createconsumergroup.go
   - internal/sdk/pkg/models/shared/consumer.go
-  - internal/sdk/pkg/models/shared/consumerrequest.go
+  - internal/sdk/pkg/models/shared/createconsumer.go
+  - internal/sdk/pkg/models/shared/hmacauth.go
+  - internal/sdk/pkg/models/shared/createhmacauth.go
+  - internal/sdk/pkg/models/shared/createhmacauthwithoutparents.go
+  - internal/sdk/pkg/models/shared/jwt.go
+  - internal/sdk/pkg/models/shared/createjwt.go
+  - internal/sdk/pkg/models/shared/createjwtwithoutparents.go
+  - internal/sdk/pkg/models/shared/apikey.go
+  - internal/sdk/pkg/models/shared/createapikey.go
+  - internal/sdk/pkg/models/shared/createapikeywithoutparents.go
+  - internal/sdk/pkg/models/shared/aiproxyplugin.go
+  - internal/sdk/pkg/models/shared/createaiproxyplugin.go
+  - internal/sdk/pkg/models/shared/basicauthplugin.go
+  - internal/sdk/pkg/models/shared/createbasicauthplugin.go
+  - internal/sdk/pkg/models/shared/keyauthplugin.go
+  - internal/sdk/pkg/models/shared/createkeyauthplugin.go
   - internal/sdk/pkg/models/shared/plugin.go
-  - internal/sdk/pkg/models/shared/pluginrequest.go
+  - internal/sdk/pkg/models/shared/createplugin.go
+  - internal/sdk/pkg/models/shared/ratelimitingplugin.go
+  - internal/sdk/pkg/models/shared/createratelimitingplugin.go
+  - internal/sdk/pkg/models/shared/requesttransformerplugin.go
+  - internal/sdk/pkg/models/shared/createrequesttransformerplugin.go
+  - internal/sdk/pkg/models/shared/createpluginwithoutparents.go
+  - internal/sdk/pkg/models/shared/keyset.go
+  - internal/sdk/pkg/models/shared/createkeyset.go
+  - internal/sdk/pkg/models/shared/key.go
+  - internal/sdk/pkg/models/shared/createkey.go
   - internal/sdk/pkg/models/shared/route.go
-  - internal/sdk/pkg/models/shared/routerequest.go
-  - internal/sdk/pkg/models/shared/servicerequest.go
+  - internal/sdk/pkg/models/shared/createroute.go
+  - internal/sdk/pkg/models/shared/createroutewithoutparents.go
+  - internal/sdk/pkg/models/shared/service.go
+  - internal/sdk/pkg/models/shared/createservice.go
+  - internal/sdk/pkg/models/shared/upstream.go
+  - internal/sdk/pkg/models/shared/createupstream.go
+  - internal/sdk/pkg/models/shared/target.go
+  - internal/sdk/pkg/models/shared/createtargetwithoutparents.go
+  - internal/sdk/pkg/models/shared/vault.go
+  - internal/sdk/pkg/models/shared/createvault.go
+  - internal/sdk/pkg/models/shared/meshcontrolplane.go
+  - internal/sdk/pkg/models/shared/createmeshcontrolplanerequest.go
+  - internal/sdk/pkg/models/shared/updatemeshcontrolplanerequest.go
+  - internal/sdk/pkg/models/shared/listportalsresponse.go
+  - internal/sdk/pkg/models/shared/paginatedmeta.go
+  - internal/sdk/pkg/models/shared/pagemeta.go
+  - internal/sdk/pkg/models/shared/portal.go
   - internal/sdk/pkg/models/shared/updateportalresponse.go
   - internal/sdk/pkg/models/shared/updateportalrequest.go
   - internal/sdk/pkg/models/shared/portalauthenticationsettingsresponse.go
@@ -150,34 +332,105 @@ generatedFiles:
   - internal/sdk/pkg/models/shared/portalclaimmappings.go
   - internal/sdk/pkg/models/shared/portalauthenticationsettingsupdaterequest.go
   - internal/sdk/pkg/models/shared/security.go
+  - internal/provider/type_create_acl_consumer.go
+  - internal/provider/type_details.go
+  - internal/provider/type_info.go
+  - internal/provider/type_auth_strategy_sync_error.go
   - internal/provider/type_gateway_service_payload.go
   - internal/provider/type_control_plane_config.go
-  - internal/provider/type_config.go
-  - internal/provider/type_plugin_consumer.go
-  - internal/provider/type_ordering.go
+  - internal/provider/type_proxy_url.go
+  - internal/provider/type_pem.go
+  - internal/provider/type_create_ai_proxy_plugin_auth.go
+  - internal/provider/type_create_ai_proxy_plugin_logging.go
+  - internal/provider/type_create_ai_proxy_plugin_options.go
+  - internal/provider/type_create_ai_proxy_plugin_model.go
+  - internal/provider/type_create_ai_proxy_plugin_config.go
+  - internal/provider/type_create_basic_auth_plugin_config.go
+  - internal/provider/type_create_key_auth_plugin_config.go
+  - internal/provider/type_create_rate_limiting_plugin_config.go
+  - internal/provider/type_add.go
+  - internal/provider/type_replace.go
+  - internal/provider/type_create_request_transformer_plugin_config.go
   - internal/provider/type_portal_claim_mappings.go
   - internal/provider/type_portal_oidc_config.go
   - internal/provider/type_destinations.go
-  - internal/provider/type_headers.go
+  - internal/provider/type_healthy.go
+  - internal/provider/type_unhealthy.go
+  - internal/provider/type_active.go
+  - internal/provider/type_create_upstream_healthy.go
+  - internal/provider/type_create_upstream_unhealthy.go
+  - internal/provider/type_passive.go
+  - internal/provider/type_healthchecks.go
   - internal/provider/type_gateway_service.go
+  - internal/provider/type_portal.go
+  - internal/provider/type_page_meta.go
+  - internal/provider/type_paginated_meta.go
   - USAGE.md
   - internal/provider/provider.go
   - examples/provider/provider.tf
+  - internal/provider/acl_resource.go
+  - internal/provider/acl_resource_sdk.go
+  - examples/resources/konnect_acl/resource.tf
+  - internal/provider/apikey_resource.go
+  - internal/provider/apikey_resource_sdk.go
+  - examples/resources/konnect_api_key/resource.tf
   - internal/provider/apiproduct_resource.go
   - internal/provider/apiproduct_resource_sdk.go
   - examples/resources/konnect_api_product/resource.tf
   - internal/provider/apiproductversion_resource.go
   - internal/provider/apiproductversion_resource_sdk.go
   - examples/resources/konnect_api_product_version/resource.tf
+  - internal/provider/basicauth_resource.go
+  - internal/provider/basicauth_resource_sdk.go
+  - examples/resources/konnect_basic_auth/resource.tf
+  - internal/provider/cacertificate_resource.go
+  - internal/provider/cacertificate_resource_sdk.go
+  - examples/resources/konnect_ca_certificate/resource.tf
+  - internal/provider/certificate_resource.go
+  - internal/provider/certificate_resource_sdk.go
+  - examples/resources/konnect_certificate/resource.tf
   - internal/provider/consumer_resource.go
   - internal/provider/consumer_resource_sdk.go
   - examples/resources/konnect_consumer/resource.tf
+  - internal/provider/consumergroup_resource.go
+  - internal/provider/consumergroup_resource_sdk.go
+  - examples/resources/konnect_consumer_group/resource.tf
   - internal/provider/gatewaycontrolplane_resource.go
   - internal/provider/gatewaycontrolplane_resource_sdk.go
   - examples/resources/konnect_gateway_control_plane/resource.tf
+  - internal/provider/hmacauth_resource.go
+  - internal/provider/hmacauth_resource_sdk.go
+  - examples/resources/konnect_hmac_auth/resource.tf
+  - internal/provider/jwt_resource.go
+  - internal/provider/jwt_resource_sdk.go
+  - examples/resources/konnect_jwt/resource.tf
+  - internal/provider/key_resource.go
+  - internal/provider/key_resource_sdk.go
+  - examples/resources/konnect_key/resource.tf
+  - internal/provider/keyset_resource.go
+  - internal/provider/keyset_resource_sdk.go
+  - examples/resources/konnect_key_set/resource.tf
+  - internal/provider/meshcontrolplane_resource.go
+  - internal/provider/meshcontrolplane_resource_sdk.go
+  - examples/resources/konnect_mesh_control_plane/resource.tf
   - internal/provider/plugin_resource.go
   - internal/provider/plugin_resource_sdk.go
   - examples/resources/konnect_plugin/resource.tf
+  - internal/provider/pluginaiproxy_resource.go
+  - internal/provider/pluginaiproxy_resource_sdk.go
+  - examples/resources/konnect_plugin_ai_proxy/resource.tf
+  - internal/provider/pluginbasicauth_resource.go
+  - internal/provider/pluginbasicauth_resource_sdk.go
+  - examples/resources/konnect_plugin_basic_auth/resource.tf
+  - internal/provider/pluginkeyauth_resource.go
+  - internal/provider/pluginkeyauth_resource_sdk.go
+  - examples/resources/konnect_plugin_key_auth/resource.tf
+  - internal/provider/pluginratelimiting_resource.go
+  - internal/provider/pluginratelimiting_resource_sdk.go
+  - examples/resources/konnect_plugin_rate_limiting/resource.tf
+  - internal/provider/pluginrequesttransformer_resource.go
+  - internal/provider/pluginrequesttransformer_resource_sdk.go
+  - examples/resources/konnect_plugin_request_transformer/resource.tf
   - internal/provider/portal_resource.go
   - internal/provider/portal_resource_sdk.go
   - examples/resources/konnect_portal/resource.tf
@@ -190,29 +443,101 @@ generatedFiles:
   - internal/provider/service_resource.go
   - internal/provider/service_resource_sdk.go
   - examples/resources/konnect_service/resource.tf
+  - internal/provider/sni_resource.go
+  - internal/provider/sni_resource_sdk.go
+  - examples/resources/konnect_sni/resource.tf
+  - internal/provider/target_resource.go
+  - internal/provider/target_resource_sdk.go
+  - examples/resources/konnect_target/resource.tf
+  - internal/provider/upstream_resource.go
+  - internal/provider/upstream_resource_sdk.go
+  - examples/resources/konnect_upstream/resource.tf
+  - internal/provider/vault_resource.go
+  - internal/provider/vault_resource_sdk.go
+  - examples/resources/konnect_vault/resource.tf
+  - internal/provider/acl_data_source.go
+  - internal/provider/acl_data_source_sdk.go
+  - examples/data-sources/konnect_acl/data-source.tf
   - internal/provider/apiproduct_data_source.go
   - internal/provider/apiproduct_data_source_sdk.go
   - examples/data-sources/konnect_api_product/data-source.tf
   - internal/provider/apiproductversion_data_source.go
   - internal/provider/apiproductversion_data_source_sdk.go
   - examples/data-sources/konnect_api_product_version/data-source.tf
+  - internal/provider/basicauth_data_source.go
+  - internal/provider/basicauth_data_source_sdk.go
+  - examples/data-sources/konnect_basic_auth/data-source.tf
+  - internal/provider/cacertificate_data_source.go
+  - internal/provider/cacertificate_data_source_sdk.go
+  - examples/data-sources/konnect_ca_certificate/data-source.tf
+  - internal/provider/certificate_data_source.go
+  - internal/provider/certificate_data_source_sdk.go
+  - examples/data-sources/konnect_certificate/data-source.tf
   - internal/provider/consumer_data_source.go
   - internal/provider/consumer_data_source_sdk.go
   - examples/data-sources/konnect_consumer/data-source.tf
+  - internal/provider/consumergroup_data_source.go
+  - internal/provider/consumergroup_data_source_sdk.go
+  - examples/data-sources/konnect_consumer_group/data-source.tf
   - internal/provider/gatewaycontrolplane_data_source.go
   - internal/provider/gatewaycontrolplane_data_source_sdk.go
   - examples/data-sources/konnect_gateway_control_plane/data-source.tf
+  - internal/provider/hmacauth_data_source.go
+  - internal/provider/hmacauth_data_source_sdk.go
+  - examples/data-sources/konnect_hmac_auth/data-source.tf
+  - internal/provider/jwt_data_source.go
+  - internal/provider/jwt_data_source_sdk.go
+  - examples/data-sources/konnect_jwt/data-source.tf
+  - internal/provider/key_data_source.go
+  - internal/provider/key_data_source_sdk.go
+  - examples/data-sources/konnect_key/data-source.tf
+  - internal/provider/keyset_data_source.go
+  - internal/provider/keyset_data_source_sdk.go
+  - examples/data-sources/konnect_key_set/data-source.tf
+  - internal/provider/meshcontrolplane_data_source.go
+  - internal/provider/meshcontrolplane_data_source_sdk.go
+  - examples/data-sources/konnect_mesh_control_plane/data-source.tf
   - internal/provider/plugin_data_source.go
   - internal/provider/plugin_data_source_sdk.go
   - examples/data-sources/konnect_plugin/data-source.tf
+  - internal/provider/pluginaiproxy_data_source.go
+  - internal/provider/pluginaiproxy_data_source_sdk.go
+  - examples/data-sources/konnect_plugin_ai_proxy/data-source.tf
+  - internal/provider/pluginbasicauth_data_source.go
+  - internal/provider/pluginbasicauth_data_source_sdk.go
+  - examples/data-sources/konnect_plugin_basic_auth/data-source.tf
+  - internal/provider/pluginkeyauth_data_source.go
+  - internal/provider/pluginkeyauth_data_source_sdk.go
+  - examples/data-sources/konnect_plugin_key_auth/data-source.tf
+  - internal/provider/pluginratelimiting_data_source.go
+  - internal/provider/pluginratelimiting_data_source_sdk.go
+  - examples/data-sources/konnect_plugin_rate_limiting/data-source.tf
+  - internal/provider/pluginrequesttransformer_data_source.go
+  - internal/provider/pluginrequesttransformer_data_source_sdk.go
+  - examples/data-sources/konnect_plugin_request_transformer/data-source.tf
   - internal/provider/portalauth_data_source.go
   - internal/provider/portalauth_data_source_sdk.go
   - examples/data-sources/konnect_portal_auth/data-source.tf
+  - internal/provider/portallist_data_source.go
+  - internal/provider/portallist_data_source_sdk.go
+  - examples/data-sources/konnect_portal_list/data-source.tf
   - internal/provider/route_data_source.go
   - internal/provider/route_data_source_sdk.go
   - examples/data-sources/konnect_route/data-source.tf
   - internal/provider/service_data_source.go
   - internal/provider/service_data_source_sdk.go
   - examples/data-sources/konnect_service/data-source.tf
+  - internal/provider/sni_data_source.go
+  - internal/provider/sni_data_source_sdk.go
+  - examples/data-sources/konnect_sni/data-source.tf
+  - internal/provider/target_data_source.go
+  - internal/provider/target_data_source_sdk.go
+  - examples/data-sources/konnect_target/data-source.tf
+  - internal/provider/upstream_data_source.go
+  - internal/provider/upstream_data_source_sdk.go
+  - examples/data-sources/konnect_upstream/data-source.tf
+  - internal/provider/vault_data_source.go
+  - internal/provider/vault_data_source_sdk.go
+  - examples/data-sources/konnect_vault/data-source.tf
   - internal/sdk/pkg/models/operations/options.go
   - .gitattributes

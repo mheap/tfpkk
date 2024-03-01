@@ -18,6 +18,8 @@ type UpdatePortalResponse struct {
 	CustomClientDomain *string `json:"custom_client_domain"`
 	// The custom domain to access the developer portal. A CNAME for the portal's default domain must be able to be set for the custom domain for it to be valid. After setting a valid CNAME, an SSL/TLS certificate will be automatically manged for the custom domain, and traffic will be able to use the custom domain to route to the portal's web client and API.
 	CustomDomain *string `json:"custom_domain"`
+	// Default strategy ID applied on applications for the portal
+	DefaultApplicationAuthStrategyID *string `json:"default_application_auth_strategy_id,omitempty"`
 	// The domain assigned to the portal by Konnect. This is the default place to access the portal and its API if not using a `custom_domain``.
 	DefaultDomain string `json:"default_domain"`
 	// Contains a unique identifier used for this resource.
@@ -76,6 +78,13 @@ func (o *UpdatePortalResponse) GetCustomDomain() *string {
 		return nil
 	}
 	return o.CustomDomain
+}
+
+func (o *UpdatePortalResponse) GetDefaultApplicationAuthStrategyID() *string {
+	if o == nil {
+		return nil
+	}
+	return o.DefaultApplicationAuthStrategyID
 }
 
 func (o *UpdatePortalResponse) GetDefaultDomain() string {

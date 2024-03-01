@@ -3,48 +3,35 @@
 package provider
 
 import (
-	"encoding/json"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/kong/terraform-provider-konnect/internal/sdk/pkg/models/shared"
 )
 
 func (r *PluginDataSourceModel) RefreshFromSharedPlugin(resp *shared.Plugin) {
-	if resp.Config == nil {
-		r.Config = types.StringNull()
-	} else {
-		configResult, _ := json.Marshal(resp.Config)
-		r.Config = types.StringValue(string(configResult))
-	}
 	if resp.Consumer == nil {
 		r.Consumer = nil
 	} else {
-		r.Consumer = &PluginConsumer{}
+		r.Consumer = &CreateACLConsumer{}
 		r.Consumer.ID = types.StringPointerValue(resp.Consumer.ID)
 	}
 	r.CreatedAt = types.Int64PointerValue(resp.CreatedAt)
 	r.Enabled = types.BoolPointerValue(resp.Enabled)
 	r.ID = types.StringPointerValue(resp.ID)
-	r.InstanceName = types.StringPointerValue(resp.InstanceName)
-	r.Name = types.StringPointerValue(resp.Name)
-	if resp.Ordering == nil {
-		r.Ordering = nil
-	} else {
-		r.Ordering = &Ordering{}
-	}
+	r.Name = types.StringValue(resp.Name)
 	r.Protocols = nil
 	for _, v := range resp.Protocols {
-		r.Protocols = append(r.Protocols, types.StringValue(v))
+		r.Protocols = append(r.Protocols, types.StringValue(string(v)))
 	}
 	if resp.Route == nil {
 		r.Route = nil
 	} else {
-		r.Route = &PluginConsumer{}
+		r.Route = &CreateACLConsumer{}
 		r.Route.ID = types.StringPointerValue(resp.Route.ID)
 	}
 	if resp.Service == nil {
 		r.Service = nil
 	} else {
-		r.Service = &PluginConsumer{}
+		r.Service = &CreateACLConsumer{}
 		r.Service.ID = types.StringPointerValue(resp.Service.ID)
 	}
 	r.Tags = nil

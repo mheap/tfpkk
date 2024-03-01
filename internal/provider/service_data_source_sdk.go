@@ -4,21 +4,11 @@ package provider
 
 import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/kong/terraform-provider-konnect/internal/sdk/pkg/models/operations"
+	"github.com/kong/terraform-provider-konnect/internal/sdk/pkg/models/shared"
 )
 
-func (r *ServiceDataSourceModel) RefreshFromOperationsGetServiceResponseBody(resp *operations.GetServiceResponseBody) {
-	r.ConnectTimeout = types.Int64PointerValue(resp.ConnectTimeout)
-	r.CreatedAt = types.Int64PointerValue(resp.CreatedAt)
-	r.Enabled = types.BoolPointerValue(resp.Enabled)
-	r.Host = types.StringPointerValue(resp.Host)
-	r.ID = types.StringPointerValue(resp.ID)
-	r.Name = types.StringPointerValue(resp.Name)
-	r.Path = types.StringPointerValue(resp.Path)
-	r.Port = types.Int64PointerValue(resp.Port)
-	r.Protocol = types.StringPointerValue(resp.Protocol)
-	r.ReadTimeout = types.Int64PointerValue(resp.ReadTimeout)
-	r.Retries = types.Int64PointerValue(resp.Retries)
-	r.UpdatedAt = types.Int64PointerValue(resp.UpdatedAt)
-	r.WriteTimeout = types.Int64PointerValue(resp.WriteTimeout)
+func (r *ServiceDataSourceModel) RefreshFromSharedService(resp *shared.Service) {
+	r.CreatedAt = types.Int64Value(resp.CreatedAt)
+	r.ID = types.StringValue(resp.ID)
+	r.UpdatedAt = types.Int64Value(resp.UpdatedAt)
 }

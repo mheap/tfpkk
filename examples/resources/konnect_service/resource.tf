@@ -1,24 +1,25 @@
 resource "konnect_service" "my_service" {
   ca_certificates = [
-    "4e3ad2e4-0bc4-4638-8e34-c84a417ba39b",
+    "...",
   ]
   client_certificate = {
-    id = "4e3ad2e4-0bc4-4638-8e34-c84a417ba39b"
+    id = "4b3676d9-dc7a-453e-875a-7c2c465dec6b"
   }
-  connect_timeout  = 6000
-  control_plane_id = "9524ec7d-36d9-465d-a8c5-83a3c9390458"
+  connect_timeout  = 5
+  control_plane_id = "cafb4e58-66ce-489d-b047-31b77b31cb14"
   enabled          = false
-  host             = "example.com"
-  name             = "my-service"
-  path             = "/some_api"
-  port             = 80
-  protocol         = "http"
-  read_timeout     = 6000
-  retries          = 5
+  host             = "...my_host..."
+  name             = "Estelle Padberg"
+  path             = "...my_path..."
+  port             = 1
+  protocol         = "https"
+  read_timeout     = 1
+  retries          = 1
   tags = [
-    "user-level",
+    "...",
   ]
-  tls_verify       = true
-  tls_verify_depth = "respected"
-  write_timeout    = 6000
+  tls_verify       = false
+  tls_verify_depth = 8
+  url              = "...my_url..."
+  write_timeout    = 8
 }

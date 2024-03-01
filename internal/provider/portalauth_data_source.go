@@ -66,16 +66,13 @@ func (r *PortalAuthDataSource) Schema(ctx context.Context, req datasource.Schema
 						Computed: true,
 						Attributes: map[string]schema.Attribute{
 							"email": schema.StringAttribute{
-								Computed:    true,
-								Description: `Default: "email"`,
+								Computed: true,
 							},
 							"groups": schema.StringAttribute{
-								Computed:    true,
-								Description: `Default: "groups"`,
+								Computed: true,
 							},
 							"name": schema.StringAttribute{
-								Computed:    true,
-								Description: `Default: "name"`,
+								Computed: true,
 							},
 						},
 						Description: `Mappings from a portal developer atribute to an Identity Provider claim.`,

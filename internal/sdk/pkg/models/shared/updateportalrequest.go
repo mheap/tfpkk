@@ -11,6 +11,8 @@ type UpdatePortalRequest struct {
 	CustomClientDomain *string `json:"custom_client_domain,omitempty"`
 	// The custom domain to access the developer portal. A CNAME for the portal's default domain must be able to be set for the custom domain for it to be valid. After setting a valid CNAME, an SSL/TLS certificate will be automatically manged for the custom domain, and traffic will be able to use the custom domain to route to the portal's web client and API.
 	CustomDomain *string `json:"custom_domain,omitempty"`
+	// Default strategy ID applied on applications for the portal
+	DefaultApplicationAuthStrategyID *string `json:"default_application_auth_strategy_id,omitempty"`
 	// Whether the portal catalog can be accessed publicly without any developer authentication. Developer accounts and applications cannot be created if the portal is public.
 	IsPublic *bool `json:"is_public,omitempty"`
 	// Whether the portal resources are protected by Role Based Access Control (RBAC). If enabled, developers view or register for products until unless assigned to teams with access to view and consume specific products.
@@ -43,6 +45,13 @@ func (o *UpdatePortalRequest) GetCustomDomain() *string {
 		return nil
 	}
 	return o.CustomDomain
+}
+
+func (o *UpdatePortalRequest) GetDefaultApplicationAuthStrategyID() *string {
+	if o == nil {
+		return nil
+	}
+	return o.DefaultApplicationAuthStrategyID
 }
 
 func (o *UpdatePortalRequest) GetIsPublic() *bool {

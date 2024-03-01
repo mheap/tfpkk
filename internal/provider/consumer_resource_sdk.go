@@ -4,18 +4,27 @@ package provider
 
 import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/kong/terraform-provider-konnect/internal/sdk/pkg/models/operations"
 	"github.com/kong/terraform-provider-konnect/internal/sdk/pkg/models/shared"
 )
 
-func (r *ConsumerResourceModel) ToSharedConsumerRequest() *shared.ConsumerRequest {
-	customID := r.CustomID.ValueString()
+func (r *ConsumerResourceModel) ToSharedCreateConsumer() *shared.CreateConsumer {
+	customID := new(string)
+	if !r.CustomID.IsUnknown() && !r.CustomID.IsNull() {
+		*customID = r.CustomID.ValueString()
+	} else {
+		customID = nil
+	}
 	var tags []string = nil
 	for _, tagsItem := range r.Tags {
 		tags = append(tags, tagsItem.ValueString())
 	}
-	username := r.Username.ValueString()
-	out := shared.ConsumerRequest{
+	username := new(string)
+	if !r.Username.IsUnknown() && !r.Username.IsNull() {
+		*username = r.Username.ValueString()
+	} else {
+		username = nil
+	}
+	out := shared.CreateConsumer{
 		CustomID: customID,
 		Tags:     tags,
 		Username: username,
@@ -31,22 +40,5 @@ func (r *ConsumerResourceModel) RefreshFromSharedConsumer(resp *shared.Consumer)
 	for _, v := range resp.Tags {
 		r.Tags = append(r.Tags, types.StringValue(v))
 	}
-	r.UpdatedAt = types.Int64PointerValue(resp.UpdatedAt)
 	r.Username = types.StringPointerValue(resp.Username)
-}
-
-func (r *ConsumerResourceModel) RefreshFromOperationsGetConsumerResponseBody(resp *operations.GetConsumerResponseBody) {
-	r.CreatedAt = types.Int64PointerValue(resp.CreatedAt)
-	r.CustomID = types.StringPointerValue(resp.CustomID)
-	r.ID = types.StringPointerValue(resp.ID)
-	r.Tags = nil
-	for _, v := range resp.Tags {
-		r.Tags = append(r.Tags, types.StringValue(v))
-	}
-	r.UpdatedAt = types.Int64PointerValue(resp.UpdatedAt)
-	r.Username = types.StringPointerValue(resp.Username)
-}
-
-func (r *ConsumerResourceModel) RefreshFromOperationsUpsertConsumerResponseBody(resp *operations.UpsertConsumerResponseBody) {
-
 }

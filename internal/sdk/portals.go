@@ -12,6 +12,7 @@ import (
 	"github.com/kong/terraform-provider-konnect/internal/sdk/pkg/utils"
 	"io"
 	"net/http"
+	"strings"
 )
 
 // Portals - APIs related to Configuration of Konnect Developer Portals.
@@ -23,6 +24,116 @@ func newPortals(sdkConfig sdkConfiguration) *Portals {
 	return &Portals{
 		sdkConfiguration: sdkConfig,
 	}
+}
+
+// ListPortals - List Portals
+// Lists developer portals defined in this region for this organization. Each developer portal is available at a unique address and has isolated appearance, configuration, developers, and applications.
+func (s *Portals) ListPortals(ctx context.Context, request operations.ListPortalsRequest, opts ...operations.Option) (*operations.ListPortalsResponse, error) {
+	o := operations.Options{}
+	supportedOptions := []string{
+		operations.SupportedOptionAcceptHeaderOverride,
+	}
+
+	for _, opt := range opts {
+		if err := opt(&o, supportedOptions...); err != nil {
+			return nil, fmt.Errorf("error applying option: %w", err)
+		}
+	}
+	baseURL := utils.ReplaceParameters(s.sdkConfiguration.GetServerDetails())
+	url := strings.TrimSuffix(baseURL, "/") + "/portals"
+
+	req, err := http.NewRequestWithContext(ctx, "GET", url, nil)
+	if err != nil {
+		return nil, fmt.Errorf("error creating request: %w", err)
+	}
+	if o.AcceptHeaderOverride != nil {
+		req.Header.Set("Accept", string(*o.AcceptHeaderOverride))
+	} else {
+		req.Header.Set("Accept", "application/json;q=1, application/problem+json;q=0")
+	}
+
+	req.Header.Set("user-agent", s.sdkConfiguration.UserAgent)
+
+	if err := utils.PopulateQueryParams(ctx, req, request, nil); err != nil {
+		return nil, fmt.Errorf("error populating query params: %w", err)
+	}
+
+	client := s.sdkConfiguration.SecurityClient
+
+	httpRes, err := client.Do(req)
+	if err != nil {
+		return nil, fmt.Errorf("error sending request: %w", err)
+	}
+	if httpRes == nil {
+		return nil, fmt.Errorf("error sending request: no response")
+	}
+
+	rawBody, err := io.ReadAll(httpRes.Body)
+	if err != nil {
+		return nil, fmt.Errorf("error reading response body: %w", err)
+	}
+	httpRes.Body.Close()
+	httpRes.Body = io.NopCloser(bytes.NewBuffer(rawBody))
+
+	contentType := httpRes.Header.Get("Content-Type")
+
+	res := &operations.ListPortalsResponse{
+		StatusCode:  httpRes.StatusCode,
+		ContentType: contentType,
+		RawResponse: httpRes,
+	}
+	switch {
+	case httpRes.StatusCode == 200:
+		switch {
+		case utils.MatchContentType(contentType, `application/json`):
+			var out shared.ListPortalsResponse
+			if err := utils.UnmarshalJsonFromResponseBody(bytes.NewBuffer(rawBody), &out, ""); err != nil {
+				return nil, err
+			}
+
+			res.ListPortalsResponse = &out
+		default:
+			return nil, sdkerrors.NewSDKError(fmt.Sprintf("unknown content-type received: %s", contentType), httpRes.StatusCode, string(rawBody), httpRes)
+		}
+	case httpRes.StatusCode == 400:
+		switch {
+		case utils.MatchContentType(contentType, `application/problem+json`):
+			var out shared.BadRequestError
+			if err := utils.UnmarshalJsonFromResponseBody(bytes.NewBuffer(rawBody), &out, ""); err != nil {
+				return nil, err
+			}
+
+			res.BadRequestError = &out
+		default:
+			return nil, sdkerrors.NewSDKError(fmt.Sprintf("unknown content-type received: %s", contentType), httpRes.StatusCode, string(rawBody), httpRes)
+		}
+	case httpRes.StatusCode == 401:
+		switch {
+		case utils.MatchContentType(contentType, `application/problem+json`):
+			var out shared.UnauthorizedError
+			if err := utils.UnmarshalJsonFromResponseBody(bytes.NewBuffer(rawBody), &out, ""); err != nil {
+				return nil, err
+			}
+
+			res.UnauthorizedError = &out
+		default:
+			return nil, sdkerrors.NewSDKError(fmt.Sprintf("unknown content-type received: %s", contentType), httpRes.StatusCode, string(rawBody), httpRes)
+		}
+	case httpRes.StatusCode == 403:
+		switch {
+		case utils.MatchContentType(contentType, `application/problem+json`):
+			var out shared.ForbiddenError
+			if err := utils.UnmarshalJsonFromResponseBody(bytes.NewBuffer(rawBody), &out, ""); err != nil {
+				return nil, err
+			}
+
+			res.ForbiddenError = &out
+		default:
+			return nil, sdkerrors.NewSDKError(fmt.Sprintf("unknown content-type received: %s", contentType), httpRes.StatusCode, string(rawBody), httpRes)
+		}
+	}
+
+	return res, nil
 }
 
 // UpdatePortal - Update Portal

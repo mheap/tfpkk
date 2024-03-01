@@ -80,6 +80,8 @@ type CreateControlPlaneRequest struct {
 	Labels interface{} `json:"labels,omitempty"`
 	// The name of the control plane.
 	Name string `json:"name"`
+	// Array of proxy URLs associated with reaching the data-planes connected to a control-plane.
+	ProxyUrls []ProxyURL `json:"proxy_urls,omitempty"`
 }
 
 func (o *CreateControlPlaneRequest) GetAuthType() *AuthType {
@@ -122,4 +124,11 @@ func (o *CreateControlPlaneRequest) GetName() string {
 		return ""
 	}
 	return o.Name
+}
+
+func (o *CreateControlPlaneRequest) GetProxyUrls() []ProxyURL {
+	if o == nil {
+		return nil
+	}
+	return o.ProxyUrls
 }

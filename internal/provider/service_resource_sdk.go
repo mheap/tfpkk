@@ -4,11 +4,10 @@ package provider
 
 import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/kong/terraform-provider-konnect/internal/sdk/pkg/models/operations"
 	"github.com/kong/terraform-provider-konnect/internal/sdk/pkg/models/shared"
 )
 
-func (r *ServiceResourceModel) ToSharedServiceRequest() *shared.ServiceRequest {
+func (r *ServiceResourceModel) ToSharedCreateService() *shared.CreateService {
 	var caCertificates []string = nil
 	for _, caCertificatesItem := range r.CaCertificates {
 		caCertificates = append(caCertificates, caCertificatesItem.ValueString())
@@ -37,7 +36,12 @@ func (r *ServiceResourceModel) ToSharedServiceRequest() *shared.ServiceRequest {
 	} else {
 		enabled = nil
 	}
-	host := r.Host.ValueString()
+	host := new(string)
+	if !r.Host.IsUnknown() && !r.Host.IsNull() {
+		*host = r.Host.ValueString()
+	} else {
+		host = nil
+	}
 	name := new(string)
 	if !r.Name.IsUnknown() && !r.Name.IsNull() {
 		*name = r.Name.ValueString()
@@ -84,11 +88,17 @@ func (r *ServiceResourceModel) ToSharedServiceRequest() *shared.ServiceRequest {
 	} else {
 		tlsVerify = nil
 	}
-	tlsVerifyDepth := new(string)
+	tlsVerifyDepth := new(int64)
 	if !r.TLSVerifyDepth.IsUnknown() && !r.TLSVerifyDepth.IsNull() {
-		*tlsVerifyDepth = r.TLSVerifyDepth.ValueString()
+		*tlsVerifyDepth = r.TLSVerifyDepth.ValueInt64()
 	} else {
 		tlsVerifyDepth = nil
+	}
+	url := new(string)
+	if !r.URL.IsUnknown() && !r.URL.IsNull() {
+		*url = r.URL.ValueString()
+	} else {
+		url = nil
 	}
 	writeTimeout := new(int64)
 	if !r.WriteTimeout.IsUnknown() && !r.WriteTimeout.IsNull() {
@@ -96,7 +106,7 @@ func (r *ServiceResourceModel) ToSharedServiceRequest() *shared.ServiceRequest {
 	} else {
 		writeTimeout = nil
 	}
-	out := shared.ServiceRequest{
+	out := shared.CreateService{
 		CaCertificates:    caCertificates,
 		ClientCertificate: clientCertificate,
 		ConnectTimeout:    connectTimeout,
@@ -111,67 +121,14 @@ func (r *ServiceResourceModel) ToSharedServiceRequest() *shared.ServiceRequest {
 		Tags:              tags,
 		TLSVerify:         tlsVerify,
 		TLSVerifyDepth:    tlsVerifyDepth,
+		URL:               url,
 		WriteTimeout:      writeTimeout,
 	}
 	return &out
 }
 
-func (r *ServiceResourceModel) RefreshFromOperationsCreateServiceResponseBody(resp *operations.CreateServiceResponseBody) {
-	r.ConnectTimeout = types.Int64PointerValue(resp.ConnectTimeout)
-	r.CreatedAt = types.Int64PointerValue(resp.CreatedAt)
-	r.Enabled = types.BoolPointerValue(resp.Enabled)
-	r.Host = types.StringPointerValue(resp.Host)
-	r.ID = types.StringPointerValue(resp.ID)
-	r.Name = types.StringPointerValue(resp.Name)
-	r.Path = types.StringPointerValue(resp.Path)
-	r.Port = types.Int64PointerValue(resp.Port)
-	if resp.Protocol != nil {
-		r.Protocol = types.StringValue(string(*resp.Protocol))
-	} else {
-		r.Protocol = types.StringNull()
-	}
-	r.ReadTimeout = types.Int64PointerValue(resp.ReadTimeout)
-	r.Retries = types.Int64PointerValue(resp.Retries)
-	r.UpdatedAt = types.Int64PointerValue(resp.UpdatedAt)
-	r.WriteTimeout = types.Int64PointerValue(resp.WriteTimeout)
-}
-
-func (r *ServiceResourceModel) RefreshFromOperationsGetServiceResponseBody(resp *operations.GetServiceResponseBody) {
-	r.ConnectTimeout = types.Int64PointerValue(resp.ConnectTimeout)
-	r.CreatedAt = types.Int64PointerValue(resp.CreatedAt)
-	r.Enabled = types.BoolPointerValue(resp.Enabled)
-	r.Host = types.StringPointerValue(resp.Host)
-	r.ID = types.StringPointerValue(resp.ID)
-	r.Name = types.StringPointerValue(resp.Name)
-	r.Path = types.StringPointerValue(resp.Path)
-	r.Port = types.Int64PointerValue(resp.Port)
-	if resp.Protocol != nil {
-		r.Protocol = types.StringValue(string(*resp.Protocol))
-	} else {
-		r.Protocol = types.StringNull()
-	}
-	r.ReadTimeout = types.Int64PointerValue(resp.ReadTimeout)
-	r.Retries = types.Int64PointerValue(resp.Retries)
-	r.UpdatedAt = types.Int64PointerValue(resp.UpdatedAt)
-	r.WriteTimeout = types.Int64PointerValue(resp.WriteTimeout)
-}
-
-func (r *ServiceResourceModel) RefreshFromOperationsUpsertServiceResponseBody(resp *operations.UpsertServiceResponseBody) {
-	r.ConnectTimeout = types.Int64PointerValue(resp.ConnectTimeout)
-	r.CreatedAt = types.Int64PointerValue(resp.CreatedAt)
-	r.Enabled = types.BoolPointerValue(resp.Enabled)
-	r.Host = types.StringPointerValue(resp.Host)
-	r.ID = types.StringPointerValue(resp.ID)
-	r.Name = types.StringPointerValue(resp.Name)
-	r.Path = types.StringPointerValue(resp.Path)
-	r.Port = types.Int64PointerValue(resp.Port)
-	if resp.Protocol != nil {
-		r.Protocol = types.StringValue(string(*resp.Protocol))
-	} else {
-		r.Protocol = types.StringNull()
-	}
-	r.ReadTimeout = types.Int64PointerValue(resp.ReadTimeout)
-	r.Retries = types.Int64PointerValue(resp.Retries)
-	r.UpdatedAt = types.Int64PointerValue(resp.UpdatedAt)
-	r.WriteTimeout = types.Int64PointerValue(resp.WriteTimeout)
+func (r *ServiceResourceModel) RefreshFromSharedService(resp *shared.Service) {
+	r.CreatedAt = types.Int64Value(resp.CreatedAt)
+	r.ID = types.StringValue(resp.ID)
+	r.UpdatedAt = types.Int64Value(resp.UpdatedAt)
 }

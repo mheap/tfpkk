@@ -70,6 +70,8 @@ func (e *PublishStatus) UnmarshalJSON(data []byte) error {
 }
 
 type APIProductVersion struct {
+	// The set of errors encountered when trying to sync the auth strategies on the version
+	AuthStrategySyncErrors []AuthStrategySyncError `json:"auth_strategy_sync_errors,omitempty"`
 	// An ISO-8601 timestamp representation of entity creation date.
 	CreatedAt time.Time `json:"created_at"`
 	// Indicates if this API product version is deprecated
@@ -94,6 +96,13 @@ func (a *APIProductVersion) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	return nil
+}
+
+func (o *APIProductVersion) GetAuthStrategySyncErrors() []AuthStrategySyncError {
+	if o == nil {
+		return nil
+	}
+	return o.AuthStrategySyncErrors
 }
 
 func (o *APIProductVersion) GetCreatedAt() time.Time {

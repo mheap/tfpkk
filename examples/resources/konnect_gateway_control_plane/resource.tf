@@ -5,4 +5,11 @@ resource "konnect_gateway_control_plane" "my_gatewaycontrolplane" {
   description   = "A test control plane for exploration."
   labels        = "{ \"see\": \"documentation\" }"
   name          = "Test Control Plane"
+  proxy_urls = [
+    {
+      host     = "...my_host..."
+      port     = 9
+      protocol = "...my_protocol..."
+    },
+  ]
 }

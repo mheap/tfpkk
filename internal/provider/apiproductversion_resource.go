@@ -8,6 +8,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
@@ -32,14 +34,15 @@ type APIProductVersionResource struct {
 
 // APIProductVersionResourceModel describes the resource data model.
 type APIProductVersionResourceModel struct {
-	APIProductID   types.String           `tfsdk:"api_product_id"`
-	CreatedAt      types.String           `tfsdk:"created_at"`
-	Deprecated     types.Bool             `tfsdk:"deprecated"`
-	GatewayService *GatewayServicePayload `tfsdk:"gateway_service"`
-	ID             types.String           `tfsdk:"id"`
-	Name           types.String           `tfsdk:"name"`
-	PublishStatus  types.String           `tfsdk:"publish_status"`
-	UpdatedAt      types.String           `tfsdk:"updated_at"`
+	APIProductID           types.String            `tfsdk:"api_product_id"`
+	AuthStrategySyncErrors []AuthStrategySyncError `tfsdk:"auth_strategy_sync_errors"`
+	CreatedAt              types.String            `tfsdk:"created_at"`
+	Deprecated             types.Bool              `tfsdk:"deprecated"`
+	GatewayService         *GatewayServicePayload  `tfsdk:"gateway_service"`
+	ID                     types.String            `tfsdk:"id"`
+	Name                   types.String            `tfsdk:"name"`
+	PublishStatus          types.String            `tfsdk:"publish_status"`
+	UpdatedAt              types.String            `tfsdk:"updated_at"`
 }
 
 func (r *APIProductVersionResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
@@ -55,6 +58,65 @@ func (r *APIProductVersionResource) Schema(ctx context.Context, req resource.Sch
 				Required:    true,
 				Description: `The API Product ID`,
 			},
+			"auth_strategy_sync_errors": schema.ListNestedAttribute{
+				Computed: true,
+				NestedObject: schema.NestedAttributeObject{
+					Attributes: map[string]schema.Attribute{
+						"info": schema.SingleNestedAttribute{
+							Computed: true,
+							Attributes: map[string]schema.Attribute{
+								"additional_properties": schema.StringAttribute{
+									Computed:    true,
+									Description: `Parsed as JSON.`,
+									Validators: []validator.String{
+										validators.IsValidJSON(),
+									},
+								},
+								"details": schema.ListNestedAttribute{
+									Computed: true,
+									NestedObject: schema.NestedAttributeObject{
+										Attributes: map[string]schema.Attribute{
+											"additional_properties": schema.StringAttribute{
+												Computed:    true,
+												Description: `Parsed as JSON.`,
+												Validators: []validator.String{
+													validators.IsValidJSON(),
+												},
+											},
+											"message": schema.ListAttribute{
+												Computed:    true,
+												ElementType: types.StringType,
+											},
+											"type": schema.StringAttribute{
+												Computed: true,
+											},
+										},
+									},
+								},
+							},
+						},
+						"message": schema.StringAttribute{
+							Computed: true,
+						},
+						"plugin_name": schema.StringAttribute{
+							Computed: true,
+						},
+						"value": schema.StringAttribute{
+							Computed:    true,
+							Description: `must be one of ["plugin_sync_error_comm", "plugin_sync_error_unknown", "plugin_sync_error_fatal", "plugin_sync_error_updating_plugin_refs"]`,
+							Validators: []validator.String{
+								stringvalidator.OneOf(
+									"plugin_sync_error_comm",
+									"plugin_sync_error_unknown",
+									"plugin_sync_error_fatal",
+									"plugin_sync_error_updating_plugin_refs",
+								),
+							},
+						},
+					},
+				},
+				Description: `The set of errors encountered when trying to sync the auth strategies on the version`,
+			},
 			"created_at": schema.StringAttribute{
 				Computed:    true,
 				Description: `An ISO-8601 timestamp representation of entity creation date.`,
@@ -65,6 +127,7 @@ func (r *APIProductVersionResource) Schema(ctx context.Context, req resource.Sch
 			"deprecated": schema.BoolAttribute{
 				Computed:    true,
 				Optional:    true,
+				Default:     booldefault.StaticBool(false),
 				Description: `Indicates if the version of the API product is deprecated. Default: false`,
 			},
 			"gateway_service": schema.SingleNestedAttribute{
@@ -104,6 +167,7 @@ func (r *APIProductVersionResource) Schema(ctx context.Context, req resource.Sch
 			"publish_status": schema.StringAttribute{
 				Computed:    true,
 				Optional:    true,
+				Default:     stringdefault.StaticString("unpublished"),
 				Description: `The publish status of the API product version. must be one of ["unpublished", "published"]; Default: "unpublished"`,
 				Validators: []validator.String{
 					stringvalidator.OneOf(

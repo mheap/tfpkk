@@ -14,7 +14,30 @@ import (
 	"net/http"
 )
 
-// Routes - Gateway routes
+// Routes - Route entities define rules to match client requests. Each route is associated with a service, and a service may have multiple routes associated to it. Every request matching a given route will be proxied to the associated service. You need at least one matching rule that applies to the protocol being matched by the route.
+// <br><br>
+// The combination of routes and services, and the separation of concerns between them, offers a powerful routing mechanism with which it is possible to define fine-grained entrypoints in Kong Gateway leading to different upstream services of your infrastructure.
+// <br><br>
+// Depending on the protocol, one of the following attributes must be set:
+// <br>
+//
+// - `http`: At least one of `methods`, `hosts`, `headers`, or `paths`
+// - `https`: At least one of `methods`, `hosts`, `headers`, `paths`, or `snis`
+// - `tcp`: At least one of `sources` or `destinations`
+// - `tls`: at least one of `sources`, `destinations`, or `snis`
+// - `tls_passthrough`: set `snis`
+// - `grpc`: At least one of `hosts`, `headers`, or `paths`
+// - `grpcs`: At least one of `hosts`, `headers`, `paths`, or `snis`
+// - `ws`: At least one of `hosts`, `headers`, or `paths`
+// - `wss`: At least one of `hosts`, `headers`, `paths`, or `snis`
+//
+//	<br>
+//	A route can't have both `tls` and `tls_passthrough` protocols at same time.
+//	<br><br>
+//	Learn more about the router:
+//
+// - [Configure routes using expressions](https://docs.konghq.com/gateway/latest/key-concepts/routes/expressions)
+// - [Router Expressions language reference](https://docs.konghq.com/gateway/latest/reference/router-expressions-language/)
 type Routes struct {
 	sdkConfiguration sdkConfiguration
 }
@@ -25,8 +48,8 @@ func newRoutes(sdkConfig sdkConfiguration) *Routes {
 	}
 }
 
-// CreateRoute - Create a new route
-// Create a new route
+// CreateRoute - Create a new Route
+// Create a new Route
 func (s *Routes) CreateRoute(ctx context.Context, request operations.CreateRouteRequest) (*operations.CreateRouteResponse, error) {
 	baseURL := utils.ReplaceParameters(s.sdkConfiguration.GetServerDetails())
 	url, err := utils.GenerateURL(ctx, baseURL, "/control-planes/{controlPlaneId}/core-entities/routes", request, nil)
@@ -34,10 +57,14 @@ func (s *Routes) CreateRoute(ctx context.Context, request operations.CreateRoute
 		return nil, fmt.Errorf("error generating URL: %w", err)
 	}
 
-	bodyReader, reqContentType, err := utils.SerializeRequestBody(ctx, request, false, true, "RouteRequest", "json", `request:"mediaType=application/json"`)
+	bodyReader, reqContentType, err := utils.SerializeRequestBody(ctx, request, false, false, "CreateRoute", "json", `request:"mediaType=application/json"`)
 	if err != nil {
 		return nil, fmt.Errorf("error serializing request body: %w", err)
 	}
+	if bodyReader == nil {
+		return nil, fmt.Errorf("request body is required")
+	}
+
 	debugBody := bytes.NewBuffer([]byte{})
 	debugReader := io.TeeReader(bodyReader, debugBody)
 
@@ -100,16 +127,87 @@ func (s *Routes) CreateRoute(ctx context.Context, request operations.CreateRoute
 		default:
 			return nil, sdkerrors.NewSDKError(fmt.Sprintf("unknown content-type received: %s", contentType), httpRes.StatusCode, string(rawBody), httpRes)
 		}
+	case httpRes.StatusCode == 401:
+		switch {
+		case utils.MatchContentType(contentType, `application/json`):
+			var out shared.UnauthorizedError
+			if err := utils.UnmarshalJsonFromResponseBody(bytes.NewBuffer(rawBody), &out, ""); err != nil {
+				return nil, err
+			}
+
+			res.UnauthorizedError = &out
+		default:
+			return nil, sdkerrors.NewSDKError(fmt.Sprintf("unknown content-type received: %s", contentType), httpRes.StatusCode, string(rawBody), httpRes)
+		}
 	}
 
 	return res, nil
 }
 
-// DeleteRoute - Delete a route
-// Delete a route.
+// DeleteRoute - Delete a Route
+// Delete a Route
 func (s *Routes) DeleteRoute(ctx context.Context, request operations.DeleteRouteRequest) (*operations.DeleteRouteResponse, error) {
 	baseURL := utils.ReplaceParameters(s.sdkConfiguration.GetServerDetails())
-	url, err := utils.GenerateURL(ctx, baseURL, "/control-planes/{controlPlaneId}/core-entities/routes/{route_id}", request, nil)
+	url, err := utils.GenerateURL(ctx, baseURL, "/control-planes/{controlPlaneId}/core-entities/routes/{RouteId}", request, nil)
+	if err != nil {
+		return nil, fmt.Errorf("error generating URL: %w", err)
+	}
+
+	req, err := http.NewRequestWithContext(ctx, "DELETE", url, nil)
+	if err != nil {
+		return nil, fmt.Errorf("error creating request: %w", err)
+	}
+	req.Header.Set("Accept", "application/json")
+	req.Header.Set("user-agent", s.sdkConfiguration.UserAgent)
+
+	client := s.sdkConfiguration.SecurityClient
+
+	httpRes, err := client.Do(req)
+	if err != nil {
+		return nil, fmt.Errorf("error sending request: %w", err)
+	}
+	if httpRes == nil {
+		return nil, fmt.Errorf("error sending request: no response")
+	}
+
+	rawBody, err := io.ReadAll(httpRes.Body)
+	if err != nil {
+		return nil, fmt.Errorf("error reading response body: %w", err)
+	}
+	httpRes.Body.Close()
+	httpRes.Body = io.NopCloser(bytes.NewBuffer(rawBody))
+
+	contentType := httpRes.Header.Get("Content-Type")
+
+	res := &operations.DeleteRouteResponse{
+		StatusCode:  httpRes.StatusCode,
+		ContentType: contentType,
+		RawResponse: httpRes,
+	}
+	switch {
+	case httpRes.StatusCode == 204:
+	case httpRes.StatusCode == 401:
+		switch {
+		case utils.MatchContentType(contentType, `application/json`):
+			var out shared.UnauthorizedError
+			if err := utils.UnmarshalJsonFromResponseBody(bytes.NewBuffer(rawBody), &out, ""); err != nil {
+				return nil, err
+			}
+
+			res.UnauthorizedError = &out
+		default:
+			return nil, sdkerrors.NewSDKError(fmt.Sprintf("unknown content-type received: %s", contentType), httpRes.StatusCode, string(rawBody), httpRes)
+		}
+	}
+
+	return res, nil
+}
+
+// DeleteControlPlanesControlPlaneIDCoreEntitiesServicesServiceIDRoutesRouteID - Delete a a Route associated with a a Service
+// Delete a a Route associated with a a Service using ID or name.
+func (s *Routes) DeleteControlPlanesControlPlaneIDCoreEntitiesServicesServiceIDRoutesRouteID(ctx context.Context, request operations.DeleteControlPlanesControlPlaneIDCoreEntitiesServicesServiceIDRoutesRouteIDRequest) (*operations.DeleteControlPlanesControlPlaneIDCoreEntitiesServicesServiceIDRoutesRouteIDResponse, error) {
+	baseURL := utils.ReplaceParameters(s.sdkConfiguration.GetServerDetails())
+	url, err := utils.GenerateURL(ctx, baseURL, "/control-planes/{controlPlaneId}/core-entities/services/{ServiceId}/routes/{RouteId}", request, nil)
 	if err != nil {
 		return nil, fmt.Errorf("error generating URL: %w", err)
 	}
@@ -140,7 +238,7 @@ func (s *Routes) DeleteRoute(ctx context.Context, request operations.DeleteRoute
 
 	contentType := httpRes.Header.Get("Content-Type")
 
-	res := &operations.DeleteRouteResponse{
+	res := &operations.DeleteControlPlanesControlPlaneIDCoreEntitiesServicesServiceIDRoutesRouteIDResponse{
 		StatusCode:  httpRes.StatusCode,
 		ContentType: contentType,
 		RawResponse: httpRes,
@@ -152,11 +250,11 @@ func (s *Routes) DeleteRoute(ctx context.Context, request operations.DeleteRoute
 	return res, nil
 }
 
-// GetRoute - Fetch a route
-// Get a route using ID or name.
+// GetRoute - Fetch a Route
+// Get a Route using ID or name.
 func (s *Routes) GetRoute(ctx context.Context, request operations.GetRouteRequest) (*operations.GetRouteResponse, error) {
 	baseURL := utils.ReplaceParameters(s.sdkConfiguration.GetServerDetails())
-	url, err := utils.GenerateURL(ctx, baseURL, "/control-planes/{controlPlaneId}/core-entities/routes/{route_id}", request, nil)
+	url, err := utils.GenerateURL(ctx, baseURL, "/control-planes/{controlPlaneId}/core-entities/routes/{RouteId}", request, nil)
 	if err != nil {
 		return nil, fmt.Errorf("error generating URL: %w", err)
 	}
@@ -167,10 +265,6 @@ func (s *Routes) GetRoute(ctx context.Context, request operations.GetRouteReques
 	}
 	req.Header.Set("Accept", "application/json")
 	req.Header.Set("user-agent", s.sdkConfiguration.UserAgent)
-
-	if err := utils.PopulateQueryParams(ctx, req, request, nil); err != nil {
-		return nil, fmt.Errorf("error populating query params: %w", err)
-	}
 
 	client := s.sdkConfiguration.SecurityClient
 
@@ -209,25 +303,246 @@ func (s *Routes) GetRoute(ctx context.Context, request operations.GetRouteReques
 		default:
 			return nil, sdkerrors.NewSDKError(fmt.Sprintf("unknown content-type received: %s", contentType), httpRes.StatusCode, string(rawBody), httpRes)
 		}
+	case httpRes.StatusCode == 401:
+		switch {
+		case utils.MatchContentType(contentType, `application/json`):
+			var out shared.UnauthorizedError
+			if err := utils.UnmarshalJsonFromResponseBody(bytes.NewBuffer(rawBody), &out, ""); err != nil {
+				return nil, err
+			}
+
+			res.UnauthorizedError = &out
+		default:
+			return nil, sdkerrors.NewSDKError(fmt.Sprintf("unknown content-type received: %s", contentType), httpRes.StatusCode, string(rawBody), httpRes)
+		}
 	case httpRes.StatusCode == 404:
 	}
 
 	return res, nil
 }
 
-// UpsertRoute - Update a route
-// Create or Update route using ID or name.
-func (s *Routes) UpsertRoute(ctx context.Context, request operations.UpsertRouteRequest) (*operations.UpsertRouteResponse, error) {
+// GetControlPlanesControlPlaneIDCoreEntitiesServicesServiceIDRoutes - List all Routes associated with a Service
+// List all Routes associated with a a Service
+func (s *Routes) GetControlPlanesControlPlaneIDCoreEntitiesServicesServiceIDRoutes(ctx context.Context, request operations.GetControlPlanesControlPlaneIDCoreEntitiesServicesServiceIDRoutesRequest) (*operations.GetControlPlanesControlPlaneIDCoreEntitiesServicesServiceIDRoutesResponse, error) {
 	baseURL := utils.ReplaceParameters(s.sdkConfiguration.GetServerDetails())
-	url, err := utils.GenerateURL(ctx, baseURL, "/control-planes/{controlPlaneId}/core-entities/routes/{route_id}", request, nil)
+	url, err := utils.GenerateURL(ctx, baseURL, "/control-planes/{controlPlaneId}/core-entities/services/{ServiceId}/routes", request, nil)
 	if err != nil {
 		return nil, fmt.Errorf("error generating URL: %w", err)
 	}
 
-	bodyReader, reqContentType, err := utils.SerializeRequestBody(ctx, request, false, true, "RouteRequest", "json", `request:"mediaType=application/json"`)
+	req, err := http.NewRequestWithContext(ctx, "GET", url, nil)
+	if err != nil {
+		return nil, fmt.Errorf("error creating request: %w", err)
+	}
+	req.Header.Set("Accept", "application/json")
+	req.Header.Set("user-agent", s.sdkConfiguration.UserAgent)
+
+	if err := utils.PopulateQueryParams(ctx, req, request, nil); err != nil {
+		return nil, fmt.Errorf("error populating query params: %w", err)
+	}
+
+	client := s.sdkConfiguration.SecurityClient
+
+	httpRes, err := client.Do(req)
+	if err != nil {
+		return nil, fmt.Errorf("error sending request: %w", err)
+	}
+	if httpRes == nil {
+		return nil, fmt.Errorf("error sending request: no response")
+	}
+
+	rawBody, err := io.ReadAll(httpRes.Body)
+	if err != nil {
+		return nil, fmt.Errorf("error reading response body: %w", err)
+	}
+	httpRes.Body.Close()
+	httpRes.Body = io.NopCloser(bytes.NewBuffer(rawBody))
+
+	contentType := httpRes.Header.Get("Content-Type")
+
+	res := &operations.GetControlPlanesControlPlaneIDCoreEntitiesServicesServiceIDRoutesResponse{
+		StatusCode:  httpRes.StatusCode,
+		ContentType: contentType,
+		RawResponse: httpRes,
+	}
+	switch {
+	case httpRes.StatusCode == 200:
+		switch {
+		case utils.MatchContentType(contentType, `application/json`):
+			var out operations.GetControlPlanesControlPlaneIDCoreEntitiesServicesServiceIDRoutesResponseBody
+			if err := utils.UnmarshalJsonFromResponseBody(bytes.NewBuffer(rawBody), &out, ""); err != nil {
+				return nil, err
+			}
+
+			res.Object = &out
+		default:
+			return nil, sdkerrors.NewSDKError(fmt.Sprintf("unknown content-type received: %s", contentType), httpRes.StatusCode, string(rawBody), httpRes)
+		}
+	}
+
+	return res, nil
+}
+
+// GetControlPlanesControlPlaneIDCoreEntitiesServicesServiceIDRoutesRouteID - Fetch a Route associated with a Service
+// Get a Route associated with a Service using ID or name.
+func (s *Routes) GetControlPlanesControlPlaneIDCoreEntitiesServicesServiceIDRoutesRouteID(ctx context.Context, request operations.GetControlPlanesControlPlaneIDCoreEntitiesServicesServiceIDRoutesRouteIDRequest) (*operations.GetControlPlanesControlPlaneIDCoreEntitiesServicesServiceIDRoutesRouteIDResponse, error) {
+	baseURL := utils.ReplaceParameters(s.sdkConfiguration.GetServerDetails())
+	url, err := utils.GenerateURL(ctx, baseURL, "/control-planes/{controlPlaneId}/core-entities/services/{ServiceId}/routes/{RouteId}", request, nil)
+	if err != nil {
+		return nil, fmt.Errorf("error generating URL: %w", err)
+	}
+
+	req, err := http.NewRequestWithContext(ctx, "GET", url, nil)
+	if err != nil {
+		return nil, fmt.Errorf("error creating request: %w", err)
+	}
+	req.Header.Set("Accept", "application/json")
+	req.Header.Set("user-agent", s.sdkConfiguration.UserAgent)
+
+	client := s.sdkConfiguration.SecurityClient
+
+	httpRes, err := client.Do(req)
+	if err != nil {
+		return nil, fmt.Errorf("error sending request: %w", err)
+	}
+	if httpRes == nil {
+		return nil, fmt.Errorf("error sending request: no response")
+	}
+
+	rawBody, err := io.ReadAll(httpRes.Body)
+	if err != nil {
+		return nil, fmt.Errorf("error reading response body: %w", err)
+	}
+	httpRes.Body.Close()
+	httpRes.Body = io.NopCloser(bytes.NewBuffer(rawBody))
+
+	contentType := httpRes.Header.Get("Content-Type")
+
+	res := &operations.GetControlPlanesControlPlaneIDCoreEntitiesServicesServiceIDRoutesRouteIDResponse{
+		StatusCode:  httpRes.StatusCode,
+		ContentType: contentType,
+		RawResponse: httpRes,
+	}
+	switch {
+	case httpRes.StatusCode == 200:
+		switch {
+		case utils.MatchContentType(contentType, `application/json`):
+			var out shared.Route
+			if err := utils.UnmarshalJsonFromResponseBody(bytes.NewBuffer(rawBody), &out, ""); err != nil {
+				return nil, err
+			}
+
+			res.Route = &out
+		default:
+			return nil, sdkerrors.NewSDKError(fmt.Sprintf("unknown content-type received: %s", contentType), httpRes.StatusCode, string(rawBody), httpRes)
+		}
+	case httpRes.StatusCode == 404:
+	}
+
+	return res, nil
+}
+
+// PostControlPlanesControlPlaneIDCoreEntitiesServicesServiceIDRoutes - Create a new Route associated with a Service
+// Create a new Route associated with a Service
+func (s *Routes) PostControlPlanesControlPlaneIDCoreEntitiesServicesServiceIDRoutes(ctx context.Context, request operations.PostControlPlanesControlPlaneIDCoreEntitiesServicesServiceIDRoutesRequest) (*operations.PostControlPlanesControlPlaneIDCoreEntitiesServicesServiceIDRoutesResponse, error) {
+	baseURL := utils.ReplaceParameters(s.sdkConfiguration.GetServerDetails())
+	url, err := utils.GenerateURL(ctx, baseURL, "/control-planes/{controlPlaneId}/core-entities/services/{ServiceId}/routes", request, nil)
+	if err != nil {
+		return nil, fmt.Errorf("error generating URL: %w", err)
+	}
+
+	bodyReader, reqContentType, err := utils.SerializeRequestBody(ctx, request, false, false, "CreateRouteWithoutParents", "json", `request:"mediaType=application/json"`)
 	if err != nil {
 		return nil, fmt.Errorf("error serializing request body: %w", err)
 	}
+	if bodyReader == nil {
+		return nil, fmt.Errorf("request body is required")
+	}
+
+	debugBody := bytes.NewBuffer([]byte{})
+	debugReader := io.TeeReader(bodyReader, debugBody)
+
+	req, err := http.NewRequestWithContext(ctx, "POST", url, debugReader)
+	if err != nil {
+		return nil, fmt.Errorf("error creating request: %w", err)
+	}
+	req.Header.Set("Accept", "application/json")
+	req.Header.Set("user-agent", s.sdkConfiguration.UserAgent)
+
+	req.Header.Set("Content-Type", reqContentType)
+
+	client := s.sdkConfiguration.SecurityClient
+
+	httpRes, err := client.Do(req)
+	if err != nil {
+		return nil, fmt.Errorf("error sending request: %w", err)
+	}
+	if httpRes == nil {
+		return nil, fmt.Errorf("error sending request: no response")
+	}
+
+	rawBody, err := io.ReadAll(httpRes.Body)
+	if err != nil {
+		return nil, fmt.Errorf("error reading response body: %w", err)
+	}
+	httpRes.Request.Body = io.NopCloser(debugBody)
+	httpRes.Body.Close()
+	httpRes.Body = io.NopCloser(bytes.NewBuffer(rawBody))
+
+	contentType := httpRes.Header.Get("Content-Type")
+
+	res := &operations.PostControlPlanesControlPlaneIDCoreEntitiesServicesServiceIDRoutesResponse{
+		StatusCode:  httpRes.StatusCode,
+		ContentType: contentType,
+		RawResponse: httpRes,
+	}
+	switch {
+	case httpRes.StatusCode == 201:
+		switch {
+		case utils.MatchContentType(contentType, `application/json`):
+			var out shared.Route
+			if err := utils.UnmarshalJsonFromResponseBody(bytes.NewBuffer(rawBody), &out, ""); err != nil {
+				return nil, err
+			}
+
+			res.Route = &out
+		default:
+			return nil, sdkerrors.NewSDKError(fmt.Sprintf("unknown content-type received: %s", contentType), httpRes.StatusCode, string(rawBody), httpRes)
+		}
+	case httpRes.StatusCode == 400:
+		switch {
+		case utils.MatchContentType(contentType, `application/json`):
+			var out operations.PostControlPlanesControlPlaneIDCoreEntitiesServicesServiceIDRoutesResponseBody
+			if err := utils.UnmarshalJsonFromResponseBody(bytes.NewBuffer(rawBody), &out, ""); err != nil {
+				return nil, err
+			}
+
+			res.Object = &out
+		default:
+			return nil, sdkerrors.NewSDKError(fmt.Sprintf("unknown content-type received: %s", contentType), httpRes.StatusCode, string(rawBody), httpRes)
+		}
+	}
+
+	return res, nil
+}
+
+// PutControlPlanesControlPlaneIDCoreEntitiesServicesServiceIDRoutesRouteID - Upsert a Route associated with a Service
+// Create or Update a Route associated with a Service using ID or name.
+func (s *Routes) PutControlPlanesControlPlaneIDCoreEntitiesServicesServiceIDRoutesRouteID(ctx context.Context, request operations.PutControlPlanesControlPlaneIDCoreEntitiesServicesServiceIDRoutesRouteIDRequest) (*operations.PutControlPlanesControlPlaneIDCoreEntitiesServicesServiceIDRoutesRouteIDResponse, error) {
+	baseURL := utils.ReplaceParameters(s.sdkConfiguration.GetServerDetails())
+	url, err := utils.GenerateURL(ctx, baseURL, "/control-planes/{controlPlaneId}/core-entities/services/{ServiceId}/routes/{RouteId}", request, nil)
+	if err != nil {
+		return nil, fmt.Errorf("error generating URL: %w", err)
+	}
+
+	bodyReader, reqContentType, err := utils.SerializeRequestBody(ctx, request, false, false, "CreateRouteWithoutParents", "json", `request:"mediaType=application/json"`)
+	if err != nil {
+		return nil, fmt.Errorf("error serializing request body: %w", err)
+	}
+	if bodyReader == nil {
+		return nil, fmt.Errorf("request body is required")
+	}
+
 	debugBody := bytes.NewBuffer([]byte{})
 	debugReader := io.TeeReader(bodyReader, debugBody)
 
@@ -260,7 +575,7 @@ func (s *Routes) UpsertRoute(ctx context.Context, request operations.UpsertRoute
 
 	contentType := httpRes.Header.Get("Content-Type")
 
-	res := &operations.UpsertRouteResponse{
+	res := &operations.PutControlPlanesControlPlaneIDCoreEntitiesServicesServiceIDRoutesRouteIDResponse{
 		StatusCode:  httpRes.StatusCode,
 		ContentType: contentType,
 		RawResponse: httpRes,
@@ -281,7 +596,7 @@ func (s *Routes) UpsertRoute(ctx context.Context, request operations.UpsertRoute
 	case httpRes.StatusCode == 400:
 		switch {
 		case utils.MatchContentType(contentType, `application/json`):
-			var out operations.UpsertRouteResponseBody
+			var out operations.PutControlPlanesControlPlaneIDCoreEntitiesServicesServiceIDRoutesRouteIDResponseBody
 			if err := utils.UnmarshalJsonFromResponseBody(bytes.NewBuffer(rawBody), &out, ""); err != nil {
 				return nil, err
 			}

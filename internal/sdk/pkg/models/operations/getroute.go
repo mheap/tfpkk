@@ -4,52 +4,14 @@ package operations
 
 import (
 	"github.com/kong/terraform-provider-konnect/internal/sdk/pkg/models/shared"
-	"github.com/kong/terraform-provider-konnect/internal/sdk/pkg/utils"
 	"net/http"
 )
 
 type GetRouteRequest struct {
-	// The ID of your control plane. This variable is available in the Konnect manager
+	// ID of the Route to lookup
+	RouteID string `pathParam:"style=simple,explode=false,name=RouteId"`
+	// The UUID of your control plane. This variable is available in the Konnect manager.
 	ControlPlaneID string `pathParam:"style=simple,explode=false,name=controlPlaneId"`
-	// A list of tags to filter the list of resources on. Multiple tags can be concatenated using ',' to mean AND or using '/' to mean OR.
-	FilterTags *string `queryParam:"style=form,explode=true,name=tags"`
-	// Offset from which to return the next set of resources. Use the value of the 'offset' field from the response of a list operation as input here to paginate through all the resources
-	Offset  *string `queryParam:"style=form,explode=true,name=offset"`
-	RouteID string  `pathParam:"style=simple,explode=false,name=route_id"`
-	// Number of resources to be returned.
-	Size *int64 `default:"100" queryParam:"style=form,explode=true,name=size"`
-}
-
-func (g GetRouteRequest) MarshalJSON() ([]byte, error) {
-	return utils.MarshalJSON(g, "", false)
-}
-
-func (g *GetRouteRequest) UnmarshalJSON(data []byte) error {
-	if err := utils.UnmarshalJSON(data, &g, "", false, false); err != nil {
-		return err
-	}
-	return nil
-}
-
-func (o *GetRouteRequest) GetControlPlaneID() string {
-	if o == nil {
-		return ""
-	}
-	return o.ControlPlaneID
-}
-
-func (o *GetRouteRequest) GetFilterTags() *string {
-	if o == nil {
-		return nil
-	}
-	return o.FilterTags
-}
-
-func (o *GetRouteRequest) GetOffset() *string {
-	if o == nil {
-		return nil
-	}
-	return o.Offset
 }
 
 func (o *GetRouteRequest) GetRouteID() string {
@@ -59,22 +21,24 @@ func (o *GetRouteRequest) GetRouteID() string {
 	return o.RouteID
 }
 
-func (o *GetRouteRequest) GetSize() *int64 {
+func (o *GetRouteRequest) GetControlPlaneID() string {
 	if o == nil {
-		return nil
+		return ""
 	}
-	return o.Size
+	return o.ControlPlaneID
 }
 
 type GetRouteResponse struct {
 	// HTTP response content type for this operation
 	ContentType string
-	// Successfully fetched route
+	// Successfully fetched Route
 	Route *shared.Route
 	// HTTP response status code for this operation
 	StatusCode int
 	// Raw HTTP response; suitable for custom response parsing
 	RawResponse *http.Response
+	// Unauthorized
+	UnauthorizedError *shared.UnauthorizedError
 }
 
 func (o *GetRouteResponse) GetContentType() string {
@@ -103,4 +67,11 @@ func (o *GetRouteResponse) GetRawResponse() *http.Response {
 		return nil
 	}
 	return o.RawResponse
+}
+
+func (o *GetRouteResponse) GetUnauthorizedError() *shared.UnauthorizedError {
+	if o == nil {
+		return nil
+	}
+	return o.UnauthorizedError
 }

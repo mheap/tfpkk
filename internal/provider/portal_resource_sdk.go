@@ -33,6 +33,12 @@ func (r *PortalResourceModel) ToSharedUpdatePortalRequest() *shared.UpdatePortal
 	} else {
 		customDomain = nil
 	}
+	defaultApplicationAuthStrategyID := new(string)
+	if !r.DefaultApplicationAuthStrategyID.IsUnknown() && !r.DefaultApplicationAuthStrategyID.IsNull() {
+		*defaultApplicationAuthStrategyID = r.DefaultApplicationAuthStrategyID.ValueString()
+	} else {
+		defaultApplicationAuthStrategyID = nil
+	}
 	isPublic := new(bool)
 	if !r.IsPublic.IsUnknown() && !r.IsPublic.IsNull() {
 		*isPublic = r.IsPublic.ValueBool()
@@ -46,12 +52,13 @@ func (r *PortalResourceModel) ToSharedUpdatePortalRequest() *shared.UpdatePortal
 		rbacEnabled = nil
 	}
 	out := shared.UpdatePortalRequest{
-		AutoApproveApplications: autoApproveApplications,
-		AutoApproveDevelopers:   autoApproveDevelopers,
-		CustomClientDomain:      customClientDomain,
-		CustomDomain:            customDomain,
-		IsPublic:                isPublic,
-		RbacEnabled:             rbacEnabled,
+		AutoApproveApplications:          autoApproveApplications,
+		AutoApproveDevelopers:            autoApproveDevelopers,
+		CustomClientDomain:               customClientDomain,
+		CustomDomain:                     customDomain,
+		DefaultApplicationAuthStrategyID: defaultApplicationAuthStrategyID,
+		IsPublic:                         isPublic,
+		RbacEnabled:                      rbacEnabled,
 	}
 	return &out
 }
@@ -63,6 +70,7 @@ func (r *PortalResourceModel) RefreshFromSharedUpdatePortalResponse(resp *shared
 	r.CustomClientDomain = types.StringPointerValue(resp.CustomClientDomain)
 	r.CustomDomain = types.StringPointerValue(resp.CustomDomain)
 	r.DefaultDomain = types.StringValue(resp.DefaultDomain)
+	r.DefaultApplicationAuthStrategyID = types.StringPointerValue(resp.DefaultApplicationAuthStrategyID)
 	r.ID = types.StringValue(resp.ID)
 	r.IsPublic = types.BoolValue(resp.IsPublic)
 	r.Name = types.StringValue(resp.Name)

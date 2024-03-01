@@ -3,11 +3,12 @@
 package provider
 
 import (
+	"encoding/json"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/kong/terraform-provider-konnect/internal/sdk/pkg/models/shared"
 )
 
-func (r *RouteResourceModel) ToSharedRouteRequest() *shared.RouteRequest {
+func (r *RouteResourceModel) ToSharedCreateRoute() *shared.CreateRoute {
 	var destinations []shared.Destinations = nil
 	for _, destinationsItem := range r.Destinations {
 		ip := new(string)
@@ -27,20 +28,11 @@ func (r *RouteResourceModel) ToSharedRouteRequest() *shared.RouteRequest {
 			Port: port,
 		})
 	}
-	var headers *shared.Headers
-	if r.Headers != nil {
-		var xAnotherHeader []string = nil
-		for _, xAnotherHeaderItem := range r.Headers.XAnotherHeader {
-			xAnotherHeader = append(xAnotherHeader, xAnotherHeaderItem.ValueString())
-		}
-		var xMyHeader []string = nil
-		for _, xMyHeaderItem := range r.Headers.XMyHeader {
-			xMyHeader = append(xMyHeader, xMyHeaderItem.ValueString())
-		}
-		headers = &shared.Headers{
-			XAnotherHeader: xAnotherHeader,
-			XMyHeader:      xMyHeader,
-		}
+	headers := make(map[string]interface{})
+	for headersKey, headersValue := range r.Headers {
+		var headersInst interface{}
+		_ = json.Unmarshal([]byte(headersValue.ValueString()), &headersInst)
+		headers[headersKey] = headersInst
 	}
 	var hosts []string = nil
 	for _, hostsItem := range r.Hosts {
@@ -78,9 +70,9 @@ func (r *RouteResourceModel) ToSharedRouteRequest() *shared.RouteRequest {
 	} else {
 		preserveHost = nil
 	}
-	var protocols []string = nil
+	var protocols []shared.CreateRouteProtocols = nil
 	for _, protocolsItem := range r.Protocols {
-		protocols = append(protocols, protocolsItem.ValueString())
+		protocols = append(protocols, shared.CreateRouteProtocols(protocolsItem.ValueString()))
 	}
 	regexPriority := new(int64)
 	if !r.RegexPriority.IsUnknown() && !r.RegexPriority.IsNull() {
@@ -100,7 +92,7 @@ func (r *RouteResourceModel) ToSharedRouteRequest() *shared.RouteRequest {
 	} else {
 		responseBuffering = nil
 	}
-	var service *shared.RouteRequestService
+	var service *shared.CreateRouteService
 	if r.Service != nil {
 		id := new(string)
 		if !r.Service.ID.IsUnknown() && !r.Service.ID.IsNull() {
@@ -108,13 +100,15 @@ func (r *RouteResourceModel) ToSharedRouteRequest() *shared.RouteRequest {
 		} else {
 			id = nil
 		}
-		service = &shared.RouteRequestService{
+		service = &shared.CreateRouteService{
 			ID: id,
 		}
 	}
-	var snis []string = nil
+	var snis []interface{} = nil
 	for _, snisItem := range r.Snis {
-		snis = append(snis, snisItem.ValueString())
+		var snisTmp interface{}
+		_ = json.Unmarshal([]byte(snisItem.ValueString()), &snisTmp)
+		snis = append(snis, snisTmp)
 	}
 	var sources []shared.Sources = nil
 	for _, sourcesItem := range r.Sources {
@@ -145,7 +139,7 @@ func (r *RouteResourceModel) ToSharedRouteRequest() *shared.RouteRequest {
 	for _, tagsItem := range r.Tags {
 		tags = append(tags, tagsItem.ValueString())
 	}
-	out := shared.RouteRequest{
+	out := shared.CreateRoute{
 		Destinations:            destinations,
 		Headers:                 headers,
 		Hosts:                   hosts,
@@ -184,10 +178,12 @@ func (r *RouteResourceModel) RefreshFromSharedRoute(resp *shared.Route) {
 			r.Destinations[destinationsCount].Port = destinations1.Port
 		}
 	}
-	if resp.Headers == nil {
-		r.Headers = nil
-	} else {
-		r.Headers = &Headers{}
+	if len(resp.Headers) > 0 {
+		r.Headers = make(map[string]types.String)
+		for key, value := range resp.Headers {
+			result, _ := json.Marshal(value)
+			r.Headers[key] = types.StringValue(string(result))
+		}
 	}
 	r.Hosts = nil
 	for _, v := range resp.Hosts {
@@ -216,7 +212,7 @@ func (r *RouteResourceModel) RefreshFromSharedRoute(resp *shared.Route) {
 	r.PreserveHost = types.BoolPointerValue(resp.PreserveHost)
 	r.Protocols = nil
 	for _, v := range resp.Protocols {
-		r.Protocols = append(r.Protocols, types.StringValue(v))
+		r.Protocols = append(r.Protocols, types.StringValue(string(v)))
 	}
 	r.RegexPriority = types.Int64PointerValue(resp.RegexPriority)
 	r.RequestBuffering = types.BoolPointerValue(resp.RequestBuffering)
@@ -224,12 +220,15 @@ func (r *RouteResourceModel) RefreshFromSharedRoute(resp *shared.Route) {
 	if resp.Service == nil {
 		r.Service = nil
 	} else {
-		r.Service = &PluginConsumer{}
+		r.Service = &CreateACLConsumer{}
 		r.Service.ID = types.StringPointerValue(resp.Service.ID)
 	}
 	r.Snis = nil
-	for _, v := range resp.Snis {
-		r.Snis = append(r.Snis, types.StringValue(v))
+	for _, snisItem := range resp.Snis {
+		var snis1 types.String
+		snis1Result, _ := json.Marshal(snisItem)
+		snis1 = types.StringValue(string(snis1Result))
+		r.Snis = append(r.Snis, snis1)
 	}
 	if len(r.Sources) > len(resp.Sources) {
 		r.Sources = r.Sources[:len(resp.Sources)]

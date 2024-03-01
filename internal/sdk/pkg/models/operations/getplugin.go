@@ -4,32 +4,21 @@ package operations
 
 import (
 	"github.com/kong/terraform-provider-konnect/internal/sdk/pkg/models/shared"
-	"github.com/kong/terraform-provider-konnect/internal/sdk/pkg/utils"
 	"net/http"
 )
 
 type GetPluginRequest struct {
-	// The UUID of your control plane. This variable is available in the Konnect manager
+	// ID of the Plugin to lookup
+	PluginID string `pathParam:"style=simple,explode=false,name=PluginId"`
+	// The UUID of your control plane. This variable is available in the Konnect manager.
 	ControlPlaneID string `pathParam:"style=simple,explode=false,name=controlPlaneId"`
-	// A list of tags to filter the list of resources on. Multiple tags can be concatenated using ',' to mean AND or using '/' to mean OR.
-	FilterTags *string `queryParam:"style=form,explode=true,name=tags"`
-	// Offset from which to return the next set of resources. Use the value of the 'offset' field from the response of a list operation as input here to paginate through all the resources
-	Offset *string `queryParam:"style=form,explode=true,name=offset"`
-	// The unique identifier of the Plugin to create or update.
-	PluginIDOrInstanceName string `pathParam:"style=simple,explode=false,name=plugin_id_or_instance_name"`
-	// Number of resources to be returned.
-	Size *int64 `default:"100" queryParam:"style=form,explode=true,name=size"`
 }
 
-func (g GetPluginRequest) MarshalJSON() ([]byte, error) {
-	return utils.MarshalJSON(g, "", false)
-}
-
-func (g *GetPluginRequest) UnmarshalJSON(data []byte) error {
-	if err := utils.UnmarshalJSON(data, &g, "", false, false); err != nil {
-		return err
+func (o *GetPluginRequest) GetPluginID() string {
+	if o == nil {
+		return ""
 	}
-	return nil
+	return o.PluginID
 }
 
 func (o *GetPluginRequest) GetControlPlaneID() string {
@@ -37,34 +26,6 @@ func (o *GetPluginRequest) GetControlPlaneID() string {
 		return ""
 	}
 	return o.ControlPlaneID
-}
-
-func (o *GetPluginRequest) GetFilterTags() *string {
-	if o == nil {
-		return nil
-	}
-	return o.FilterTags
-}
-
-func (o *GetPluginRequest) GetOffset() *string {
-	if o == nil {
-		return nil
-	}
-	return o.Offset
-}
-
-func (o *GetPluginRequest) GetPluginIDOrInstanceName() string {
-	if o == nil {
-		return ""
-	}
-	return o.PluginIDOrInstanceName
-}
-
-func (o *GetPluginRequest) GetSize() *int64 {
-	if o == nil {
-		return nil
-	}
-	return o.Size
 }
 
 type GetPluginResponse struct {
@@ -76,6 +37,8 @@ type GetPluginResponse struct {
 	StatusCode int
 	// Raw HTTP response; suitable for custom response parsing
 	RawResponse *http.Response
+	// Unauthorized
+	UnauthorizedError *shared.UnauthorizedError
 }
 
 func (o *GetPluginResponse) GetContentType() string {
@@ -104,4 +67,11 @@ func (o *GetPluginResponse) GetRawResponse() *http.Response {
 		return nil
 	}
 	return o.RawResponse
+}
+
+func (o *GetPluginResponse) GetUnauthorizedError() *shared.UnauthorizedError {
+	if o == nil {
+		return nil
+	}
+	return o.UnauthorizedError
 }

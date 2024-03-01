@@ -8,17 +8,17 @@ import (
 )
 
 type CreateConsumerRequest struct {
-	// Consumer request body
-	ConsumerRequest *shared.ConsumerRequest `request:"mediaType=application/json"`
-	// The UUID of your control plane. This variable is available in the Konnect manager
+	// Description of the new Consumer for creation
+	CreateConsumer shared.CreateConsumer `request:"mediaType=application/json"`
+	// The UUID of your control plane. This variable is available in the Konnect manager.
 	ControlPlaneID string `pathParam:"style=simple,explode=false,name=controlPlaneId"`
 }
 
-func (o *CreateConsumerRequest) GetConsumerRequest() *shared.ConsumerRequest {
+func (o *CreateConsumerRequest) GetCreateConsumer() shared.CreateConsumer {
 	if o == nil {
-		return nil
+		return shared.CreateConsumer{}
 	}
-	return o.ConsumerRequest
+	return o.CreateConsumer
 }
 
 func (o *CreateConsumerRequest) GetControlPlaneID() string {
@@ -33,7 +33,7 @@ type CreateConsumerResponseBody struct {
 }
 
 type CreateConsumerResponse struct {
-	// Successfully created consumer
+	// Successfully created Consumer
 	Consumer *shared.Consumer
 	// HTTP response content type for this operation
 	ContentType string
@@ -41,6 +41,8 @@ type CreateConsumerResponse struct {
 	StatusCode int
 	// Raw HTTP response; suitable for custom response parsing
 	RawResponse *http.Response
+	// Unauthorized
+	UnauthorizedError *shared.UnauthorizedError
 	// Invalid Consumer
 	Object *CreateConsumerResponseBody
 }
@@ -71,6 +73,13 @@ func (o *CreateConsumerResponse) GetRawResponse() *http.Response {
 		return nil
 	}
 	return o.RawResponse
+}
+
+func (o *CreateConsumerResponse) GetUnauthorizedError() *shared.UnauthorizedError {
+	if o == nil {
+		return nil
+	}
+	return o.UnauthorizedError
 }
 
 func (o *CreateConsumerResponse) GetObject() *CreateConsumerResponseBody {

@@ -8,10 +8,17 @@ import (
 )
 
 type CreatePluginRequest struct {
-	// The UUID of your control plane. This variable is available in the Konnect manager
+	// Description of the new Plugin for creation
+	CreatePlugin shared.CreatePlugin `request:"mediaType=application/json"`
+	// The UUID of your control plane. This variable is available in the Konnect manager.
 	ControlPlaneID string `pathParam:"style=simple,explode=false,name=controlPlaneId"`
-	// Plugin request body
-	PluginRequest *shared.PluginRequest `request:"mediaType=application/json"`
+}
+
+func (o *CreatePluginRequest) GetCreatePlugin() shared.CreatePlugin {
+	if o == nil {
+		return shared.CreatePlugin{}
+	}
+	return o.CreatePlugin
 }
 
 func (o *CreatePluginRequest) GetControlPlaneID() string {
@@ -21,13 +28,6 @@ func (o *CreatePluginRequest) GetControlPlaneID() string {
 	return o.ControlPlaneID
 }
 
-func (o *CreatePluginRequest) GetPluginRequest() *shared.PluginRequest {
-	if o == nil {
-		return nil
-	}
-	return o.PluginRequest
-}
-
 // CreatePluginResponseBody - Invalid Plugin
 type CreatePluginResponseBody struct {
 }
@@ -35,12 +35,14 @@ type CreatePluginResponseBody struct {
 type CreatePluginResponse struct {
 	// HTTP response content type for this operation
 	ContentType string
-	// Successfully created plugin
+	// Successfully created Plugin
 	Plugin *shared.Plugin
 	// HTTP response status code for this operation
 	StatusCode int
 	// Raw HTTP response; suitable for custom response parsing
 	RawResponse *http.Response
+	// Unauthorized
+	UnauthorizedError *shared.UnauthorizedError
 	// Invalid Plugin
 	Object *CreatePluginResponseBody
 }
@@ -71,6 +73,13 @@ func (o *CreatePluginResponse) GetRawResponse() *http.Response {
 		return nil
 	}
 	return o.RawResponse
+}
+
+func (o *CreatePluginResponse) GetUnauthorizedError() *shared.UnauthorizedError {
+	if o == nil {
+		return nil
+	}
+	return o.UnauthorizedError
 }
 
 func (o *CreatePluginResponse) GetObject() *CreatePluginResponseBody {

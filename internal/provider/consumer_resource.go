@@ -7,8 +7,13 @@ import (
 	"fmt"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
+	speakeasy_listplanmodifier "github.com/kong/terraform-provider-konnect/internal/planmodifiers/listplanmodifier"
+	speakeasy_stringplanmodifier "github.com/kong/terraform-provider-konnect/internal/planmodifiers/stringplanmodifier"
 	"github.com/kong/terraform-provider-konnect/internal/sdk"
 	"github.com/kong/terraform-provider-konnect/internal/sdk/pkg/models/operations"
 )
@@ -33,7 +38,6 @@ type ConsumerResourceModel struct {
 	CustomID       types.String   `tfsdk:"custom_id"`
 	ID             types.String   `tfsdk:"id"`
 	Tags           []types.String `tfsdk:"tags"`
-	UpdatedAt      types.Int64    `tfsdk:"updated_at"`
 	Username       types.String   `tfsdk:"username"`
 }
 
@@ -47,37 +51,47 @@ func (r *ConsumerResource) Schema(ctx context.Context, req resource.SchemaReques
 
 		Attributes: map[string]schema.Attribute{
 			"control_plane_id": schema.StringAttribute{
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.RequiresReplaceIfConfigured(),
+				},
 				Required:    true,
-				Description: `The UUID of your control plane. This variable is available in the Konnect manager`,
+				Description: `The UUID of your control plane. This variable is available in the Konnect manager. Requires replacement if changed. `,
 			},
 			"created_at": schema.Int64Attribute{
 				Computed:    true,
 				Description: `Unix epoch when the resource was created.`,
 			},
 			"custom_id": schema.StringAttribute{
-				Required: true,
-				MarkdownDescription: `Field for storing an existing unique ID for the Consumer - useful for mapping Kong with users in your existing database. You must send either this field or username with the request.` + "\n" +
-					``,
+				Computed: true,
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.RequiresReplaceIfConfigured(),
+					speakeasy_stringplanmodifier.SuppressDiff(speakeasy_stringplanmodifier.ExplicitSuppress),
+				},
+				Optional:    true,
+				Description: `Field for storing an existing unique ID for the Consumer - useful for mapping Kong with users in your existing database. You must send either this field or ` + "`" + `username` + "`" + ` with the request. Requires replacement if changed. `,
 			},
 			"id": schema.StringAttribute{
 				Computed:    true,
-				Description: `The unique identifier or the username of the Consumer to retrieve.`,
+				Description: `ID of the Consumer to lookup`,
 			},
 			"tags": schema.ListAttribute{
-				Computed:    true,
+				Computed: true,
+				PlanModifiers: []planmodifier.List{
+					listplanmodifier.RequiresReplaceIfConfigured(),
+					speakeasy_listplanmodifier.SuppressDiff(speakeasy_listplanmodifier.ExplicitSuppress),
+				},
 				Optional:    true,
 				ElementType: types.StringType,
-				MarkdownDescription: `An optional set of strings associated with the Consumer for grouping and filtering.` + "\n" +
-					``,
-			},
-			"updated_at": schema.Int64Attribute{
-				Computed:    true,
-				Description: `Unix epoch when the resouce was updated.`,
+				Description: `An optional set of strings associated with the Consumer for grouping and filtering. Requires replacement if changed. `,
 			},
 			"username": schema.StringAttribute{
-				Required: true,
-				MarkdownDescription: `The unique username of the Consumer. You must send either this field or custom_id with the request.` + "\n" +
-					``,
+				Computed: true,
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.RequiresReplaceIfConfigured(),
+					speakeasy_stringplanmodifier.SuppressDiff(speakeasy_stringplanmodifier.ExplicitSuppress),
+				},
+				Optional:    true,
+				Description: `The unique username of the Consumer. You must send either this field or ` + "`" + `custom_id` + "`" + ` with the request. Requires replacement if changed. `,
 			},
 		},
 	}
@@ -121,11 +135,11 @@ func (r *ConsumerResource) Create(ctx context.Context, req resource.CreateReques
 		return
 	}
 
-	consumerRequest := data.ToSharedConsumerRequest()
+	createConsumer := *data.ToSharedCreateConsumer()
 	controlPlaneID := data.ControlPlaneID.ValueString()
 	request := operations.CreateConsumerRequest{
-		ConsumerRequest: consumerRequest,
-		ControlPlaneID:  controlPlaneID,
+		CreateConsumer: createConsumer,
+		ControlPlaneID: controlPlaneID,
 	}
 	res, err := r.client.Consumers.CreateConsumer(ctx, request)
 	if err != nil {
@@ -174,15 +188,9 @@ func (r *ConsumerResource) Read(ctx context.Context, req resource.ReadRequest, r
 
 	consumerID := data.ID.ValueString()
 	controlPlaneID := data.ControlPlaneID.ValueString()
-	var filterTags *string
-	var offset *string
-	var size *int64
 	request := operations.GetConsumerRequest{
 		ConsumerID:     consumerID,
 		ControlPlaneID: controlPlaneID,
-		FilterTags:     filterTags,
-		Offset:         offset,
-		Size:           size,
 	}
 	res, err := r.client.Consumers.GetConsumer(ctx, request)
 	if err != nil {
@@ -200,11 +208,11 @@ func (r *ConsumerResource) Read(ctx context.Context, req resource.ReadRequest, r
 		resp.Diagnostics.AddError(fmt.Sprintf("unexpected response from API. Got an unexpected response code %v", res.StatusCode), debugResponse(res.RawResponse))
 		return
 	}
-	if res.Object == nil {
+	if res.Consumer == nil {
 		resp.Diagnostics.AddError("unexpected response from API. No response body", debugResponse(res.RawResponse))
 		return
 	}
-	data.RefreshFromOperationsGetConsumerResponseBody(res.Object)
+	data.RefreshFromSharedConsumer(res.Consumer)
 
 	// Save updated data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
@@ -224,70 +232,7 @@ func (r *ConsumerResource) Update(ctx context.Context, req resource.UpdateReques
 		return
 	}
 
-	consumerRequest := data.ToSharedConsumerRequest()
-	consumerID := data.ID.ValueString()
-	controlPlaneID := data.ControlPlaneID.ValueString()
-	request := operations.UpsertConsumerRequest{
-		ConsumerRequest: consumerRequest,
-		ConsumerID:      consumerID,
-		ControlPlaneID:  controlPlaneID,
-	}
-	res, err := r.client.Consumers.UpsertConsumer(ctx, request)
-	if err != nil {
-		resp.Diagnostics.AddError("failure to invoke API", err.Error())
-		if res != nil && res.RawResponse != nil {
-			resp.Diagnostics.AddError("unexpected http request/response", debugResponse(res.RawResponse))
-		}
-		return
-	}
-	if res == nil {
-		resp.Diagnostics.AddError("unexpected response from API", fmt.Sprintf("%v", res))
-		return
-	}
-	if res.StatusCode != 200 {
-		resp.Diagnostics.AddError(fmt.Sprintf("unexpected response from API. Got an unexpected response code %v", res.StatusCode), debugResponse(res.RawResponse))
-		return
-	}
-	if res.Object == nil {
-		resp.Diagnostics.AddError("unexpected response from API. No response body", debugResponse(res.RawResponse))
-		return
-	}
-	data.RefreshFromOperationsUpsertConsumerResponseBody(res.Object)
-	refreshPlan(ctx, plan, &data, resp.Diagnostics)
-	consumerId1 := data.ID.ValueString()
-	controlPlaneId1 := data.ControlPlaneID.ValueString()
-	var filterTags *string
-	var offset *string
-	var size *int64
-	request1 := operations.GetConsumerRequest{
-		ConsumerID:     consumerId1,
-		ControlPlaneID: controlPlaneId1,
-		FilterTags:     filterTags,
-		Offset:         offset,
-		Size:           size,
-	}
-	res1, err := r.client.Consumers.GetConsumer(ctx, request1)
-	if err != nil {
-		resp.Diagnostics.AddError("failure to invoke API", err.Error())
-		if res1 != nil && res1.RawResponse != nil {
-			resp.Diagnostics.AddError("unexpected http request/response", debugResponse(res1.RawResponse))
-		}
-		return
-	}
-	if res1 == nil {
-		resp.Diagnostics.AddError("unexpected response from API", fmt.Sprintf("%v", res1))
-		return
-	}
-	if res1.StatusCode != 200 {
-		resp.Diagnostics.AddError(fmt.Sprintf("unexpected response from API. Got an unexpected response code %v", res1.StatusCode), debugResponse(res1.RawResponse))
-		return
-	}
-	if res1.Object == nil {
-		resp.Diagnostics.AddError("unexpected response from API. No response body", debugResponse(res1.RawResponse))
-		return
-	}
-	data.RefreshFromOperationsGetConsumerResponseBody(res1.Object)
-	refreshPlan(ctx, plan, &data, resp.Diagnostics)
+	// Not Implemented; all attributes marked as RequiresReplace
 
 	// Save updated data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)

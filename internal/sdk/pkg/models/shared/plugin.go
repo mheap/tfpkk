@@ -3,6 +3,8 @@
 package shared
 
 import (
+	"encoding/json"
+	"fmt"
 	"github.com/kong/terraform-provider-konnect/internal/sdk/pkg/utils"
 )
 
@@ -18,10 +20,58 @@ func (o *PluginConsumer) GetID() *string {
 	return o.ID
 }
 
-type Ordering struct {
+type PluginProtocols string
+
+const (
+	PluginProtocolsGrpc           PluginProtocols = "grpc"
+	PluginProtocolsGrpcs          PluginProtocols = "grpcs"
+	PluginProtocolsHTTP           PluginProtocols = "http"
+	PluginProtocolsHTTPS          PluginProtocols = "https"
+	PluginProtocolsTCP            PluginProtocols = "tcp"
+	PluginProtocolsTLS            PluginProtocols = "tls"
+	PluginProtocolsTLSPassthrough PluginProtocols = "tls_passthrough"
+	PluginProtocolsUDP            PluginProtocols = "udp"
+	PluginProtocolsWs             PluginProtocols = "ws"
+	PluginProtocolsWss            PluginProtocols = "wss"
+)
+
+func (e PluginProtocols) ToPointer() *PluginProtocols {
+	return &e
 }
 
-// PluginRoute - If set, the plugin will only activate when receiving requests via the specified route. Leave unset for the plugin to activate regardless of the route being used.
+func (e *PluginProtocols) UnmarshalJSON(data []byte) error {
+	var v string
+	if err := json.Unmarshal(data, &v); err != nil {
+		return err
+	}
+	switch v {
+	case "grpc":
+		fallthrough
+	case "grpcs":
+		fallthrough
+	case "http":
+		fallthrough
+	case "https":
+		fallthrough
+	case "tcp":
+		fallthrough
+	case "tls":
+		fallthrough
+	case "tls_passthrough":
+		fallthrough
+	case "udp":
+		fallthrough
+	case "ws":
+		fallthrough
+	case "wss":
+		*e = PluginProtocols(v)
+		return nil
+	default:
+		return fmt.Errorf("invalid value for PluginProtocols: %v", v)
+	}
+}
+
+// PluginRoute - If set, the plugin will only activate when receiving requests via the specified route. Leave unset for the plugin to activate regardless of the Route being used.
 type PluginRoute struct {
 	ID *string `json:"id,omitempty"`
 }
@@ -33,7 +83,7 @@ func (o *PluginRoute) GetID() *string {
 	return o.ID
 }
 
-// PluginService - If set, the plugin will only activate when receiving requests via one of the routes belonging to the specified service. Leave unset for the plugin to activate regardless of the service being matched.
+// PluginService - If set, the plugin will only activate when receiving requests via one of the routes belonging to the specified Service. Leave unset for the plugin to activate regardless of the Service being matched.
 type PluginService struct {
 	ID *string `json:"id,omitempty"`
 }
@@ -45,26 +95,22 @@ func (o *PluginService) GetID() *string {
 	return o.ID
 }
 
-// A Plugin entity represents a plugin configuration that will be executed during the HTTP request/response lifecycle.
+// A Plugin entity represents a plugin configuration that will be executed during the HTTP request/response lifecycle. It is how you can add functionalities to Services that run behind Kong, like Authentication or Rate Limiting for example. You can find more information about how to install and what values each plugin takes by visiting the [Kong Hub](https://docs.konghq.com/hub/). When adding a Plugin Configuration to a Service, every request made by a client to that Service will run said Plugin. If a Plugin needs to be tuned to different values for some specific Consumers, you can do so by creating a separate plugin instance that specifies both the Service and the Consumer, through the `service` and `consumer` fields.
 type Plugin struct {
-	// The configuration properties for the Plugin which can be found on the plugins documentation page in the [Kong Hub](https://docs.konghq.com/hub/).
-	Config interface{} `json:"config,omitempty"`
 	// If set, the plugin will activate only for requests where the specified has been authenticated. (Note that some plugins can not be restricted to consumers this way.). Leave unset for the plugin to activate regardless of the authenticated Consumer.
 	Consumer *PluginConsumer `json:"consumer,omitempty"`
 	// Unix epoch when the resource was created.
 	CreatedAt *int64 `json:"created_at,omitempty"`
 	// Whether the plugin is applied.
-	Enabled      *bool   `default:"true" json:"enabled"`
-	ID           *string `json:"id,omitempty"`
-	InstanceName *string `json:"instance_name,omitempty"`
+	Enabled *bool   `default:"true" json:"enabled"`
+	ID      *string `json:"id,omitempty"`
 	// The name of the Plugin that's going to be added. Currently, the Plugin must be installed in every Kong instance separately.
-	Name     *string   `json:"name,omitempty"`
-	Ordering *Ordering `json:"ordering,omitempty"`
-	// A list of the request protocols that will trigger this plugin. The default value, as well as the possible values allowed on this field, may change depending on the plugin type. For example, plugins that only work in stream mode will only support `tcp` and `tls`.
-	Protocols []string `json:"protocols,omitempty"`
-	// If set, the plugin will only activate when receiving requests via the specified route. Leave unset for the plugin to activate regardless of the route being used.
+	Name string `json:"name"`
+	// A list of the request protocols that will trigger this plugin. The default value, as well as the possible values allowed on this field, may change depending on the plugin type. For example, plugins that only work in stream mode will only support `"tcp"` and `"tls"`.
+	Protocols []PluginProtocols `json:"protocols"`
+	// If set, the plugin will only activate when receiving requests via the specified route. Leave unset for the plugin to activate regardless of the Route being used.
 	Route *PluginRoute `json:"route,omitempty"`
-	// If set, the plugin will only activate when receiving requests via one of the routes belonging to the specified service. Leave unset for the plugin to activate regardless of the service being matched.
+	// If set, the plugin will only activate when receiving requests via one of the routes belonging to the specified Service. Leave unset for the plugin to activate regardless of the Service being matched.
 	Service *PluginService `json:"service,omitempty"`
 	// An optional set of strings associated with the Plugin for grouping and filtering.
 	Tags []string `json:"tags,omitempty"`
@@ -79,13 +125,6 @@ func (p *Plugin) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	return nil
-}
-
-func (o *Plugin) GetConfig() interface{} {
-	if o == nil {
-		return nil
-	}
-	return o.Config
 }
 
 func (o *Plugin) GetConsumer() *PluginConsumer {
@@ -116,30 +155,16 @@ func (o *Plugin) GetID() *string {
 	return o.ID
 }
 
-func (o *Plugin) GetInstanceName() *string {
+func (o *Plugin) GetName() string {
 	if o == nil {
-		return nil
-	}
-	return o.InstanceName
-}
-
-func (o *Plugin) GetName() *string {
-	if o == nil {
-		return nil
+		return ""
 	}
 	return o.Name
 }
 
-func (o *Plugin) GetOrdering() *Ordering {
+func (o *Plugin) GetProtocols() []PluginProtocols {
 	if o == nil {
-		return nil
-	}
-	return o.Ordering
-}
-
-func (o *Plugin) GetProtocols() []string {
-	if o == nil {
-		return nil
+		return []PluginProtocols{}
 	}
 	return o.Protocols
 }

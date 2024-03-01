@@ -3,13 +3,14 @@
 package operations
 
 import (
+	"github.com/kong/terraform-provider-konnect/internal/sdk/pkg/models/shared"
 	"net/http"
 )
 
 type DeleteConsumerRequest struct {
-	// The unique identifier or the username of the Consumer to retrieve.
-	ConsumerID string `pathParam:"style=simple,explode=false,name=consumer_id"`
-	// The UUID of your control plane. This variable is available in the Konnect manager
+	// ID of the Consumer to lookup
+	ConsumerID string `pathParam:"style=simple,explode=false,name=ConsumerId"`
+	// The UUID of your control plane. This variable is available in the Konnect manager.
 	ControlPlaneID string `pathParam:"style=simple,explode=false,name=controlPlaneId"`
 }
 
@@ -34,6 +35,8 @@ type DeleteConsumerResponse struct {
 	StatusCode int
 	// Raw HTTP response; suitable for custom response parsing
 	RawResponse *http.Response
+	// Unauthorized
+	UnauthorizedError *shared.UnauthorizedError
 }
 
 func (o *DeleteConsumerResponse) GetContentType() string {
@@ -55,4 +58,11 @@ func (o *DeleteConsumerResponse) GetRawResponse() *http.Response {
 		return nil
 	}
 	return o.RawResponse
+}
+
+func (o *DeleteConsumerResponse) GetUnauthorizedError() *shared.UnauthorizedError {
+	if o == nil {
+		return nil
+	}
+	return o.UnauthorizedError
 }

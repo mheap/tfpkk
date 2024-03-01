@@ -3,20 +3,15 @@
 package operations
 
 import (
+	"github.com/kong/terraform-provider-konnect/internal/sdk/pkg/models/shared"
 	"net/http"
 )
 
 type DeleteRouteRequest struct {
-	// The ID of your control plane. This variable is available in the Konnect manager
+	// ID of the Route to lookup
+	RouteID string `pathParam:"style=simple,explode=false,name=RouteId"`
+	// The UUID of your control plane. This variable is available in the Konnect manager.
 	ControlPlaneID string `pathParam:"style=simple,explode=false,name=controlPlaneId"`
-	RouteID        string `pathParam:"style=simple,explode=false,name=route_id"`
-}
-
-func (o *DeleteRouteRequest) GetControlPlaneID() string {
-	if o == nil {
-		return ""
-	}
-	return o.ControlPlaneID
 }
 
 func (o *DeleteRouteRequest) GetRouteID() string {
@@ -26,6 +21,13 @@ func (o *DeleteRouteRequest) GetRouteID() string {
 	return o.RouteID
 }
 
+func (o *DeleteRouteRequest) GetControlPlaneID() string {
+	if o == nil {
+		return ""
+	}
+	return o.ControlPlaneID
+}
+
 type DeleteRouteResponse struct {
 	// HTTP response content type for this operation
 	ContentType string
@@ -33,6 +35,8 @@ type DeleteRouteResponse struct {
 	StatusCode int
 	// Raw HTTP response; suitable for custom response parsing
 	RawResponse *http.Response
+	// Unauthorized
+	UnauthorizedError *shared.UnauthorizedError
 }
 
 func (o *DeleteRouteResponse) GetContentType() string {
@@ -54,4 +58,11 @@ func (o *DeleteRouteResponse) GetRawResponse() *http.Response {
 		return nil
 	}
 	return o.RawResponse
+}
+
+func (o *DeleteRouteResponse) GetUnauthorizedError() *shared.UnauthorizedError {
+	if o == nil {
+		return nil
+	}
+	return o.UnauthorizedError
 }
